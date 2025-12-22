@@ -31,6 +31,9 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         private Grid controlPanel;
         private bool panelActive;
+        private bool isDragging;
+        private Point dragStartPoint;
+        private TranslateTransform panelTransform;
         private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro;
         private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro;
         private TextBlock lblConfluence, lblTradeStatus, lblSessionStats, lblTriggerMode, lblLastSignal;
@@ -236,14 +239,21 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             try
             {
+                panelTransform = new TranslateTransform(0, 0);
                 controlPanel = new Grid
                 {
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Bottom,
                     Margin = new Thickness(10, 0, 0, 30),
                     Background = new SolidColorBrush(Color.FromArgb(230, 30, 30, 40)),
-                    MinWidth = 200
+                    MinWidth = 200,
+                    RenderTransform = panelTransform,
+                    Cursor = System.Windows.Input.Cursors.Hand
                 };
+
+                controlPanel.MouseLeftButtonDown += Panel_MouseLeftButtonDown;
+                controlPanel.MouseLeftButtonUp += Panel_MouseLeftButtonUp;
+                controlPanel.MouseMove += Panel_MouseMove;
                 
                 var border = new Border
                 {
@@ -337,6 +347,10 @@ namespace NinjaTrader.NinjaScript.Strategies
             {
                 if (controlPanel != null && panelActive)
                 {
+                    controlPanel.MouseLeftButtonDown -= Panel_MouseLeftButtonDown;
+                    controlPanel.MouseLeftButtonUp -= Panel_MouseLeftButtonUp;
+                    controlPanel.MouseMove -= Panel_MouseMove;
+
                     UIElementCollection panelHolder = (ChartControl?.Parent as Grid)?.Children;
                     if (panelHolder != null && panelHolder.Contains(controlPanel))
                         panelHolder.Remove(controlPanel);
@@ -344,6 +358,37 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             catch { }
+        }
+
+        private void Panel_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            isDragging = true;
+            dragStartPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+            dragStartPoint.X -= panelTransform.X;
+            dragStartPoint.Y -= panelTransform.Y;
+            controlPanel.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void Panel_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (isDragging)
+            {
+                isDragging = false;
+                controlPanel.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
+
+        private void Panel_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                Point currentPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+                panelTransform.X = currentPoint.X - dragStartPoint.X;
+                panelTransform.Y = currentPoint.Y - dragStartPoint.Y;
+                e.Handled = true;
+            }
         }
         
         private void UpdatePanel()
