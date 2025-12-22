@@ -42,7 +42,7 @@ namespace NinjaTrader.NinjaScript.Indicators
         private Border resizeGrip;
         private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro;
         private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro;
-        private TextBlock lblConfluence, lblTradeStatus, lblSessionStats, lblTriggerMode, lblLastSignal, lblSubtitle;
+        private TextBlock lblTradeStatus, lblSessionStats, lblTriggerMode, lblLastSignal, lblSubtitle;
         private Border signalBorder;
         
         private int signalCount;
@@ -291,13 +291,12 @@ namespace NinjaTrader.NinjaScript.Indicators
                 stack.Children.Add(CreateRow("T3 Pro", ref chkT3Pro, ref lblT3Pro, UseT3Pro));
                 
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
-                
-                lblConfluence = new TextBlock { Text = "Confluence: 0/6", Foreground = Brushes.Yellow, FontSize = 10, Margin = new Thickness(0,2,0,2) };
+
+                // lblConfluence removed - redundant with SIGNAL field
                 lblTriggerMode = new TextBlock { Text = "Triggers: RR + DT", Foreground = Brushes.LightGray, FontSize = 9 };
                 lblTradeStatus = new TextBlock { Text = "Mode: MONITOR", Foreground = Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
                 lblSessionStats = new TextBlock { Text = "Signals: 0", Foreground = Brushes.LightGray, FontSize = 9 };
-                
-                stack.Children.Add(lblConfluence);
+
                 stack.Children.Add(lblTriggerMode);
                 stack.Children.Add(lblTradeStatus);
                 stack.Children.Add(lblSessionStats);
@@ -557,32 +556,57 @@ namespace NinjaTrader.NinjaScript.Indicators
                     else
                         lblSubtitle.Text = $"{effMin}/{enabled}{triggers}";
                 }
-                
+
                 UpdLbl(lblRubyRiver, RR_IsUp, UseRubyRiver);
                 UpdLbl(lblDragonTrend, DT_IsUp, UseDragonTrend);
                 UpdLbl(lblSolarWave, SW_IsUp, UseSolarWave);
                 UpdLbl(lblVIDYA, VY_IsUp, UseVIDYAPro);
                 UpdLbl(lblEasyTrend, ET_IsUp, UseEasyTrend);
                 UpdLbl(lblT3Pro, T3P_IsUp, UseT3Pro);
-                
+
                 var (bull, bear, total) = GetConfluence();
                 int aligned = Math.Max(bull, bear);
                 string dir = bull > bear ? "LONG" : bear > bull ? "SHORT" : "---";
-                if (lblConfluence != null) 
-                { 
-                    if (total == 0)
-                        { lblConfluence.Text = "No indicators selected"; lblConfluence.Foreground = Brushes.Gray; }
-                    else
-                        { lblConfluence.Text = $"Confluence: {aligned}/{total} {dir}"; lblConfluence.Foreground = aligned >= effMin ? Brushes.Lime : Brushes.Yellow; }
-                }
+                // Confluence field commented out - same info shown in SIGNAL field below
+                // if (lblConfluence != null)
+                // {
+                //     if (total == 0)
+                //         { lblConfluence.Text = "No indicators selected"; lblConfluence.Foreground = Brushes.Gray; }
+                //     else
+                //         { lblConfluence.Text = $"Confluence: {aligned}/{total} {dir}"; lblConfluence.Foreground = aligned >= effMin ? Brushes.Lime : Brushes.Yellow; }
+                // }
                 if (lblTriggerMode != null) lblTriggerMode.Text = EnableDTAfterRR ? "Triggers: RR + DT" : "Triggers: RR only";
                 if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount}";
-                if (lblLastSignal != null) 
+
+                // Update signal box based on CURRENT live confluence
+                if (lblLastSignal != null && signalBorder != null)
                 {
-                    if (GetEnabledCount() == 0)
-                        { lblLastSignal.Text = "No indicators selected"; lblLastSignal.Foreground = Brushes.Gray; lblLastSignal.FontWeight = FontWeights.Normal; }
-                    else if (!string.IsNullOrEmpty(lastSignalText)) 
-                        lblLastSignal.Text = lastSignalText;
+                    if (total == 0)
+                    {
+                        lblLastSignal.Text = "No indicators selected";
+                        lblLastSignal.Foreground = Brushes.Gray;
+                        lblLastSignal.FontWeight = FontWeights.Normal;
+                        signalBorder.BorderBrush = Brushes.Transparent;
+                        signalBorder.Background = Brushes.Transparent;
+                    }
+                    else if (aligned >= effMin)
+                    {
+                        // Show current signal based on live confluence
+                        lblLastSignal.Text = $"SIGNAL: {dir} @ {aligned}/{total}";
+                        lblLastSignal.FontWeight = FontWeights.Bold;
+                        lblLastSignal.Foreground = dir == "LONG" ? Brushes.Lime : Brushes.Red;
+                        signalBorder.BorderBrush = dir == "LONG" ? Brushes.Lime : Brushes.Red;
+                        signalBorder.Background = new SolidColorBrush(dir == "LONG" ? Color.FromArgb(60, 0, 255, 0) : Color.FromArgb(60, 255, 0, 0));
+                    }
+                    else
+                    {
+                        // Confluence below threshold - show NEUTRAL
+                        lblLastSignal.Text = $"NEUTRAL ({aligned}/{total})";
+                        lblLastSignal.FontWeight = FontWeights.Normal;
+                        lblLastSignal.Foreground = Brushes.Yellow;
+                        signalBorder.BorderBrush = Brushes.Gray;
+                        signalBorder.Background = Brushes.Transparent;
+                    }
                 }
             });
         }
@@ -591,18 +615,13 @@ namespace NinjaTrader.NinjaScript.Indicators
         {
             signalCount++;
             lastSignalText = $"SIGNAL: {dir} @ {aligned}/{total}\n[{trigger}] {t:HH:mm:ss}";
-            
+
             if (EnableSoundAlert)
             {
                 try { System.Media.SystemSounds.Exclamation.Play(); } catch { }
             }
-            
-            ChartControl?.Dispatcher.InvokeAsync(() =>
-            {
-                if (lblLastSignal != null) { lblLastSignal.Text = lastSignalText; lblLastSignal.FontWeight = FontWeights.Bold; lblLastSignal.Foreground = dir == "LONG" ? Brushes.Lime : Brushes.Red; }
-                if (signalBorder != null) { signalBorder.BorderBrush = dir == "LONG" ? Brushes.Lime : Brushes.Red; signalBorder.Background = new SolidColorBrush(dir == "LONG" ? Color.FromArgb(60, 0, 255, 0) : Color.FromArgb(60, 255, 0, 0)); }
-                if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount}";
-            });
+
+            // Panel update is handled by UpdatePanel() which is called right after
         }
         
         private void UpdLbl(TextBlock l, bool? v, bool en) { if (l == null) return; if (!en) { l.Text = "OFF"; l.Foreground = Brushes.Gray; } else if (!v.HasValue) { l.Text = "MIX"; l.Foreground = Brushes.Yellow; } else { l.Text = v.Value ? "UP" : "DN"; l.Foreground = v.Value ? Brushes.Lime : Brushes.Red; } }
@@ -644,7 +663,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                         UpdateSignalDisplay(dir, "RR_FLIP", aligned, total, barTime);
                     }
                 }
-                
+
                 // DT_AFTER_RR trigger
                 if (EnableDTAfterRR && (dtFlipUp || dtFlipDn))
                 {
