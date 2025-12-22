@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using NinjaTrader.Cbi;
 using NinjaTrader.Data;
 using NinjaTrader.Gui.Chart;
@@ -30,6 +31,15 @@ namespace NinjaTrader.NinjaScript.Indicators
         
         private Grid controlPanel;
         private bool panelActive;
+        private bool isDragging;
+        private bool isResizing;
+        private Point dragStartPoint;
+        private Point resizeStartPoint;
+        private double resizeStartWidth, resizeStartHeight;
+        private TranslateTransform panelTransform;
+        private ScaleTransform panelScale;
+        private string panelSettingsFile;
+        private Border resizeGrip;
         private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro;
         private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro;
         private TextBlock lblConfluence, lblTradeStatus, lblSessionStats, lblTriggerMode, lblLastSignal, lblSubtitle;
@@ -223,15 +233,35 @@ namespace NinjaTrader.NinjaScript.Indicators
         {
             try
             {
+                // Initialize panel settings file path
+                string settingsDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "NinjaTrader 8", "settings");
+                panelSettingsFile = System.IO.Path.Combine(settingsDir, "ActiveNikiMonitor_PanelSettings.txt");
+
+                panelTransform = new TranslateTransform(0, 0);
+                panelScale = new ScaleTransform(1, 1);
+                var transformGroup = new TransformGroup();
+                transformGroup.Children.Add(panelScale);
+                transformGroup.Children.Add(panelTransform);
+
+                LoadPanelSettings();
+
                 controlPanel = new Grid
                 {
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Bottom,
                     Margin = new Thickness(10, 0, 0, 30),
                     Background = new SolidColorBrush(Color.FromArgb(230, 30, 30, 40)),
-                    MinWidth = 200
+                    MinWidth = 200,
+                    RenderTransform = transformGroup,
+                    RenderTransformOrigin = new Point(0, 1),  // Scale from bottom-left
+                    Cursor = System.Windows.Input.Cursors.Hand
                 };
-                
+
+                controlPanel.MouseLeftButtonDown += Panel_MouseLeftButtonDown;
+                controlPanel.MouseLeftButtonUp += Panel_MouseLeftButtonUp;
+                controlPanel.MouseMove += Panel_MouseMove;
+
                 var border = new Border
                 {
                     BorderBrush = new SolidColorBrush(Color.FromRgb(80, 80, 100)),
@@ -281,10 +311,43 @@ namespace NinjaTrader.NinjaScript.Indicators
                 
                 border.Child = stack;
                 controlPanel.Children.Add(border);
-                
+
+                // Add resize grip at bottom-right corner
+                resizeGrip = new Border
+                {
+                    Width = 16,
+                    Height = 16,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    Background = Brushes.Transparent,
+                    Cursor = System.Windows.Input.Cursors.SizeNWSE,
+                    Margin = new Thickness(0, 0, 2, 2)
+                };
+
+                // Draw resize grip lines
+                var gripCanvas = new Canvas { Width = 12, Height = 12 };
+                for (int i = 0; i < 3; i++)
+                {
+                    var line = new Line
+                    {
+                        X1 = 10 - i * 4, Y1 = 10,
+                        X2 = 10, Y2 = 10 - i * 4,
+                        Stroke = new SolidColorBrush(Color.FromRgb(120, 120, 140)),
+                        StrokeThickness = 1
+                    };
+                    gripCanvas.Children.Add(line);
+                }
+                resizeGrip.Child = gripCanvas;
+
+                resizeGrip.MouseLeftButtonDown += ResizeGrip_MouseLeftButtonDown;
+                resizeGrip.MouseLeftButtonUp += ResizeGrip_MouseLeftButtonUp;
+                resizeGrip.MouseMove += ResizeGrip_MouseMove;
+
+                controlPanel.Children.Add(resizeGrip);
+
                 UIElementCollection panelHolder = (ChartControl.Parent as Grid)?.Children;
                 if (panelHolder != null) panelHolder.Add(controlPanel);
-                
+
                 panelActive = true;
             }
             catch (Exception ex) { Print($"Panel error: {ex.Message}"); }
@@ -325,10 +388,154 @@ namespace NinjaTrader.NinjaScript.Indicators
             {
                 if (controlPanel != null && panelActive)
                 {
+                    controlPanel.MouseLeftButtonDown -= Panel_MouseLeftButtonDown;
+                    controlPanel.MouseLeftButtonUp -= Panel_MouseLeftButtonUp;
+                    controlPanel.MouseMove -= Panel_MouseMove;
+
+                    if (resizeGrip != null)
+                    {
+                        resizeGrip.MouseLeftButtonDown -= ResizeGrip_MouseLeftButtonDown;
+                        resizeGrip.MouseLeftButtonUp -= ResizeGrip_MouseLeftButtonUp;
+                        resizeGrip.MouseMove -= ResizeGrip_MouseMove;
+                    }
+
                     UIElementCollection panelHolder = (ChartControl?.Parent as Grid)?.Children;
                     if (panelHolder != null && panelHolder.Contains(controlPanel))
                         panelHolder.Remove(controlPanel);
                     panelActive = false;
+                }
+            }
+            catch { }
+        }
+
+        private void Panel_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            isDragging = true;
+            dragStartPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+            dragStartPoint.X -= panelTransform.X;
+            dragStartPoint.Y -= panelTransform.Y;
+            controlPanel.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void Panel_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (isDragging)
+            {
+                isDragging = false;
+                controlPanel.ReleaseMouseCapture();
+                SavePanelSettings();
+                e.Handled = true;
+            }
+        }
+
+        private void Panel_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                Point currentPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+                double newX = currentPoint.X - dragStartPoint.X;
+                double newY = currentPoint.Y - dragStartPoint.Y;
+
+                // Constrain to chart boundaries
+                var parent = ChartControl?.Parent as FrameworkElement;
+                if (parent != null && controlPanel != null)
+                {
+                    double panelWidth = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth : 200;
+                    double panelHeight = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight : 300;
+
+                    // Account for the initial margin (10, 0, 0, 30)
+                    double minX = -10;  // Can move left to edge
+                    double maxX = parent.ActualWidth - panelWidth - 10;
+                    double minY = -(parent.ActualHeight - panelHeight - 30);  // Can move up
+                    double maxY = 0;  // Bottom edge (due to VerticalAlignment.Bottom)
+
+                    newX = Math.Max(minX, Math.Min(maxX, newX));
+                    newY = Math.Max(minY, Math.Min(maxY, newY));
+                }
+
+                panelTransform.X = newX;
+                panelTransform.Y = newY;
+                e.Handled = true;
+            }
+        }
+
+        private void ResizeGrip_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            isResizing = true;
+            resizeStartPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+            resizeStartWidth = panelScale.ScaleX;
+            resizeStartHeight = panelScale.ScaleY;
+            resizeGrip.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void ResizeGrip_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (isResizing)
+            {
+                isResizing = false;
+                resizeGrip.ReleaseMouseCapture();
+                SavePanelSettings();
+                e.Handled = true;
+            }
+        }
+
+        private void ResizeGrip_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (isResizing)
+            {
+                Point currentPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+                double deltaX = currentPoint.X - resizeStartPoint.X;
+                double deltaY = currentPoint.Y - resizeStartPoint.Y;
+
+                // Calculate new scale based on drag distance
+                // Panel is anchored bottom-left, so dragging right/down should enlarge
+                double baseWidth = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth / panelScale.ScaleX : 200;
+                double baseHeight = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight / panelScale.ScaleY : 300;
+
+                // Use average of X and Y deltas for uniform scaling
+                double avgDelta = (deltaX - deltaY) / 2;  // Subtract deltaY because down is positive but should shrink
+                double newScale = resizeStartWidth + avgDelta / baseWidth;
+
+                // Constrain scale between 0.5 and 2.0
+                newScale = Math.Max(0.5, Math.Min(2.0, newScale));
+
+                panelScale.ScaleX = newScale;
+                panelScale.ScaleY = newScale;
+
+                e.Handled = true;
+            }
+        }
+
+        private void SavePanelSettings()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(panelSettingsFile)) return;
+                string dir = System.IO.Path.GetDirectoryName(panelSettingsFile);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                File.WriteAllText(panelSettingsFile, $"{panelTransform.X},{panelTransform.Y},{panelScale.ScaleX},{panelScale.ScaleY}");
+            }
+            catch { }
+        }
+
+        private void LoadPanelSettings()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(panelSettingsFile) || !File.Exists(panelSettingsFile)) return;
+                string content = File.ReadAllText(panelSettingsFile);
+                string[] parts = content.Split(',');
+                if (parts.Length >= 2 && double.TryParse(parts[0], out double x) && double.TryParse(parts[1], out double y))
+                {
+                    panelTransform.X = x;
+                    panelTransform.Y = y;
+                }
+                if (parts.Length >= 4 && double.TryParse(parts[2], out double scaleX) && double.TryParse(parts[3], out double scaleY))
+                {
+                    panelScale.ScaleX = Math.Max(0.5, Math.Min(2.0, scaleX));
+                    panelScale.ScaleY = Math.Max(0.5, Math.Min(2.0, scaleY));
                 }
             }
             catch { }
@@ -478,7 +685,7 @@ namespace NinjaTrader.NinjaScript.Indicators
             {
                 string dir = @"C:\Users\Administrator\Documents\NinjaTrader 8\log";
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                logFilePath = Path.Combine(dir, $"ActiveNikiMonitor_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
+                logFilePath = System.IO.Path.Combine(dir, $"ActiveNikiMonitor_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
                 logWriter = new StreamWriter(logFilePath, true) { AutoFlush = true };
                 logWriter.WriteLine($"\n=== ActiveNikiMonitor Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
                 logWriter.WriteLine($"    Min={MinIndicatorsRequired}/6, MaxFlips={MaxFlipsPerMinute}, DT_AFTER_RR={EnableDTAfterRR}\n");
