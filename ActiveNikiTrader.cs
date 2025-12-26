@@ -15,17 +15,24 @@ using NinjaTrader.Data;
 using NinjaTrader.Gui.Chart;
 using NinjaTrader.Gui.Tools;
 using NinjaTrader.NinjaScript;
+using NinjaTrader.NinjaScript.Strategies;
 using NinjaTrader.NinjaScript.Indicators;
 #endregion
 
-namespace NinjaTrader.NinjaScript.Indicators
+namespace NinjaTrader.NinjaScript.Strategies
 {
-    public class ActiveNikiMonitor : Indicator
+    public class ActiveNikiTrader : Strategy
     {
         private object rubyRiver, vidyaPro, easyTrend, dragonTrend, solarWave, ninZaT3Pro;
         private T3ProEquivalent t3ProEquivalent;
+        private VIDYAProEquivalent vidyaProEquivalent;
+        private EasyTrendEquivalent easyTrendEquivalent;
+        private RubyRiverEquivalent rubyRiverEquivalent;
+        private DragonTrendEquivalent dragonTrendEquivalent;
+        private SolarWaveEquivalent solarWaveEquivalent;
         private FieldInfo rrIsUptrend, vyIsUptrend, etIsUptrend, dtPrevSignal, swIsUptrend, swCountWave, t3pIsUptrend;
-        private bool prevRR_IsUp, prevDT_IsUp, indicatorsReady, useHostedT3Pro, isFirstBar = true;
+        private bool prevRR_IsUp, prevDT_IsUp, indicatorsReady, isFirstBar = true;
+        private bool useHostedT3Pro, useHostedVIDYAPro, useHostedEasyTrend, useHostedRubyRiver, useHostedDragonTrend, useHostedSolarWave;
         private DateTime lastRR_FlipTime = DateTime.MinValue, lastDT_FlipTime = DateTime.MinValue;
         private Queue<DateTime> recentFlips = new Queue<DateTime>();
         
@@ -94,7 +101,58 @@ namespace NinjaTrader.NinjaScript.Indicators
         [NinjaScriptProperty][Range(0.1, 10.0)][Display(Name="T3Pro Filter Multiplier", Order=7, GroupName="3. T3 Pro Settings")]
         public double T3ProFilterMultiplier { get; set; }
         
-        [NinjaScriptProperty][Display(Name="Enable Sound Alert", Order=1, GroupName="4. Alerts")]
+        [NinjaScriptProperty][Range(1, 100)][Display(Name="VIDYA Period", Order=1, GroupName="4. VIDYA Pro Settings")]
+        public int VIDYAPeriod { get; set; }
+        [NinjaScriptProperty][Range(1, 100)][Display(Name="VIDYA Volatility Period", Order=2, GroupName="4. VIDYA Pro Settings")]
+        public int VIDYAVolatilityPeriod { get; set; }
+        [NinjaScriptProperty][Display(Name="VIDYA Smoothing Enabled", Order=3, GroupName="4. VIDYA Pro Settings")]
+        public bool VIDYASmoothingEnabled { get; set; }
+        [NinjaScriptProperty][Range(1, 50)][Display(Name="VIDYA Smoothing Period", Order=4, GroupName="4. VIDYA Pro Settings")]
+        public int VIDYASmoothingPeriod { get; set; }
+        [NinjaScriptProperty][Display(Name="VIDYA Filter Enabled", Order=5, GroupName="4. VIDYA Pro Settings")]
+        public bool VIDYAFilterEnabled { get; set; }
+        [NinjaScriptProperty][Range(0.1, 10.0)][Display(Name="VIDYA Filter Multiplier", Order=6, GroupName="4. VIDYA Pro Settings")]
+        public double VIDYAFilterMultiplier { get; set; }
+        
+        [NinjaScriptProperty][Range(1, 100)][Display(Name="EasyTrend Period", Order=1, GroupName="5. Easy Trend Settings")]
+        public int EasyTrendPeriod { get; set; }
+        [NinjaScriptProperty][Display(Name="EasyTrend Smoothing Enabled", Order=2, GroupName="5. Easy Trend Settings")]
+        public bool EasyTrendSmoothingEnabled { get; set; }
+        [NinjaScriptProperty][Range(1, 50)][Display(Name="EasyTrend Smoothing Period", Order=3, GroupName="5. Easy Trend Settings")]
+        public int EasyTrendSmoothingPeriod { get; set; }
+        [NinjaScriptProperty][Display(Name="EasyTrend Filter Enabled", Order=4, GroupName="5. Easy Trend Settings")]
+        public bool EasyTrendFilterEnabled { get; set; }
+        [NinjaScriptProperty][Range(0.01, 10.0)][Display(Name="EasyTrend Filter Multiplier", Order=5, GroupName="5. Easy Trend Settings")]
+        public double EasyTrendFilterMultiplier { get; set; }
+        [NinjaScriptProperty][Range(1, 200)][Display(Name="EasyTrend ATR Period", Order=6, GroupName="5. Easy Trend Settings")]
+        public int EasyTrendATRPeriod { get; set; }
+        
+        [NinjaScriptProperty][Range(1, 100)][Display(Name="RubyRiver MA Period", Order=1, GroupName="6. Ruby River Settings")]
+        public int RubyRiverMAPeriod { get; set; }
+        [NinjaScriptProperty][Display(Name="RubyRiver Smoothing Enabled", Order=2, GroupName="6. Ruby River Settings")]
+        public bool RubyRiverSmoothingEnabled { get; set; }
+        [NinjaScriptProperty][Range(1, 50)][Display(Name="RubyRiver Smoothing Period", Order=3, GroupName="6. Ruby River Settings")]
+        public int RubyRiverSmoothingPeriod { get; set; }
+        [NinjaScriptProperty][Range(0.01, 2.0)][Display(Name="RubyRiver Offset Multiplier", Order=4, GroupName="6. Ruby River Settings")]
+        public double RubyRiverOffsetMultiplier { get; set; }
+        [NinjaScriptProperty][Range(1, 200)][Display(Name="RubyRiver Offset Period", Order=5, GroupName="6. Ruby River Settings")]
+        public int RubyRiverOffsetPeriod { get; set; }
+        
+        [NinjaScriptProperty][Range(1, 100)][Display(Name="DragonTrend Period", Order=1, GroupName="7. Dragon Trend Settings")]
+        public int DragonTrendPeriod { get; set; }
+        [NinjaScriptProperty][Display(Name="DragonTrend Smoothing Enabled", Order=2, GroupName="7. Dragon Trend Settings")]
+        public bool DragonTrendSmoothingEnabled { get; set; }
+        [NinjaScriptProperty][Range(1, 50)][Display(Name="DragonTrend Smoothing Period", Order=3, GroupName="7. Dragon Trend Settings")]
+        public int DragonTrendSmoothingPeriod { get; set; }
+        
+        [NinjaScriptProperty][Range(1, 200)][Display(Name="SolarWave ATR Period", Order=1, GroupName="8. Solar Wave Settings")]
+        public int SolarWaveATRPeriod { get; set; }
+        [NinjaScriptProperty][Range(0.1, 10.0)][Display(Name="SolarWave Trend Multiplier", Order=2, GroupName="8. Solar Wave Settings")]
+        public double SolarWaveTrendMultiplier { get; set; }
+        [NinjaScriptProperty][Range(0.1, 10.0)][Display(Name="SolarWave Stop Multiplier", Order=3, GroupName="8. Solar Wave Settings")]
+        public double SolarWaveStopMultiplier { get; set; }
+        
+        [NinjaScriptProperty][Display(Name="Enable Sound Alert", Order=1, GroupName="9. Alerts")]
         public bool EnableSoundAlert { get; set; }
         #endregion
 
@@ -102,13 +160,19 @@ namespace NinjaTrader.NinjaScript.Indicators
         {
             if (State == State.SetDefaults)
             {
-                Name = "ActiveNikiMonitor";
-                Description = "Monitors indicators and displays signals - Baseline #1 (4/6 + DT_AFTER_RR)";
+                Name = "ActiveNikiTrader";
+                Description = "Monitors indicators and displays signals - Trader Strategy";
                 Calculate = Calculate.OnBarClose;
-                IsOverlay = true;
-                DisplayInDataBox = false;
-                DrawOnPricePanel = true;
-                IsSuspendedWhileInactive = false;
+                EntriesPerDirection = 1;
+                EntryHandling = EntryHandling.AllEntries;
+                IsExitOnSessionCloseStrategy = true;
+                ExitOnSessionCloseSeconds = 30;
+                MaximumBarsLookBack = MaximumBarsLookBack.TwoHundredFiftySix;
+                StartBehavior = StartBehavior.WaitUntilFlat;
+                TimeInForce = TimeInForce.Gtc;
+                RealtimeErrorHandling = RealtimeErrorHandling.StopCancelClose;
+                StopTargetHandling = StopTargetHandling.PerEntryExecution;
+                BarsRequiredToTrade = 20;
                 
                 MinIndicatorsRequired = 4;
                 MinSolarWaveCount = 1;
@@ -132,6 +196,34 @@ namespace NinjaTrader.NinjaScript.Indicators
                 T3ProFilterEnabled = true;
                 T3ProFilterMultiplier = 4.0;
                 
+                VIDYAPeriod = 9;
+                VIDYAVolatilityPeriod = 9;
+                VIDYASmoothingEnabled = true;
+                VIDYASmoothingPeriod = 5;
+                VIDYAFilterEnabled = true;
+                VIDYAFilterMultiplier = 4.0;
+                
+                EasyTrendPeriod = 30;
+                EasyTrendSmoothingEnabled = true;
+                EasyTrendSmoothingPeriod = 7;
+                EasyTrendFilterEnabled = true;
+                EasyTrendFilterMultiplier = 0.5;
+                EasyTrendATRPeriod = 100;
+                
+                RubyRiverMAPeriod = 20;
+                RubyRiverSmoothingEnabled = true;
+                RubyRiverSmoothingPeriod = 5;
+                RubyRiverOffsetMultiplier = 0.15;
+                RubyRiverOffsetPeriod = 100;
+                
+                DragonTrendPeriod = 10;
+                DragonTrendSmoothingEnabled = true;
+                DragonTrendSmoothingPeriod = 5;
+                
+                SolarWaveATRPeriod = 100;
+                SolarWaveTrendMultiplier = 2;
+                SolarWaveStopMultiplier = 4;
+                
                 EnableSoundAlert = true;
             }
             else if (State == State.DataLoaded)
@@ -140,12 +232,27 @@ namespace NinjaTrader.NinjaScript.Indicators
                 InitializeLogFile();
                 t3ProEquivalent = T3ProEquivalent(T3ProMAType.EMA, T3ProPeriod, T3ProTCount, T3ProVFactor,
                     T3ProChaosSmoothingEnabled, T3ProMAType.DEMA, T3ProChaosSmoothingPeriod,
-                    T3ProFilterEnabled, T3ProFilterMultiplier, 14, true, false, "Γû▓", "Γû╝", 10);
-                PrintAndLog($"ActiveNikiMonitor | Min={MinIndicatorsRequired}/6 | DT_AFTER_RR={EnableDTAfterRR}");
+                    T3ProFilterEnabled, T3ProFilterMultiplier, 14, true, false, "╬ô├╗Γûô", "╬ô├╗Γò¥", 10);
+                vidyaProEquivalent = VIDYAProEquivalent(VIDYAPeriod, VIDYAVolatilityPeriod, VIDYASmoothingEnabled,
+                    VIDYAProMAType.EMA, VIDYASmoothingPeriod, VIDYAFilterEnabled, VIDYAFilterMultiplier, 14,
+                    true, false, "▲", "▼", 10);
+                easyTrendEquivalent = EasyTrendEquivalent(EasyTrendMAType.EMA, EasyTrendPeriod, EasyTrendSmoothingEnabled,
+                    EasyTrendMAType.EMA, EasyTrendSmoothingPeriod, EasyTrendFilterEnabled, true,
+                    EasyTrendFilterMultiplier, EasyTrendFilterUnit.ninZaATR, EasyTrendATRPeriod,
+                    true, false, "▲ + Easy", "Easy + ▼", 10);
+                rubyRiverEquivalent = RubyRiverEquivalent(RubyRiverMAType.EMA, RubyRiverMAPeriod, RubyRiverSmoothingEnabled,
+                    RubyRiverMAType.LinReg, RubyRiverSmoothingPeriod, RubyRiverOffsetMultiplier, RubyRiverOffsetPeriod,
+                    true, false, "▲", "▼", 10);
+                dragonTrendEquivalent = DragonTrendEquivalent(DragonTrendPeriod, DragonTrendSmoothingEnabled,
+                    DragonTrendMAType.EMA, DragonTrendSmoothingPeriod, false, "▲", "▼", 10);
+                solarWaveEquivalent = SolarWaveEquivalent(SolarWaveATRPeriod, SolarWaveTrendMultiplier, SolarWaveStopMultiplier,
+                    2, 1, 5, 10, 10, true, false, "▲ + Trend", "Trend + ▼", 12);
+                LogAlways($"ActiveNikiTrader | Min={MinIndicatorsRequired}/6 | DT_AFTER_RR={EnableDTAfterRR}");
             }
             else if (State == State.Historical)
             {
                 LoadNinZaIndicators();
+                LogDetectedIndicators();
                 if (ChartControl != null) ChartControl.Dispatcher.InvokeAsync(CreateControlPanel);
             }
             else if (State == State.Terminated)
@@ -157,7 +264,13 @@ namespace NinjaTrader.NinjaScript.Indicators
         
         private void LoadNinZaIndicators()
         {
-            if (ChartControl?.Indicators == null) { useHostedT3Pro = true; indicatorsReady = true; return; }
+            if (ChartControl?.Indicators == null) 
+            { 
+                useHostedT3Pro = useHostedVIDYAPro = useHostedEasyTrend = true;
+                useHostedRubyRiver = useHostedDragonTrend = useHostedSolarWave = true;
+                indicatorsReady = true; 
+                return; 
+            }
             var flags = BindingFlags.NonPublic | BindingFlags.Instance;
             foreach (var ind in ChartControl.Indicators)
             {
@@ -173,21 +286,66 @@ namespace NinjaTrader.NinjaScript.Indicators
                 }
             }
             useHostedT3Pro = ninZaT3Pro == null;
+            useHostedVIDYAPro = vidyaPro == null;
+            useHostedEasyTrend = easyTrend == null;
+            useHostedRubyRiver = rubyRiver == null;
+            useHostedDragonTrend = dragonTrend == null;
+            useHostedSolarWave = solarWave == null;
             indicatorsReady = true;
+        }
+        
+        private void LogDetectedIndicators()
+        {
+            LogAlways($"--- Indicators Detected on Chart ---");
+            
+            // Log ninZa indicators found
+            LogAlways($"  ninZaRubyRiver:   {(rubyRiver != null ? "FOUND" : "not found")}");
+            LogAlways($"  ninZaDragonTrend: {(dragonTrend != null ? "FOUND" : "not found")}");
+            LogAlways($"  ninZaVIDYAPro:    {(vidyaPro != null ? "FOUND" : "not found")}");
+            LogAlways($"  ninZaEasyTrend:   {(easyTrend != null ? "FOUND" : "not found")}");
+            LogAlways($"  ninZaSolarWave:   {(solarWave != null ? "FOUND" : "not found")}");
+            LogAlways($"  ninZaT3Pro:       {(ninZaT3Pro != null ? "FOUND" : "not found")}");
+            
+            // Log which equivalents are being used
+            LogAlways($"--- Equivalent Indicators ---");
+            LogAlways($"  T3ProEquivalent:       {(useHostedT3Pro ? "ACTIVE (using hosted)" : "inactive (using ninZa)")}");
+            LogAlways($"  VIDYAProEquivalent:    {(useHostedVIDYAPro ? "ACTIVE (using hosted)" : "inactive (using ninZa)")}");
+            LogAlways($"  EasyTrendEquivalent:   {(useHostedEasyTrend ? "ACTIVE (using hosted)" : "inactive (using ninZa)")}");
+            LogAlways($"  RubyRiverEquivalent:   {(useHostedRubyRiver ? "ACTIVE (using hosted)" : "inactive (using ninZa)")}");
+            LogAlways($"  DragonTrendEquivalent: {(useHostedDragonTrend ? "ACTIVE (using hosted)" : "inactive (using ninZa)")}");
+            LogAlways($"  SolarWaveEquivalent:   {(useHostedSolarWave ? "ACTIVE (using hosted)" : "inactive (using ninZa)")}");
+            
+            // List all indicators on chart
+            if (ChartControl?.Indicators != null)
+            {
+                LogAlways($"--- All Chart Indicators ({ChartControl.Indicators.Count}) ---");
+                foreach (var ind in ChartControl.Indicators)
+                {
+                    LogAlways($"  - {ind.GetType().Name}");
+                }
+            }
+            LogAlways($"--------------------------------");
+        }
+        
+        private void LogAlways(string msg)
+        {
+            Print(msg);
+            if (logWriter != null)
+                try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
         }
         
         private bool GetBool(object o, FieldInfo f) { try { return o != null && f != null && (bool)f.GetValue(o); } catch { return false; } }
         private double GetDbl(object o, FieldInfo f) { try { return o != null && f != null ? (double)f.GetValue(o) : 0; } catch { return 0; } }
         private int GetInt(object o, FieldInfo f) { try { return o != null && f != null ? (int)f.GetValue(o) : 0; } catch { return 0; } }
         
-        public bool RR_IsUp => GetBool(rubyRiver, rrIsUptrend);
-        public bool VY_IsUp => GetBool(vidyaPro, vyIsUptrend);
-        public bool ET_IsUp => GetBool(easyTrend, etIsUptrend);
-        public double DT_Signal => GetDbl(dragonTrend, dtPrevSignal);
+        public bool RR_IsUp => useHostedRubyRiver ? (rubyRiverEquivalent?.IsUptrend ?? false) : GetBool(rubyRiver, rrIsUptrend);
+        public bool VY_IsUp => useHostedVIDYAPro ? (vidyaProEquivalent?.IsUptrend ?? false) : GetBool(vidyaPro, vyIsUptrend);
+        public bool ET_IsUp => useHostedEasyTrend ? (easyTrendEquivalent?.IsUptrend ?? false) : GetBool(easyTrend, etIsUptrend);
+        public double DT_Signal => useHostedDragonTrend ? (dragonTrendEquivalent?.PrevSignal ?? 0) : GetDbl(dragonTrend, dtPrevSignal);
         public bool DT_IsUp => DT_Signal > 0;
         public bool DT_IsDown => DT_Signal < 0;
-        public bool SW_IsUp => GetBool(solarWave, swIsUptrend);
-        public int SW_Count => GetInt(solarWave, swCountWave);
+        public bool SW_IsUp => useHostedSolarWave ? (solarWaveEquivalent?.IsUptrend ?? false) : GetBool(solarWave, swIsUptrend);
+        public int SW_Count => useHostedSolarWave ? (solarWaveEquivalent?.CountWave ?? 0) : GetInt(solarWave, swCountWave);
         public bool T3P_IsUp => useHostedT3Pro ? (t3ProEquivalent?.IsUptrend ?? false) : GetBool(ninZaT3Pro, t3pIsUptrend);
         
         private int GetEnabledCount() => (UseRubyRiver?1:0)+(UseDragonTrend?1:0)+(UseSolarWave?1:0)+(UseVIDYAPro?1:0)+(UseEasyTrend?1:0)+(UseT3Pro?1:0);
@@ -236,7 +394,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                 // Initialize panel settings file path
                 string settingsDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     "NinjaTrader 8", "settings");
-                panelSettingsFile = System.IO.Path.Combine(settingsDir, "ActiveNikiMonitor_PanelSettings.txt");
+                panelSettingsFile = System.IO.Path.Combine(settingsDir, "ActiveNikiTrader_PanelSettings.txt");
 
                 panelTransform = new TranslateTransform(0, 0);
                 panelScale = new ScaleTransform(1, 1);
@@ -273,7 +431,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                 var stack = new StackPanel();
                 stack.Children.Add(new TextBlock
                 {
-                    Text = "ActiveNiki Monitor",
+                    Text = "ActiveNiki Trader",
                     FontWeight = FontWeights.Bold,
                     Foreground = Brushes.Cyan,
                     FontSize = 11,
@@ -292,9 +450,8 @@ namespace NinjaTrader.NinjaScript.Indicators
                 
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
 
-                // lblConfluence removed - redundant with SIGNAL field
                 lblTriggerMode = new TextBlock { Text = "Triggers: RR + DT", Foreground = Brushes.LightGray, FontSize = 9 };
-                lblTradeStatus = new TextBlock { Text = "Mode: MONITOR", Foreground = Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
+                lblTradeStatus = new TextBlock { Text = "Mode: TRADER", Foreground = Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
                 lblSessionStats = new TextBlock { Text = "Signals: 0", Foreground = Brushes.LightGray, FontSize = 9 };
 
                 stack.Children.Add(lblTriggerMode);
@@ -567,14 +724,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                 var (bull, bear, total) = GetConfluence();
                 int aligned = Math.Max(bull, bear);
                 string dir = bull > bear ? "LONG" : bear > bull ? "SHORT" : "---";
-                // Confluence field commented out - same info shown in SIGNAL field below
-                // if (lblConfluence != null)
-                // {
-                //     if (total == 0)
-                //         { lblConfluence.Text = "No indicators selected"; lblConfluence.Foreground = Brushes.Gray; }
-                //     else
-                //         { lblConfluence.Text = $"Confluence: {aligned}/{total} {dir}"; lblConfluence.Foreground = aligned >= effMin ? Brushes.Lime : Brushes.Yellow; }
-                // }
+
                 if (lblTriggerMode != null) lblTriggerMode.Text = EnableDTAfterRR ? "Triggers: RR + DT" : "Triggers: RR only";
                 if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount}";
 
@@ -629,7 +779,7 @@ namespace NinjaTrader.NinjaScript.Indicators
 
         protected override void OnBarUpdate()
         {
-            if (CurrentBar < 20 || !indicatorsReady) return;
+            if (CurrentBar < BarsRequiredToTrade || !indicatorsReady) return;
             UpdatePanel();
             
             DateTime barTime = Time[0];
@@ -702,11 +852,11 @@ namespace NinjaTrader.NinjaScript.Indicators
         {
             try
             {
-                string dir = @"C:\Users\Administrator\Documents\NinjaTrader 8\log";
+                string dir = System.IO.Path.Combine(NinjaTrader.Core.Globals.UserDataDir, "log");
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                logFilePath = System.IO.Path.Combine(dir, $"ActiveNikiMonitor_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
+                logFilePath = System.IO.Path.Combine(dir, $"ActiveNikiTrader_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
                 logWriter = new StreamWriter(logFilePath, true) { AutoFlush = true };
-                logWriter.WriteLine($"\n=== ActiveNikiMonitor Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+                logWriter.WriteLine($"\n=== ActiveNikiTrader Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
                 logWriter.WriteLine($"    Min={MinIndicatorsRequired}/6, MaxFlips={MaxFlipsPerMinute}, DT_AFTER_RR={EnableDTAfterRR}\n");
             }
             catch { }
@@ -724,72 +874,10 @@ namespace NinjaTrader.NinjaScript.Indicators
         
         private void PrintAndLog(string msg)
         {
-            if (DateTime.Now.TimeOfDay < startTime || DateTime.Now.TimeOfDay > endTime)
-                return;
-
-            string timestampedMsg = $"{DateTime.Now:HH:mm:ss} | {msg}";
-            Print(timestampedMsg);
-            if (logWriter != null)
-                try { logWriter.WriteLine(timestampedMsg); } catch { }
+            Print(msg);
+            if (logWriter != null && DateTime.Now.TimeOfDay >= startTime && DateTime.Now.TimeOfDay <= endTime)
+                try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
         }
         #endregion
     }
 }
-
-
-#region NinjaScript generated code. Neither change nor remove.
-
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private ActiveNikiMonitor[] cacheActiveNikiMonitor;
-		public ActiveNikiMonitor ActiveNikiMonitor(int minIndicatorsRequired, int minSolarWaveCount, bool requireRubyRiverTrigger, bool enableDTAfterRR, int minSecondsSinceFlip, int maxFlipsPerMinute, bool useRubyRiver, bool useDragonTrend, bool useSolarWave, bool useVIDYAPro, bool useEasyTrend, bool useT3Pro, int t3ProPeriod, int t3ProTCount, double t3ProVFactor, bool t3ProChaosSmoothingEnabled, int t3ProChaosSmoothingPeriod, bool t3ProFilterEnabled, double t3ProFilterMultiplier, bool enableSoundAlert)
-		{
-			return ActiveNikiMonitor(Input, minIndicatorsRequired, minSolarWaveCount, requireRubyRiverTrigger, enableDTAfterRR, minSecondsSinceFlip, maxFlipsPerMinute, useRubyRiver, useDragonTrend, useSolarWave, useVIDYAPro, useEasyTrend, useT3Pro, t3ProPeriod, t3ProTCount, t3ProVFactor, t3ProChaosSmoothingEnabled, t3ProChaosSmoothingPeriod, t3ProFilterEnabled, t3ProFilterMultiplier, enableSoundAlert);
-		}
-
-		public ActiveNikiMonitor ActiveNikiMonitor(ISeries<double> input, int minIndicatorsRequired, int minSolarWaveCount, bool requireRubyRiverTrigger, bool enableDTAfterRR, int minSecondsSinceFlip, int maxFlipsPerMinute, bool useRubyRiver, bool useDragonTrend, bool useSolarWave, bool useVIDYAPro, bool useEasyTrend, bool useT3Pro, int t3ProPeriod, int t3ProTCount, double t3ProVFactor, bool t3ProChaosSmoothingEnabled, int t3ProChaosSmoothingPeriod, bool t3ProFilterEnabled, double t3ProFilterMultiplier, bool enableSoundAlert)
-		{
-			if (cacheActiveNikiMonitor != null)
-				for (int idx = 0; idx < cacheActiveNikiMonitor.Length; idx++)
-					if (cacheActiveNikiMonitor[idx] != null && cacheActiveNikiMonitor[idx].MinIndicatorsRequired == minIndicatorsRequired && cacheActiveNikiMonitor[idx].MinSolarWaveCount == minSolarWaveCount && cacheActiveNikiMonitor[idx].RequireRubyRiverTrigger == requireRubyRiverTrigger && cacheActiveNikiMonitor[idx].EnableDTAfterRR == enableDTAfterRR && cacheActiveNikiMonitor[idx].MinSecondsSinceFlip == minSecondsSinceFlip && cacheActiveNikiMonitor[idx].MaxFlipsPerMinute == maxFlipsPerMinute && cacheActiveNikiMonitor[idx].UseRubyRiver == useRubyRiver && cacheActiveNikiMonitor[idx].UseDragonTrend == useDragonTrend && cacheActiveNikiMonitor[idx].UseSolarWave == useSolarWave && cacheActiveNikiMonitor[idx].UseVIDYAPro == useVIDYAPro && cacheActiveNikiMonitor[idx].UseEasyTrend == useEasyTrend && cacheActiveNikiMonitor[idx].UseT3Pro == useT3Pro && cacheActiveNikiMonitor[idx].T3ProPeriod == t3ProPeriod && cacheActiveNikiMonitor[idx].T3ProTCount == t3ProTCount && cacheActiveNikiMonitor[idx].T3ProVFactor == t3ProVFactor && cacheActiveNikiMonitor[idx].T3ProChaosSmoothingEnabled == t3ProChaosSmoothingEnabled && cacheActiveNikiMonitor[idx].T3ProChaosSmoothingPeriod == t3ProChaosSmoothingPeriod && cacheActiveNikiMonitor[idx].T3ProFilterEnabled == t3ProFilterEnabled && cacheActiveNikiMonitor[idx].T3ProFilterMultiplier == t3ProFilterMultiplier && cacheActiveNikiMonitor[idx].EnableSoundAlert == enableSoundAlert && cacheActiveNikiMonitor[idx].EqualsInput(input))
-						return cacheActiveNikiMonitor[idx];
-			return CacheIndicator<ActiveNikiMonitor>(new ActiveNikiMonitor(){ MinIndicatorsRequired = minIndicatorsRequired, MinSolarWaveCount = minSolarWaveCount, RequireRubyRiverTrigger = requireRubyRiverTrigger, EnableDTAfterRR = enableDTAfterRR, MinSecondsSinceFlip = minSecondsSinceFlip, MaxFlipsPerMinute = maxFlipsPerMinute, UseRubyRiver = useRubyRiver, UseDragonTrend = useDragonTrend, UseSolarWave = useSolarWave, UseVIDYAPro = useVIDYAPro, UseEasyTrend = useEasyTrend, UseT3Pro = useT3Pro, T3ProPeriod = t3ProPeriod, T3ProTCount = t3ProTCount, T3ProVFactor = t3ProVFactor, T3ProChaosSmoothingEnabled = t3ProChaosSmoothingEnabled, T3ProChaosSmoothingPeriod = t3ProChaosSmoothingPeriod, T3ProFilterEnabled = t3ProFilterEnabled, T3ProFilterMultiplier = t3ProFilterMultiplier, EnableSoundAlert = enableSoundAlert }, input, ref cacheActiveNikiMonitor);
-		}
-	}
-}
-
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.ActiveNikiMonitor ActiveNikiMonitor(int minIndicatorsRequired, int minSolarWaveCount, bool requireRubyRiverTrigger, bool enableDTAfterRR, int minSecondsSinceFlip, int maxFlipsPerMinute, bool useRubyRiver, bool useDragonTrend, bool useSolarWave, bool useVIDYAPro, bool useEasyTrend, bool useT3Pro, int t3ProPeriod, int t3ProTCount, double t3ProVFactor, bool t3ProChaosSmoothingEnabled, int t3ProChaosSmoothingPeriod, bool t3ProFilterEnabled, double t3ProFilterMultiplier, bool enableSoundAlert)
-		{
-			return indicator.ActiveNikiMonitor(Input, minIndicatorsRequired, minSolarWaveCount, requireRubyRiverTrigger, enableDTAfterRR, minSecondsSinceFlip, maxFlipsPerMinute, useRubyRiver, useDragonTrend, useSolarWave, useVIDYAPro, useEasyTrend, useT3Pro, t3ProPeriod, t3ProTCount, t3ProVFactor, t3ProChaosSmoothingEnabled, t3ProChaosSmoothingPeriod, t3ProFilterEnabled, t3ProFilterMultiplier, enableSoundAlert);
-		}
-
-		public Indicators.ActiveNikiMonitor ActiveNikiMonitor(ISeries<double> input , int minIndicatorsRequired, int minSolarWaveCount, bool requireRubyRiverTrigger, bool enableDTAfterRR, int minSecondsSinceFlip, int maxFlipsPerMinute, bool useRubyRiver, bool useDragonTrend, bool useSolarWave, bool useVIDYAPro, bool useEasyTrend, bool useT3Pro, int t3ProPeriod, int t3ProTCount, double t3ProVFactor, bool t3ProChaosSmoothingEnabled, int t3ProChaosSmoothingPeriod, bool t3ProFilterEnabled, double t3ProFilterMultiplier, bool enableSoundAlert)
-		{
-			return indicator.ActiveNikiMonitor(input, minIndicatorsRequired, minSolarWaveCount, requireRubyRiverTrigger, enableDTAfterRR, minSecondsSinceFlip, maxFlipsPerMinute, useRubyRiver, useDragonTrend, useSolarWave, useVIDYAPro, useEasyTrend, useT3Pro, t3ProPeriod, t3ProTCount, t3ProVFactor, t3ProChaosSmoothingEnabled, t3ProChaosSmoothingPeriod, t3ProFilterEnabled, t3ProFilterMultiplier, enableSoundAlert);
-		}
-	}
-}
-
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.ActiveNikiMonitor ActiveNikiMonitor(int minIndicatorsRequired, int minSolarWaveCount, bool requireRubyRiverTrigger, bool enableDTAfterRR, int minSecondsSinceFlip, int maxFlipsPerMinute, bool useRubyRiver, bool useDragonTrend, bool useSolarWave, bool useVIDYAPro, bool useEasyTrend, bool useT3Pro, int t3ProPeriod, int t3ProTCount, double t3ProVFactor, bool t3ProChaosSmoothingEnabled, int t3ProChaosSmoothingPeriod, bool t3ProFilterEnabled, double t3ProFilterMultiplier, bool enableSoundAlert)
-		{
-			return indicator.ActiveNikiMonitor(Input, minIndicatorsRequired, minSolarWaveCount, requireRubyRiverTrigger, enableDTAfterRR, minSecondsSinceFlip, maxFlipsPerMinute, useRubyRiver, useDragonTrend, useSolarWave, useVIDYAPro, useEasyTrend, useT3Pro, t3ProPeriod, t3ProTCount, t3ProVFactor, t3ProChaosSmoothingEnabled, t3ProChaosSmoothingPeriod, t3ProFilterEnabled, t3ProFilterMultiplier, enableSoundAlert);
-		}
-
-		public Indicators.ActiveNikiMonitor ActiveNikiMonitor(ISeries<double> input , int minIndicatorsRequired, int minSolarWaveCount, bool requireRubyRiverTrigger, bool enableDTAfterRR, int minSecondsSinceFlip, int maxFlipsPerMinute, bool useRubyRiver, bool useDragonTrend, bool useSolarWave, bool useVIDYAPro, bool useEasyTrend, bool useT3Pro, int t3ProPeriod, int t3ProTCount, double t3ProVFactor, bool t3ProChaosSmoothingEnabled, int t3ProChaosSmoothingPeriod, bool t3ProFilterEnabled, double t3ProFilterMultiplier, bool enableSoundAlert)
-		{
-			return indicator.ActiveNikiMonitor(input, minIndicatorsRequired, minSolarWaveCount, requireRubyRiverTrigger, enableDTAfterRR, minSecondsSinceFlip, maxFlipsPerMinute, useRubyRiver, useDragonTrend, useSolarWave, useVIDYAPro, useEasyTrend, useT3Pro, t3ProPeriod, t3ProTCount, t3ProVFactor, t3ProChaosSmoothingEnabled, t3ProChaosSmoothingPeriod, t3ProFilterEnabled, t3ProFilterMultiplier, enableSoundAlert);
-		}
-	}
-}
-
-#endregion
