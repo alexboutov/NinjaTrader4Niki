@@ -102,8 +102,8 @@ namespace NinjaTrader.NinjaScript.Indicators
                 
                 // Marker Settings
                 MarkerEnabled = false;
-                MarkerStringUptrend = "▲ + T3";
-                MarkerStringDowntrend = "T3 + ▼";
+                MarkerStringUptrend = "Γû▓ + T3";
+                MarkerStringDowntrend = "T3 + Γû╝";
                 MarkerOffset = 10;
                 
                 AddPlot(new Stroke(Brushes.DodgerBlue, 2), PlotStyle.Line, "T3");
@@ -519,7 +519,6 @@ namespace NinjaTrader.NinjaScript.Indicators
         #endregion
     }
 }
-
 
 #region NinjaScript generated code. Neither change nor remove.
 
