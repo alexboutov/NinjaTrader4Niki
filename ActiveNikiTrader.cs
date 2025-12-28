@@ -165,6 +165,34 @@ namespace NinjaTrader.NinjaScript.Strategies
         [Display(Name="Session 2 End Minute", Description="Second session end minute (0-59)", Order=17, GroupName="1. Signal Filters")]
         public int Session2EndMinute { get; set; }
         
+        [NinjaScriptProperty]
+        [Display(Name="Close Before News", Description="Close positions before 8:30 AM news window", Order=18, GroupName="1. Signal Filters")]
+        public bool CloseBeforeNews { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 23)]
+        [Display(Name="News Close Hour", Description="Hour to close before news (0-23)", Order=19, GroupName="1. Signal Filters")]
+        public int NewsCloseHour { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 59)]
+        [Display(Name="News Close Minute", Description="Minute to close before news (0-59)", Order=20, GroupName="1. Signal Filters")]
+        public int NewsCloseMinute { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Close At End Of Day", Description="Close all positions at end of trading day", Order=21, GroupName="1. Signal Filters")]
+        public bool CloseAtEndOfDay { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 23)]
+        [Display(Name="EOD Close Hour", Description="Hour to close at end of day (0-23)", Order=22, GroupName="1. Signal Filters")]
+        public int EODCloseHour { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 59)]
+        [Display(Name="EOD Close Minute", Description="Minute to close at end of day (0-59)", Order=23, GroupName="1. Signal Filters")]
+        public int EODCloseMinute { get; set; }
+        
         [NinjaScriptProperty][Display(Name="Use Ruby River", Order=1, GroupName="2. Indicator Selection")]
         public bool UseRubyRiver { get; set; }
         [NinjaScriptProperty][Display(Name="Use Dragon Trend", Order=2, GroupName="2. Indicator Selection")]
@@ -276,16 +304,24 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableAutoTrading = false;  // Default OFF for safety
                 MinConfluenceForAutoTrade = 5;  // Only auto-trade high confluence signals
                 
-                // Trading hours filter - default: 7:00-8:29 and 9:30-11:00
+                // Trading hours filter - default: 7:00-8:29 and 9:00-16:00 (excludes 8:30-9:00 news)
                 UseTradingHoursFilter = true;
                 Session1StartHour = 7;
                 Session1StartMinute = 0;
                 Session1EndHour = 8;
                 Session1EndMinute = 29;
                 Session2StartHour = 9;
-                Session2StartMinute = 30;
-                Session2EndHour = 11;
+                Session2StartMinute = 0;
+                Session2EndHour = 16;
                 Session2EndMinute = 0;
+                
+                // Auto-close positions
+                CloseBeforeNews = true;
+                NewsCloseHour = 8;
+                NewsCloseMinute = 28;  // Close at 8:28, before 8:30 news
+                CloseAtEndOfDay = true;
+                EODCloseHour = 15;
+                EODCloseMinute = 58;  // Close at 15:58, before session end
                 
                 // Indicator selection (all enabled by default for confluence)
                 UseRubyRiver = true;
@@ -370,6 +406,10 @@ namespace NinjaTrader.NinjaScript.Strategies
                 LogAlways($"ActiveNikiTrader | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
                 if (UseTradingHoursFilter)
                     LogAlways($"Trading Hours: {GetTradingHoursString()}");
+                if (CloseBeforeNews)
+                    LogAlways($"Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2}");
+                if (CloseAtEndOfDay)
+                    LogAlways($"Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
             }
             else if (State == State.Historical)
             {
@@ -996,6 +1036,48 @@ namespace NinjaTrader.NinjaScript.Strategies
             
             DateTime barTime = Time[0];
             
+            // Auto-close positions before news window (8:30 AM)
+            if (CloseBeforeNews && Position.MarketPosition != MarketPosition.Flat)
+            {
+                int currentMinutes = barTime.Hour * 60 + barTime.Minute;
+                int newsCloseMinutes = NewsCloseHour * 60 + NewsCloseMinute;
+                
+                if (currentMinutes >= newsCloseMinutes && currentMinutes < newsCloseMinutes + 32)  // Within 8:28-9:00 window
+                {
+                    if (Position.MarketPosition == MarketPosition.Long)
+                    {
+                        ExitLong("Long", "PreNews Exit");
+                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - Before news window");
+                    }
+                    else if (Position.MarketPosition == MarketPosition.Short)
+                    {
+                        ExitShort("Short", "PreNews Exit");
+                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - Before news window");
+                    }
+                }
+            }
+            
+            // Auto-close positions at end of day
+            if (CloseAtEndOfDay && Position.MarketPosition != MarketPosition.Flat)
+            {
+                int currentMinutes = barTime.Hour * 60 + barTime.Minute;
+                int eodCloseMinutes = EODCloseHour * 60 + EODCloseMinute;
+                
+                if (currentMinutes >= eodCloseMinutes)
+                {
+                    if (Position.MarketPosition == MarketPosition.Long)
+                    {
+                        ExitLong("Long", "EOD Exit");
+                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - End of day");
+                    }
+                    else if (Position.MarketPosition == MarketPosition.Short)
+                    {
+                        ExitShort("Short", "EOD Exit");
+                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - End of day");
+                    }
+                }
+            }
+            
             // Increment cooldown counter
             if (barsSinceLastSignal >= 0)
                 barsSinceLastSignal++;
@@ -1244,6 +1326,10 @@ namespace NinjaTrader.NinjaScript.Strategies
                     logWriter.WriteLine($"    Trading Hours: {GetTradingHoursString()}");
                 else
                     logWriter.WriteLine($"    Trading Hours: ALL (filter disabled)");
+                if (CloseBeforeNews)
+                    logWriter.WriteLine($"    Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2}");
+                if (CloseAtEndOfDay)
+                    logWriter.WriteLine($"    Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
                 logWriter.WriteLine($"    LONG:  Yellow□ (AIQ1 UP) → RR UP → Bull Confluence ≥ {MinConfluenceRequired}");
                 logWriter.WriteLine($"    SHORT: Orange□ (AIQ1 DN) → RR DN → Bear Confluence ≥ {MinConfluenceRequired}\n");
             }
