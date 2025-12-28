@@ -116,6 +116,55 @@ namespace NinjaTrader.NinjaScript.Strategies
         [Display(Name="Enable Auto Trading", Description="Place orders automatically when signals fire", Order=7, GroupName="1. Signal Filters")]
         public bool EnableAutoTrading { get; set; }
         
+        [NinjaScriptProperty]
+        [Range(2, 6)]
+        [Display(Name="Min Confluence For Auto Trade", Description="Higher confluence required to actually place orders (2-6)", Order=8, GroupName="1. Signal Filters")]
+        public int MinConfluenceForAutoTrade { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Use Trading Hours Filter", Description="Only allow trades during specified hours", Order=9, GroupName="1. Signal Filters")]
+        public bool UseTradingHoursFilter { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 23)]
+        [Display(Name="Session 1 Start Hour", Description="First session start hour (0-23)", Order=10, GroupName="1. Signal Filters")]
+        public int Session1StartHour { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 59)]
+        [Display(Name="Session 1 Start Minute", Description="First session start minute (0-59)", Order=11, GroupName="1. Signal Filters")]
+        public int Session1StartMinute { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 23)]
+        [Display(Name="Session 1 End Hour", Description="First session end hour (0-23)", Order=12, GroupName="1. Signal Filters")]
+        public int Session1EndHour { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 59)]
+        [Display(Name="Session 1 End Minute", Description="First session end minute (0-59)", Order=13, GroupName="1. Signal Filters")]
+        public int Session1EndMinute { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 23)]
+        [Display(Name="Session 2 Start Hour", Description="Second session start hour (0-23)", Order=14, GroupName="1. Signal Filters")]
+        public int Session2StartHour { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 59)]
+        [Display(Name="Session 2 Start Minute", Description="Second session start minute (0-59)", Order=15, GroupName="1. Signal Filters")]
+        public int Session2StartMinute { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 23)]
+        [Display(Name="Session 2 End Hour", Description="Second session end hour (0-23)", Order=16, GroupName="1. Signal Filters")]
+        public int Session2EndHour { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 59)]
+        [Display(Name="Session 2 End Minute", Description="Second session end minute (0-59)", Order=17, GroupName="1. Signal Filters")]
+        public int Session2EndMinute { get; set; }
+        
         [NinjaScriptProperty][Display(Name="Use Ruby River", Order=1, GroupName="2. Indicator Selection")]
         public bool UseRubyRiver { get; set; }
         [NinjaScriptProperty][Display(Name="Use Dragon Trend", Order=2, GroupName="2. Indicator Selection")]
@@ -225,6 +274,18 @@ namespace NinjaTrader.NinjaScript.Strategies
                 TakeProfitUSD = 60;
                 CooldownBars = 10;
                 EnableAutoTrading = false;  // Default OFF for safety
+                MinConfluenceForAutoTrade = 5;  // Only auto-trade high confluence signals
+                
+                // Trading hours filter - default: 7:00-8:29 and 9:30-11:00
+                UseTradingHoursFilter = true;
+                Session1StartHour = 7;
+                Session1StartMinute = 0;
+                Session1EndHour = 8;
+                Session1EndMinute = 29;
+                Session2StartHour = 9;
+                Session2StartMinute = 30;
+                Session2EndHour = 11;
+                Session2EndMinute = 0;
                 
                 // Indicator selection (all enabled by default for confluence)
                 UseRubyRiver = true;
@@ -306,7 +367,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 aiq1Equivalent = AIQ_1Equivalent(3, 0, AIQ1EquivMAMethod.MA1, true, 0.05, 0.05, 0.03, 0.03,
                     true, 15, 100, false, 4, Brushes.Orange, Brushes.Orange);
                 
-                LogAlways($"ActiveNikiTrader | MinConf={MinConfluenceRequired}/6 | MaxBars={MaxBarsAfterYellowSquare} | Cooldown={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                LogAlways($"ActiveNikiTrader | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                if (UseTradingHoursFilter)
+                    LogAlways($"Trading Hours: {GetTradingHoursString()}");
             }
             else if (State == State.Historical)
             {
@@ -475,6 +538,28 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (UseT3Pro) { total++; if (T3P_IsUp) bull++; else bear++; }
             return (bull, bear, total);
         }
+        
+        // Check if current time is within allowed trading hours
+        private bool IsTradingHoursAllowed(DateTime barTime)
+        {
+            if (!UseTradingHoursFilter) return true;  // Filter disabled, always allow
+            
+            int currentMinutes = barTime.Hour * 60 + barTime.Minute;
+            int session1Start = Session1StartHour * 60 + Session1StartMinute;
+            int session1End = Session1EndHour * 60 + Session1EndMinute;
+            int session2Start = Session2StartHour * 60 + Session2StartMinute;
+            int session2End = Session2EndHour * 60 + Session2EndMinute;
+            
+            bool inSession1 = currentMinutes >= session1Start && currentMinutes <= session1End;
+            bool inSession2 = currentMinutes >= session2Start && currentMinutes <= session2End;
+            
+            return inSession1 || inSession2;
+        }
+        
+        private string GetTradingHoursString()
+        {
+            return $"{Session1StartHour:D2}:{Session1StartMinute:D2}-{Session1EndHour:D2}:{Session1EndMinute:D2}, {Session2StartHour:D2}:{Session2StartMinute:D2}-{Session2EndHour:D2}:{Session2EndMinute:D2}";
+        }
 
         #region Chart Panel
         private void CreateControlPanel()
@@ -559,7 +644,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
 
-                lblTriggerMode = new TextBlock { Text = $"□→RR (≤{MaxBarsAfterYellowSquare}b) CD={CooldownBars}b", Foreground = Brushes.LightGray, FontSize = 9 };
+                lblTriggerMode = new TextBlock { Text = $"Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} CD={CooldownBars}", Foreground = Brushes.LightGray, FontSize = 9 };
                 lblTradeStatus = new TextBlock { Text = EnableAutoTrading ? "⚡ AUTO TRADING ON" : "Mode: Signal Only", Foreground = EnableAutoTrading ? Brushes.Lime : Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
                 lblSessionStats = new TextBlock { Text = "Signals: 0", Foreground = Brushes.LightGray, FontSize = 9 };
 
@@ -988,16 +1073,30 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("LONG", "YellowSquare+RR", barTime, bull, total);
                         UpdateSignalDisplay("YellowSquare+RR", bull, total, barTime, true);
                         
-                        // Place order if auto trading enabled
+                        // Place order if auto trading enabled AND meets higher confluence threshold
                         if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
                         {
-                            double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
-                            double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
-                            
-                            SetStopLoss("Long", CalculationMode.Ticks, stopPoints / TickSize, false);
-                            SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
-                            EnterLong("Long");
-                            PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts TP={tpPoints:F2}pts");
+                            if (bull >= MinConfluenceForAutoTrade)
+                            {
+                                if (IsTradingHoursAllowed(barTime))
+                                {
+                                    double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
+                                    double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
+                                    
+                                    SetStopLoss("Long", CalculationMode.Ticks, stopPoints / TickSize, true);
+                                    SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
+                                    EnterLong("Long");
+                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts TP={tpPoints:F2}pts");
+                                }
+                                else
+                                {
+                                    PrintAndLog($">>> OUTSIDE TRADING HOURS: LONG signal not traded @ {barTime:HH:mm:ss}");
+                                }
+                            }
+                            else
+                            {
+                                PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bull}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}");
+                            }
                         }
                         
                         barsSinceYellowSquare = -1;
@@ -1022,16 +1121,30 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("SHORT", "OrangeSquare+RR", barTime, bear, total);
                         UpdateSignalDisplay("OrangeSquare+RR", bear, total, barTime, false);
                         
-                        // Place order if auto trading enabled
+                        // Place order if auto trading enabled AND meets higher confluence threshold
                         if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
                         {
-                            double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
-                            double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
-                            
-                            SetStopLoss("Short", CalculationMode.Ticks, stopPoints / TickSize, false);
-                            SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
-                            EnterShort("Short");
-                            PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts TP={tpPoints:F2}pts");
+                            if (bear >= MinConfluenceForAutoTrade)
+                            {
+                                if (IsTradingHoursAllowed(barTime))
+                                {
+                                    double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
+                                    double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
+                                    
+                                    SetStopLoss("Short", CalculationMode.Ticks, stopPoints / TickSize, true);
+                                    SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
+                                    EnterShort("Short");
+                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts TP={tpPoints:F2}pts");
+                                }
+                                else
+                                {
+                                    PrintAndLog($">>> OUTSIDE TRADING HOURS: SHORT signal not traded @ {barTime:HH:mm:ss}");
+                                }
+                            }
+                            else
+                            {
+                                PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bear}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}");
+                            }
                         }
                         
                         barsSinceOrangeSquare = -1;
@@ -1124,9 +1237,13 @@ namespace NinjaTrader.NinjaScript.Strategies
                 logFilePath = System.IO.Path.Combine(dir, $"ActiveNikiTrader_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
                 logWriter = new StreamWriter(logFilePath, true) { AutoFlush = true };
                 logWriter.WriteLine($"\n=== ActiveNikiTrader Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
-                logWriter.WriteLine($"    MinConf={MinConfluenceRequired}/6, MaxBarsAfterSquare={MaxBarsAfterYellowSquare}, Cooldown={CooldownBars} bars");
-                logWriter.WriteLine($"    Stop Loss=${StopLossUSD:F0}, Take Profit=${TakeProfitUSD:F0}");
-                logWriter.WriteLine($"    Auto Trading: {(EnableAutoTrading ? "ENABLED" : "DISABLED")}");
+                logWriter.WriteLine($"    Signal Filter: MinConf={MinConfluenceRequired}/6, MaxBars={MaxBarsAfterYellowSquare}, Cooldown={CooldownBars}");
+                logWriter.WriteLine($"    Auto Trade: {(EnableAutoTrading ? "ON" : "OFF")} | MinConf for Trade={MinConfluenceForAutoTrade}/6");
+                logWriter.WriteLine($"    Risk: SL=${StopLossUSD:F0}, TP=${TakeProfitUSD:F0}");
+                if (UseTradingHoursFilter)
+                    logWriter.WriteLine($"    Trading Hours: {GetTradingHoursString()}");
+                else
+                    logWriter.WriteLine($"    Trading Hours: ALL (filter disabled)");
                 logWriter.WriteLine($"    LONG:  Yellow□ (AIQ1 UP) → RR UP → Bull Confluence ≥ {MinConfluenceRequired}");
                 logWriter.WriteLine($"    SHORT: Orange□ (AIQ1 DN) → RR DN → Bear Confluence ≥ {MinConfluenceRequired}\n");
             }
