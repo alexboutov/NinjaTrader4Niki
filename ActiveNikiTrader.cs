@@ -27,6 +27,11 @@ namespace NinjaTrader.NinjaScript.Strategies
         private object rubyRiver, vidyaPro, easyTrend, dragonTrend, solarWave, ninZaT3Pro;
         private FieldInfo rrIsUptrend, vyIsUptrend, etIsUptrend, dtPrevSignal, swIsUptrend, swCountWave, t3pIsUptrend;
         
+        // Native AIQ_1 indicator reference (from AIQ folder)
+        private object nativeAiq1;
+        private FieldInfo nativeAiq1TrendState;  // Int32: 1=up, -1=down
+        private bool useNativeAiq1;
+        
         // Chart-attached equivalent indicator references
         private object chartAiq1Equivalent, chartRubyRiverEquiv, chartDragonTrendEquiv;
         private object chartVidyaProEquiv, chartEasyTrendEquiv, chartSolarWaveEquiv, chartT3ProEquiv;
@@ -53,6 +58,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private int barsSinceYellowSquare = -1;  // -1 = no active LONG window, 0+ = counting bars since AIQ1 flipped UP
         private int barsSinceOrangeSquare = -1;  // -1 = no active SHORT window, 0+ = counting bars since AIQ1 flipped DN
         private int barsSinceLastSignal = -1;    // -1 = no cooldown active, 0+ = counting bars since last signal
+        private DateTime lastSignalTime = DateTime.MinValue;  // For time-based cooldown
         private bool prevAIQ1_IsUp;
         private bool isFirstBar = true;
         
@@ -274,6 +280,23 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty][Display(Name="Enable Sound Alert", Order=1, GroupName="9. Alerts")]
         public bool EnableSoundAlert { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="UniRenko Mode", Description="Enable adjustments for UniRenko/range bars", Order=1, GroupName="10. UniRenko Settings")]
+        public bool UniRenkoMode { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Use Time-Based Cooldown", Description="Use seconds instead of bars for cooldown (recommended for UniRenko)", Order=2, GroupName="10. UniRenko Settings")]
+        public bool UseTimeBasedCooldown { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(10, 600)]
+        [Display(Name="Cooldown Seconds", Description="Seconds between signals when using time-based cooldown", Order=3, GroupName="10. UniRenko Settings")]
+        public int CooldownSeconds { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Log Bar Details", Description="Log detailed bar info for debugging UniRenko behavior", Order=4, GroupName="10. UniRenko Settings")]
+        public bool LogBarDetails { get; set; }
         #endregion
 
         protected override void OnStateChange()
@@ -301,10 +324,10 @@ namespace NinjaTrader.NinjaScript.Strategies
                 StopLossUSD = 100;
                 TakeProfitUSD = 60;
                 CooldownBars = 10;
-                EnableAutoTrading = false;  // Default OFF for safety
-                MinConfluenceForAutoTrade = 5;  // Only auto-trade high confluence signals
+                EnableAutoTrading = false;
+                MinConfluenceForAutoTrade = 5;
                 
-                // Trading hours filter - default: 7:00-8:29 and 9:00-16:00 (excludes 8:30-9:00 news)
+                // Trading hours filter
                 UseTradingHoursFilter = true;
                 Session1StartHour = 7;
                 Session1StartMinute = 0;
@@ -318,12 +341,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                 // Auto-close positions
                 CloseBeforeNews = true;
                 NewsCloseHour = 8;
-                NewsCloseMinute = 28;  // Close at 8:28, before 8:30 news
+                NewsCloseMinute = 28;
                 CloseAtEndOfDay = true;
                 EODCloseHour = 15;
-                EODCloseMinute = 58;  // Close at 15:58, before session end
+                EODCloseMinute = 58;
                 
-                // Indicator selection (all enabled by default for confluence)
+                // Indicator selection
                 UseRubyRiver = true;
                 UseDragonTrend = true;
                 UseSolarWave = true;
@@ -374,6 +397,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                 SolarWaveStopMultiplier = 4;
                 
                 EnableSoundAlert = true;
+                
+                // UniRenko settings
+                UniRenkoMode = false;
+                UseTimeBasedCooldown = false;
+                CooldownSeconds = 120;  // 2 minutes default
+                LogBarDetails = false;
             }
             else if (State == State.DataLoaded)
             {
@@ -399,11 +428,19 @@ namespace NinjaTrader.NinjaScript.Strategies
                 solarWaveEquivalent = SolarWaveEquivalent(SolarWaveATRPeriod, SolarWaveTrendMultiplier, SolarWaveStopMultiplier,
                     2, 1, 5, 10, 10, true, false, "▲ + Trend", "Trend + ▼", 12);
                 
-                // Initialize AIQ_1 trigger indicator
+                // Initialize AIQ_1 trigger indicator (hosted fallback)
                 aiq1Equivalent = AIQ_1Equivalent(3, 0, AIQ1EquivMAMethod.MA1, true, 0.05, 0.05, 0.03, 0.03,
                     true, 15, 100, false, 4, Brushes.Orange, Brushes.Orange);
                 
                 LogAlways($"ActiveNikiTrader | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                if (UniRenkoMode)
+                {
+                    LogAlways($"*** UNIRENKO MODE ENABLED ***");
+                    if (UseTimeBasedCooldown)
+                        LogAlways($"Time-Based Cooldown: {CooldownSeconds} seconds");
+                    if (LogBarDetails)
+                        LogAlways($"Bar Detail Logging: ON");
+                }
                 if (UseTradingHoursFilter)
                     LogAlways($"Trading Hours: {GetTradingHoursString()}");
                 if (CloseBeforeNews)
@@ -430,7 +467,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             { 
                 useHostedT3Pro = useHostedVIDYAPro = useHostedEasyTrend = true;
                 useHostedRubyRiver = useHostedDragonTrend = useHostedSolarWave = true;
-                useChartAiq1 = useChartRR = useChartDT = useChartVY = useChartET = useChartSW = useChartT3P = false;
+                useNativeAiq1 = useChartAiq1 = useChartRR = useChartDT = useChartVY = useChartET = useChartSW = useChartT3P = false;
                 indicatorsReady = true; 
                 return; 
             }
@@ -440,7 +477,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             foreach (var ind in ChartControl.Indicators)
             {
                 var t = ind.GetType();
-                switch (t.Name)
+                string typeName = t.Name;
+                
+                switch (typeName)
                 {
                     // ninZa licensed indicators
                     case "ninZaRubyRiver": rubyRiver = ind; rrIsUptrend = t.GetField("isUptrend", flagsPrivate); break;
@@ -449,6 +488,13 @@ namespace NinjaTrader.NinjaScript.Strategies
                     case "ninZaDragonTrend": dragonTrend = ind; dtPrevSignal = t.GetField("prevSignal", flagsPrivate); break;
                     case "ninZaSolarWave": solarWave = ind; swIsUptrend = t.GetField("isUptrend", flagsPrivate); swCountWave = t.GetField("countWave", flagsPrivate); break;
                     case "ninZaT3Pro": ninZaT3Pro = ind; t3pIsUptrend = t.GetField("isUptrend", flagsPrivate); break;
+                    
+                    // Native AIQ_1 indicator (from AIQ folder) - uses trendState Int32 field
+                    case "AIQ_1":
+                        nativeAiq1 = ind;
+                        // trendState: 1 = uptrend, -1 = downtrend
+                        nativeAiq1TrendState = t.GetField("trendState", flagsPrivate);
+                        break;
                     
                     // Chart-attached equivalent indicators
                     case "AIQ_1Equivalent": 
@@ -483,8 +529,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
-            // Determine source priority: ninZa > chart-attached equivalent > hosted equivalent
-            useChartAiq1 = chartAiq1Equivalent != null && aiq1IsUptrend != null;
+            // Determine source priority for AIQ_1: native > chart-attached equivalent > hosted equivalent
+            useNativeAiq1 = nativeAiq1 != null && nativeAiq1TrendState != null;
+            useChartAiq1 = !useNativeAiq1 && chartAiq1Equivalent != null && aiq1IsUptrend != null;
+            
+            // Determine source priority for other indicators: ninZa > chart-attached equivalent > hosted equivalent
             useChartRR = chartRubyRiverEquiv != null && rrEquivIsUptrend != null;
             useChartDT = chartDragonTrendEquiv != null && dtEquivPrevSignal != null;
             useChartVY = chartVidyaProEquiv != null && vyEquivIsUptrend != null;
@@ -512,15 +561,16 @@ namespace NinjaTrader.NinjaScript.Strategies
             LogAlways($"  ninZaEasyTrend:   {(easyTrend != null ? "FOUND" : "not found")}");
             LogAlways($"  ninZaSolarWave:   {(solarWave != null ? "FOUND" : "not found")}");
             LogAlways($"  ninZaT3Pro:       {(ninZaT3Pro != null ? "FOUND" : "not found")}");
+            LogAlways($"  AIQ_1 (native):   {(nativeAiq1 != null ? "FOUND" : "not found")}");
             
-            LogAlways($"--- Indicator Sources (Priority: ninZa > chart > hosted) ---");
+            LogAlways($"--- Indicator Sources (Priority: ninZa/native > chart > hosted) ---");
             LogAlways($"  RubyRiver:   {(rubyRiver != null ? "ninZa" : (useChartRR ? "CHART" : "hosted"))}");
             LogAlways($"  DragonTrend: {(dragonTrend != null ? "ninZa" : (useChartDT ? "CHART" : "hosted"))}");
             LogAlways($"  VIDYAPro:    {(vidyaPro != null ? "ninZa" : (useChartVY ? "CHART" : "hosted"))}");
             LogAlways($"  EasyTrend:   {(easyTrend != null ? "ninZa" : (useChartET ? "CHART" : "hosted"))}");
             LogAlways($"  SolarWave:   {(solarWave != null ? "ninZa" : (useChartSW ? "CHART" : "hosted"))}");
             LogAlways($"  T3Pro:       {(ninZaT3Pro != null ? "ninZa" : (useChartT3P ? "CHART" : "hosted"))}");
-            LogAlways($"  AIQ_1:       {(useChartAiq1 ? "CHART" : "hosted")}");
+            LogAlways($"  AIQ_1:       {(useNativeAiq1 ? "NATIVE" : (useChartAiq1 ? "CHART" : "hosted"))}");
             
             if (ChartControl?.Indicators != null)
             {
@@ -544,7 +594,6 @@ namespace NinjaTrader.NinjaScript.Strategies
         private int GetInt(object o, FieldInfo f) { try { return o != null && f != null ? (int)f.GetValue(o) : 0; } catch { return 0; } }
         
         // Indicator value accessors - Priority: ninZa > chart-attached > hosted
-        // Hidden from UI - these are computed at runtime from indicators
         [Browsable(false)] public bool RR_IsUp => rubyRiver != null ? GetBool(rubyRiver, rrIsUptrend) : (useChartRR ? GetChartBool(chartRubyRiverEquiv, rrEquivIsUptrend) : (rubyRiverEquivalent?.IsUptrend ?? false));
         [Browsable(false)] public bool VY_IsUp => vidyaPro != null ? GetBool(vidyaPro, vyIsUptrend) : (useChartVY ? GetChartBool(chartVidyaProEquiv, vyEquivIsUptrend) : (vidyaProEquivalent?.IsUptrend ?? false));
         [Browsable(false)] public bool ET_IsUp => easyTrend != null ? GetBool(easyTrend, etIsUptrend) : (useChartET ? GetChartBool(chartEasyTrendEquiv, etEquivIsUptrend) : (easyTrendEquivalent?.IsUptrend ?? false));
@@ -555,18 +604,30 @@ namespace NinjaTrader.NinjaScript.Strategies
         [Browsable(false)] public int SW_Count => solarWave != null ? GetInt(solarWave, swCountWave) : (useChartSW ? GetChartInt(chartSolarWaveEquiv, swEquivCountWave) : (solarWaveEquivalent?.CountWave ?? 0));
         [Browsable(false)] public bool T3P_IsUp => ninZaT3Pro != null ? GetBool(ninZaT3Pro, t3pIsUptrend) : (useChartT3P ? GetChartBool(chartT3ProEquiv, t3pEquivIsUptrend) : (t3ProEquivalent?.IsUptrend ?? false));
         
-        // AIQ_1 trigger indicator (prefer chart-attached, fallback to hosted)
-        [Browsable(false)] public bool AIQ1_IsUp => useChartAiq1 ? GetChartBool(chartAiq1Equivalent, aiq1IsUptrend) : (aiq1Equivalent?.IsUptrend ?? false);
+        // AIQ_1 trigger indicator - Priority: native > chart-attached equivalent > hosted equivalent
+        // Native AIQ_1 uses trendState: 1 = uptrend, -1 = downtrend
+        [Browsable(false)] public bool AIQ1_IsUp 
+        {
+            get 
+            {
+                if (useNativeAiq1)
+                {
+                    // trendState is Int32: 1 = up, -1 = down
+                    return GetInt(nativeAiq1, nativeAiq1TrendState) > 0;
+                }
+                if (useChartAiq1)
+                    return GetChartBool(chartAiq1Equivalent, aiq1IsUptrend);
+                return aiq1Equivalent?.IsUptrend ?? false;
+            }
+        }
         
         // Helper methods for chart-attached indicator reading (via PropertyInfo)
         private bool GetChartBool(object o, PropertyInfo p) { try { return o != null && p != null && (bool)p.GetValue(o); } catch { return false; } }
         private double GetChartDbl(object o, PropertyInfo p) { try { return o != null && p != null ? (double)p.GetValue(o) : 0; } catch { return 0; } }
         private int GetChartInt(object o, PropertyInfo p) { try { return o != null && p != null ? (int)p.GetValue(o) : 0; } catch { return 0; } }
         
-        // Count enabled confluence indicators
         private int GetEnabledCount() => (UseRubyRiver?1:0)+(UseDragonTrend?1:0)+(UseSolarWave?1:0)+(UseVIDYAPro?1:0)+(UseEasyTrend?1:0)+(UseT3Pro?1:0);
         
-        // Get bullish confluence count (how many of the 6 indicators are UP)
         private (int bull, int bear, int total) GetConfluence()
         {
             int bull = 0, bear = 0, total = 0;
@@ -579,10 +640,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             return (bull, bear, total);
         }
         
-        // Check if current time is within allowed trading hours
         private bool IsTradingHoursAllowed(DateTime barTime)
         {
-            if (!UseTradingHoursFilter) return true;  // Filter disabled, always allow
+            if (!UseTradingHoursFilter) return true;
             
             int currentMinutes = barTime.Hour * 60 + barTime.Minute;
             int session1Start = Session1StartHour * 60 + Session1StartMinute;
@@ -606,16 +666,13 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             try
             {
-                string settingsDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    "NinjaTrader 8", "settings");
+                string settingsDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "NinjaTrader 8", "settings");
                 panelSettingsFile = System.IO.Path.Combine(settingsDir, "ActiveNikiTrader_PanelSettings.txt");
-
                 panelTransform = new TranslateTransform(0, 0);
                 panelScale = new ScaleTransform(1, 1);
                 var transformGroup = new TransformGroup();
                 transformGroup.Children.Add(panelScale);
                 transformGroup.Children.Add(panelTransform);
-
                 LoadPanelSettings();
 
                 controlPanel = new Grid
@@ -629,7 +686,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                     RenderTransformOrigin = new Point(0, 1),
                     Cursor = System.Windows.Input.Cursors.Hand
                 };
-
                 controlPanel.MouseLeftButtonDown += Panel_MouseLeftButtonDown;
                 controlPanel.MouseLeftButtonUp += Panel_MouseLeftButtonUp;
                 controlPanel.MouseMove += Panel_MouseMove;
@@ -643,19 +699,10 @@ namespace NinjaTrader.NinjaScript.Strategies
                 };
                 
                 var stack = new StackPanel();
-                stack.Children.Add(new TextBlock
-                {
-                    Text = "ActiveNiki Trader",
-                    FontWeight = FontWeights.Bold,
-                    Foreground = Brushes.Cyan,
-                    FontSize = 11,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    Margin = new Thickness(0, 0, 0, 2)
-                });
+                stack.Children.Add(new TextBlock { Text = "ActiveNiki Trader", FontWeight = FontWeights.Bold, Foreground = Brushes.Cyan, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
                 lblSubtitle = new TextBlock { Foreground = Brushes.LightGray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) };
                 stack.Children.Add(lblSubtitle);
                 
-                // Confluence indicators section
                 stack.Children.Add(new TextBlock { Text = "─ Confluence ─", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 stack.Children.Add(CreateRow("Ruby River", ref chkRubyRiver, ref lblRubyRiver, UseRubyRiver));
                 stack.Children.Add(CreateRow("Dragon Trend", ref chkDragonTrend, ref lblDragonTrend, UseDragonTrend));
@@ -664,11 +711,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 stack.Children.Add(CreateRow("Solar Wave", ref chkSolarWave, ref lblSolarWave, UseSolarWave));
                 stack.Children.Add(CreateRow("T3 Pro", ref chkT3Pro, ref lblT3Pro, UseT3Pro));
                 
-                // Trigger section
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
                 stack.Children.Add(new TextBlock { Text = "─ Trigger ─", Foreground = Brushes.Orange, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 
-                // AIQ_1 row
                 var aiqRow = new Grid { Margin = new Thickness(0, 1, 0, 1) };
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
@@ -678,7 +723,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                 Grid.SetColumn(lblAIQ1Status, 1); aiqRow.Children.Add(lblAIQ1Status);
                 stack.Children.Add(aiqRow);
                 
-                // Window status row
                 lblWindowStatus = new TextBlock { Text = "Window: CLOSED", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) };
                 stack.Children.Add(lblWindowStatus);
                 
@@ -702,16 +746,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 border.Child = stack;
                 controlPanel.Children.Add(border);
 
-                // Resize grip
-                resizeGrip = new Border
-                {
-                    Width = 16, Height = 16,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Background = Brushes.Transparent,
-                    Cursor = System.Windows.Input.Cursors.SizeNWSE,
-                    Margin = new Thickness(0, 0, 2, 2)
-                };
+                resizeGrip = new Border { Width = 16, Height = 16, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom, Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.SizeNWSE, Margin = new Thickness(0, 0, 2, 2) };
                 var gripCanvas = new Canvas { Width = 12, Height = 12 };
                 for (int i = 0; i < 3; i++)
                 {
@@ -890,7 +925,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (lblSubtitle != null)
                     lblSubtitle.Text = enabled == 0 ? "No indicators" : $"Min {MinConfluenceRequired}/{enabled} for signal";
 
-                // Update confluence indicator labels
                 UpdLbl(lblRubyRiver, RR_IsUp, UseRubyRiver);
                 UpdLbl(lblDragonTrend, DT_IsUp, UseDragonTrend);
                 UpdLbl(lblSolarWave, SW_IsUp, UseSolarWave);
@@ -898,21 +932,34 @@ namespace NinjaTrader.NinjaScript.Strategies
                 UpdLbl(lblEasyTrend, ET_IsUp, UseEasyTrend);
                 UpdLbl(lblT3Pro, T3P_IsUp, UseT3Pro);
                 
-                // Update AIQ_1 trigger status
                 if (lblAIQ1Status != null)
                 {
                     lblAIQ1Status.Text = AIQ1_IsUp ? "UP" : "DN";
                     lblAIQ1Status.Foreground = AIQ1_IsUp ? Brushes.Lime : Brushes.Red;
                 }
                 
-                // Update window status
                 if (lblWindowStatus != null)
                 {
-                    bool inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
+                    bool inCooldown = false;
+                    string cooldownText = "";
+                    
+                    if (UseTimeBasedCooldown && lastSignalTime != DateTime.MinValue)
+                    {
+                        double secondsSinceSignal = (DateTime.Now - lastSignalTime).TotalSeconds;
+                        inCooldown = secondsSinceSignal < CooldownSeconds;
+                        if (inCooldown)
+                            cooldownText = $"🕐 Cooldown ({secondsSinceSignal:F0}s/{CooldownSeconds}s)";
+                    }
+                    else
+                    {
+                        inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
+                        if (inCooldown)
+                            cooldownText = $"🕐 Cooldown ({barsSinceLastSignal}/{CooldownBars})";
+                    }
                     
                     if (inCooldown)
                     {
-                        lblWindowStatus.Text = $"🕐 Cooldown ({barsSinceLastSignal}/{CooldownBars})";
+                        lblWindowStatus.Text = cooldownText;
                         lblWindowStatus.Foreground = Brushes.Yellow;
                     }
                     else if (barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare)
@@ -935,7 +982,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                 var (bull, bear, total) = GetConfluence();
                 if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount} | Bull:{bull} Bear:{bear}/{total}";
 
-                // Update signal box
                 if (lblLastSignal != null && signalBorder != null)
                 {
                     bool longWindowOpen = barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare;
@@ -1016,7 +1062,6 @@ namespace NinjaTrader.NinjaScript.Strategies
             signalCount++;
             string dir = isLong ? "LONG" : "SHORT";
             lastSignalText = $"{dir} @ {confluenceCount}/{total} [{trigger}] {t:HH:mm:ss}";
-
             if (EnableSoundAlert)
                 try { System.Media.SystemSounds.Exclamation.Play(); } catch { }
         }
@@ -1036,13 +1081,19 @@ namespace NinjaTrader.NinjaScript.Strategies
             
             DateTime barTime = Time[0];
             
-            // Auto-close positions before news window (8:30 AM)
+            // UniRenko debug logging
+            if (LogBarDetails && UniRenkoMode)
+            {
+                var (bull, bear, total) = GetConfluence();
+                PrintAndLog($"[BAR {CurrentBar}] {barTime:HH:mm:ss} | O={Open[0]:F2} H={High[0]:F2} L={Low[0]:F2} C={Close[0]:F2} | AIQ1={Ts(AIQ1_IsUp)} RR={Ts(RR_IsUp)} Bull={bull} Bear={bear}");
+            }
+            
             if (CloseBeforeNews && Position.MarketPosition != MarketPosition.Flat)
             {
                 int currentMinutes = barTime.Hour * 60 + barTime.Minute;
                 int newsCloseMinutes = NewsCloseHour * 60 + NewsCloseMinute;
                 
-                if (currentMinutes >= newsCloseMinutes && currentMinutes < newsCloseMinutes + 32)  // Within 8:28-9:00 window
+                if (currentMinutes >= newsCloseMinutes && currentMinutes < newsCloseMinutes + 32)
                 {
                     if (Position.MarketPosition == MarketPosition.Long)
                     {
@@ -1057,7 +1108,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
-            // Auto-close positions at end of day
             if (CloseAtEndOfDay && Position.MarketPosition != MarketPosition.Flat)
             {
                 int currentMinutes = barTime.Hour * 60 + barTime.Minute;
@@ -1078,40 +1128,54 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
-            // Increment cooldown counter
+            // Increment bar-based cooldown counter
             if (barsSinceLastSignal >= 0)
                 barsSinceLastSignal++;
             
-            // Check if in cooldown
-            bool inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
+            // Check cooldown - support both bar-based and time-based
+            bool inCooldown = false;
+            string cooldownStatus = "";
             
-            // Detect AIQ_1 flip to UP (yellow square appears) - LONG trigger
+            if (UseTimeBasedCooldown)
+            {
+                // Time-based cooldown (better for UniRenko)
+                if (lastSignalTime != DateTime.MinValue)
+                {
+                    double secondsSinceSignal = (barTime - lastSignalTime).TotalSeconds;
+                    inCooldown = secondsSinceSignal < CooldownSeconds;
+                    if (inCooldown)
+                        cooldownStatus = $"{secondsSinceSignal:F0}s/{CooldownSeconds}s";
+                }
+            }
+            else
+            {
+                // Bar-based cooldown (original behavior)
+                inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
+                if (inCooldown)
+                    cooldownStatus = $"{barsSinceLastSignal}/{CooldownBars}";
+            }
+            
             bool yellowSquareAppeared = AIQ1_IsUp && !prevAIQ1_IsUp && !isFirstBar;
-            
-            // Detect AIQ_1 flip to DN (orange square appears) - SHORT trigger
             bool orangeSquareAppeared = !AIQ1_IsUp && prevAIQ1_IsUp && !isFirstBar;
             
-            // If yellow square just appeared, start the LONG trigger window
             if (yellowSquareAppeared)
             {
                 barsSinceYellowSquare = 0;
-                barsSinceOrangeSquare = -1;  // Close any SHORT window
+                barsSinceOrangeSquare = -1;
                 if (inCooldown)
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({barsSinceLastSignal}/{CooldownBars})");
+                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
                 else
                     PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})");
             }
-            // If orange square just appeared, start the SHORT trigger window
             else if (orangeSquareAppeared)
             {
                 barsSinceOrangeSquare = 0;
-                barsSinceYellowSquare = -1;  // Close any LONG window
+                barsSinceYellowSquare = -1;
                 if (inCooldown)
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({barsSinceLastSignal}/{CooldownBars})");
+                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
                 else
                     PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})");
             }
-            // Increment LONG window counter
             else if (barsSinceYellowSquare >= 0)
             {
                 barsSinceYellowSquare++;
@@ -1121,7 +1185,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                     barsSinceYellowSquare = -1;
                 }
             }
-            // Increment SHORT window counter
             else if (barsSinceOrangeSquare >= 0)
             {
                 barsSinceOrangeSquare++;
@@ -1132,10 +1195,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
-            // Update panel every bar
             UpdatePanel();
             
-            // Skip signal checks if in cooldown
             if (inCooldown)
             {
                 prevAIQ1_IsUp = AIQ1_IsUp;
@@ -1143,7 +1204,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                 return;
             }
             
-            // Check for LONG trigger: Window open + RubyRiver UP + Confluence met
             if (barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare)
             {
                 if (RR_IsUp)
@@ -1155,7 +1215,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("LONG", "YellowSquare+RR", barTime, bull, total);
                         UpdateSignalDisplay("YellowSquare+RR", bull, total, barTime, true);
                         
-                        // Place order if auto trading enabled AND meets higher confluence threshold
                         if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
                         {
                             if (bull >= MinConfluenceForAutoTrade)
@@ -1182,7 +1241,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                         }
                         
                         barsSinceYellowSquare = -1;
-                        barsSinceLastSignal = 0;  // Start cooldown
+                        barsSinceLastSignal = 0;
+                        lastSignalTime = barTime;  // Track time for time-based cooldown
                     }
                     else
                     {
@@ -1191,10 +1251,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
-            // Check for SHORT trigger: Window open + RubyRiver DN + Confluence met
             if (barsSinceOrangeSquare >= 0 && barsSinceOrangeSquare <= MaxBarsAfterYellowSquare)
             {
-                if (!RR_IsUp)  // RR is DOWN
+                if (!RR_IsUp)
                 {
                     var (bull, bear, total) = GetConfluence();
                     
@@ -1203,7 +1262,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("SHORT", "OrangeSquare+RR", barTime, bear, total);
                         UpdateSignalDisplay("OrangeSquare+RR", bear, total, barTime, false);
                         
-                        // Place order if auto trading enabled AND meets higher confluence threshold
                         if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
                         {
                             if (bear >= MinConfluenceForAutoTrade)
@@ -1230,7 +1288,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                         }
                         
                         barsSinceOrangeSquare = -1;
-                        barsSinceLastSignal = 0;  // Start cooldown
+                        barsSinceLastSignal = 0;
+                        lastSignalTime = barTime;  // Track time for time-based cooldown
                     }
                     else
                     {
@@ -1239,19 +1298,14 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
-            // Store previous states
             prevAIQ1_IsUp = AIQ1_IsUp;
             isFirstBar = false;
         }
         
         private void LogSignal(string dir, string trigger, DateTime t, int confluenceCount, int total)
         {
-            // Get current Ask and Bid prices
             double askPrice = GetCurrentAsk();
             double bidPrice = GetCurrentBid();
-            
-            // Calculate STOP and TP prices based on USD values
-            // PointValue = dollar value per point (e.g., NQ = $20/point)
             double pointValue = Instrument.MasterInstrument.PointValue;
             double stopPoints = pointValue > 0 ? StopLossUSD / pointValue : 0;
             double tpPoints = pointValue > 0 ? TakeProfitUSD / pointValue : 0;
@@ -1262,15 +1316,15 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (dir == "LONG")
             {
                 entryPrice = askPrice;
-                stopPrice = askPrice - stopPoints;  // LONG stop is below entry
-                tpPrice = askPrice + tpPoints;      // LONG TP is above entry
+                stopPrice = askPrice - stopPoints;
+                tpPrice = askPrice + tpPoints;
                 barsAfterSquare = barsSinceYellowSquare;
             }
-            else // SHORT
+            else
             {
                 entryPrice = bidPrice;
-                stopPrice = bidPrice + stopPoints;  // SHORT stop is above entry
-                tpPrice = bidPrice - tpPoints;      // SHORT TP is below entry
+                stopPrice = bidPrice + stopPoints;
+                tpPrice = bidPrice - tpPoints;
                 barsAfterSquare = barsSinceOrangeSquare;
             }
             
@@ -1297,14 +1351,14 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             if (BarsInProgress == 0 && GetCurrentAsk(0) > 0)
                 return GetCurrentAsk(0);
-            return Close[0];  // Fallback to close if no live data
+            return Close[0];
         }
         
         private double GetCurrentBid()
         {
             if (BarsInProgress == 0 && GetCurrentBid(0) > 0)
                 return GetCurrentBid(0);
-            return Close[0];  // Fallback to close if no live data
+            return Close[0];
         }
         
         private string Ts(bool up) => up ? "UP" : "DN";
@@ -1319,6 +1373,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                 logFilePath = System.IO.Path.Combine(dir, $"ActiveNikiTrader_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
                 logWriter = new StreamWriter(logFilePath, true) { AutoFlush = true };
                 logWriter.WriteLine($"\n=== ActiveNikiTrader Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+                if (UniRenkoMode)
+                {
+                    logWriter.WriteLine($"    *** UNIRENKO MODE ***");
+                    logWriter.WriteLine($"    Cooldown: {(UseTimeBasedCooldown ? $"{CooldownSeconds} seconds (time-based)" : $"{CooldownBars} bars")}");
+                }
                 logWriter.WriteLine($"    Signal Filter: MinConf={MinConfluenceRequired}/6, MaxBars={MaxBarsAfterYellowSquare}, Cooldown={CooldownBars}");
                 logWriter.WriteLine($"    Auto Trade: {(EnableAutoTrading ? "ON" : "OFF")} | MinConf for Trade={MinConfluenceForAutoTrade}/6");
                 logWriter.WriteLine($"    Risk: SL=${StopLossUSD:F0}, TP=${TakeProfitUSD:F0}");
