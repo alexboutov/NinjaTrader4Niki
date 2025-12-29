@@ -87,6 +87,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         private StreamWriter logWriter;
         private string chartSessionId;
         
+        // Daily P&L tracking
+        private double dailyPnL = 0;
+        private DateTime lastTradeDate = DateTime.MinValue;
+        private bool dailyLossLimitHit = false;
+        private int dailyTradeCount = 0;
+        
         #region Parameters
         [NinjaScriptProperty]
         [Range(2, 6)]
@@ -297,6 +303,19 @@ namespace NinjaTrader.NinjaScript.Strategies
         [NinjaScriptProperty]
         [Display(Name="Log Bar Details", Description="Log detailed bar info for debugging UniRenko behavior", Order=4, GroupName="10. UniRenko Settings")]
         public bool LogBarDetails { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Enable Daily Loss Limit", Description="Stop trading if daily loss exceeds limit", Order=1, GroupName="11. Risk Management")]
+        public bool EnableDailyLossLimit { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(50, 5000)]
+        [Display(Name="Daily Loss Limit USD", Description="Maximum loss allowed per day before stopping", Order=2, GroupName="11. Risk Management")]
+        public double DailyLossLimitUSD { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Reset Daily P&L at Session Start", Description="Reset daily P&L tracking at start of trading session", Order=3, GroupName="11. Risk Management")]
+        public bool ResetDailyPnLAtSessionStart { get; set; }
         #endregion
 
         protected override void OnStateChange()
@@ -403,6 +422,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                 UseTimeBasedCooldown = false;
                 CooldownSeconds = 120;  // 2 minutes default
                 LogBarDetails = false;
+                
+                // Risk Management
+                EnableDailyLossLimit = true;
+                DailyLossLimitUSD = 300;
+                ResetDailyPnLAtSessionStart = true;
             }
             else if (State == State.DataLoaded)
             {
@@ -447,6 +471,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     LogAlways($"Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2}");
                 if (CloseAtEndOfDay)
                     LogAlways($"Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
+                if (EnableDailyLossLimit)
+                    LogAlways($"🛡️ Daily Loss Limit: ${DailyLossLimitUSD:F0}");
             }
             else if (State == State.Historical)
             {
@@ -980,7 +1006,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
 
                 var (bull, bear, total) = GetConfluence();
-                if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount} | Bull:{bull} Bear:{bear}/{total}";
+                string dailyPnLText = EnableDailyLossLimit ? $" | Day: ${dailyPnL:F0}" : "";
+                string limitHitText = dailyLossLimitHit ? " 🛑STOPPED" : "";
+                if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount} | Bull:{bull} Bear:{bear}/{total}{dailyPnLText}{limitHitText}";
 
                 if (lblLastSignal != null && signalBorder != null)
                 {
@@ -1080,6 +1108,24 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (CurrentBar < BarsRequiredToTrade || !indicatorsReady) return;
             
             DateTime barTime = Time[0];
+            
+            // Daily P&L reset check - reset at start of new trading day
+            if (ResetDailyPnLAtSessionStart && barTime.Date != lastTradeDate.Date)
+            {
+                if (dailyPnL != 0 || dailyTradeCount > 0)
+                    PrintAndLog($"📊 NEW DAY: Resetting Daily P&L (was ${dailyPnL:F2}, {dailyTradeCount} trades)");
+                dailyPnL = 0;
+                dailyTradeCount = 0;
+                dailyLossLimitHit = false;
+                lastTradeDate = barTime.Date;
+            }
+            
+            // Daily loss limit check
+            if (EnableDailyLossLimit && dailyLossLimitHit)
+            {
+                // Already hit limit - no more trading today
+                return;
+            }
             
             // UniRenko debug logging
             if (LogBarDetails && UniRenkoMode)
@@ -1381,6 +1427,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                 logWriter.WriteLine($"    Signal Filter: MinConf={MinConfluenceRequired}/6, MaxBars={MaxBarsAfterYellowSquare}, Cooldown={CooldownBars}");
                 logWriter.WriteLine($"    Auto Trade: {(EnableAutoTrading ? "ON" : "OFF")} | MinConf for Trade={MinConfluenceForAutoTrade}/6");
                 logWriter.WriteLine($"    Risk: SL=${StopLossUSD:F0}, TP=${TakeProfitUSD:F0}");
+                if (EnableDailyLossLimit)
+                    logWriter.WriteLine($"    Daily Loss Limit: ${DailyLossLimitUSD:F0}");
                 if (UseTradingHoursFilter)
                     logWriter.WriteLine($"    Trading Hours: {GetTradingHoursString()}");
                 else
@@ -1393,6 +1441,45 @@ namespace NinjaTrader.NinjaScript.Strategies
                 logWriter.WriteLine($"    SHORT: Orange□ (AIQ1 DN) → RR DN → Bear Confluence ≥ {MinConfluenceRequired}\n");
             }
             catch { }
+        }
+        
+        protected override void OnExecutionUpdate(Execution execution, string executionId, double price, int quantity, MarketPosition marketPosition, string orderId, DateTime time)
+        {
+            // Track P&L when a position is closed
+            if (execution.Order != null && execution.Order.OrderState == OrderState.Filled)
+            {
+                // Check if this is an exit (position is now flat and order name suggests exit)
+                string orderName = execution.Order.Name ?? "";
+                bool isExit = Position.MarketPosition == MarketPosition.Flat && 
+                    (orderName.Contains("Stop") || orderName.Contains("Profit") || orderName.Contains("Exit") || 
+                     execution.Order.OrderAction == OrderAction.Sell || execution.Order.OrderAction == OrderAction.BuyToCover);
+                
+                if (isExit && SystemPerformance.AllTrades.Count > 0)
+                {
+                    // Get the most recent completed trade
+                    var lastTrade = SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1];
+                    double tradePnL = lastTrade.ProfitCurrency;
+                    
+                    dailyPnL += tradePnL;
+                    dailyTradeCount++;
+                    
+                    string pnlIcon = tradePnL >= 0 ? "✅" : "❌";
+                    PrintAndLog($"{pnlIcon} TRADE CLOSED: P&L ${tradePnL:F2} | Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades)");
+                    
+                    // Play sound on trade close
+                    if (EnableSoundAlert)
+                        try { System.Media.SystemSounds.Asterisk.Play(); } catch { }
+                    
+                    // Check if daily loss limit hit
+                    if (EnableDailyLossLimit && dailyPnL <= -DailyLossLimitUSD)
+                    {
+                        dailyLossLimitHit = true;
+                        PrintAndLog($"🛑 DAILY LOSS LIMIT HIT: ${dailyPnL:F2} exceeds -${DailyLossLimitUSD:F2} limit. Trading stopped for today.");
+                        if (EnableSoundAlert)
+                            try { System.Media.SystemSounds.Hand.Play(); } catch { }
+                    }
+                }
+            }
         }
         
         private void CloseLogFile()
