@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NinjaTrader>
+  <Strategy>
+    <Name>ActiveNikiTrader</Name>
+    <Description>Winning Configuration - UniRenko +$950</Description>
+    
+    <!-- 1. Signal Filters -->
+    <MinConfluenceRequired>4</MinConfluenceRequired>
+    <MaxBarsAfterYellowSquare>3</MaxBarsAfterYellowSquare>
+    <MinSolarWaveCount>1</MinSolarWaveCount>
+    <StopLossUSD>80</StopLossUSD>
+    <TakeProfitUSD>200</TakeProfitUSD>
+    <CooldownBars>10</CooldownBars>
+    <EnableAutoTrading>False</EnableAutoTrading>
+    <MinConfluenceForAutoTrade>5</MinConfluenceForAutoTrade>
+    
+    <!-- Trading Hours Filter -->
+    <UseTradingHoursFilter>True</UseTradingHoursFilter>
+    <Session1StartHour>7</Session1StartHour>
+    <Session1StartMinute>0</Session1StartMinute>
+    <Session1EndHour>8</Session1EndHour>
+    <Session1EndMinute>29</Session1EndMinute>
+    <Session2StartHour>9</Session2StartHour>
+    <Session2StartMinute>0</Session2StartMinute>
+    <Session2EndHour>16</Session2EndHour>
+    <Session2EndMinute>0</Session2EndMinute>
+    
+    <!-- Auto-Close Settings -->
+    <CloseBeforeNews>True</CloseBeforeNews>
+    <NewsCloseHour>8</NewsCloseHour>
+    <NewsCloseMinute>28</NewsCloseMinute>
+    <CloseAtEndOfDay>True</CloseAtEndOfDay>
+    <EODCloseHour>15</EODCloseHour>
+    <EODCloseMinute>58</EODCloseMinute>
+    
+    <!-- 2. Indicator Selection (all enabled) -->
+    <UseRubyRiver>True</UseRubyRiver>
+    <UseDragonTrend>True</UseDragonTrend>
+    <UseSolarWave>True</UseSolarWave>
+    <UseVIDYAPro>True</UseVIDYAPro>
+    <UseEasyTrend>True</UseEasyTrend>
+    <UseT3Pro>True</UseT3Pro>
+    
+    <!-- 3. T3 Pro Settings -->
+    <T3ProPeriod>14</T3ProPeriod>
+    <T3ProTCount>3</T3ProTCount>
+    <T3ProVFactor>0.7</T3ProVFactor>
+    <T3ProChaosSmoothingEnabled>True</T3ProChaosSmoothingEnabled>
+    <T3ProChaosSmoothingPeriod>5</T3ProChaosSmoothingPeriod>
+    <T3ProFilterEnabled>True</T3ProFilterEnabled>
+    <T3ProFilterMultiplier>4</T3ProFilterMultiplier>
+    
+    <!-- 4. VIDYA Pro Settings -->
+    <VIDYAPeriod>9</VIDYAPeriod>
+    <VIDYAVolatilityPeriod>9</VIDYAVolatilityPeriod>
+    <VIDYASmoothingEnabled>True</VIDYASmoothingEnabled>
+    <VIDYASmoothingPeriod>5</VIDYASmoothingPeriod>
+    <VIDYAFilterEnabled>True</VIDYAFilterEnabled>
+    <VIDYAFilterMultiplier>4</VIDYAFilterMultiplier>
+    
+    <!-- 5. Easy Trend Settings -->
+    <EasyTrendPeriod>30</EasyTrendPeriod>
+    <EasyTrendSmoothingEnabled>True</EasyTrendSmoothingEnabled>
+    <EasyTrendSmoothingPeriod>7</EasyTrendSmoothingPeriod>
+    <EasyTrendFilterEnabled>True</EasyTrendFilterEnabled>
+    <EasyTrendFilterMultiplier>0.5</EasyTrendFilterMultiplier>
+    <EasyTrendATRPeriod>100</EasyTrendATRPeriod>
+    
+    <!-- 6. Ruby River Settings -->
+    <RubyRiverMAPeriod>20</RubyRiverMAPeriod>
+    <RubyRiverSmoothingEnabled>True</RubyRiverSmoothingEnabled>
+    <RubyRiverSmoothingPeriod>5</RubyRiverSmoothingPeriod>
+    <RubyRiverOffsetMultiplier>0.15</RubyRiverOffsetMultiplier>
+    <RubyRiverOffsetPeriod>100</RubyRiverOffsetPeriod>
+    
+    <!-- 7. Dragon Trend Settings -->
+    <DragonTrendPeriod>10</DragonTrendPeriod>
+    <DragonTrendSmoothingEnabled>True</DragonTrendSmoothingEnabled>
+    <DragonTrendSmoothingPeriod>5</DragonTrendSmoothingPeriod>
+    
+    <!-- 8. Solar Wave Settings -->
+    <SolarWaveATRPeriod>100</SolarWaveATRPeriod>
+    <SolarWaveTrendMultiplier>2</SolarWaveTrendMultiplier>
+    <SolarWaveStopMultiplier>4</SolarWaveStopMultiplier>
+    
+    <!-- 9. Alerts -->
+    <EnableSoundAlert>True</EnableSoundAlert>
+    
+    <!-- 10. UniRenko Settings -->
+    <UniRenkoMode>True</UniRenkoMode>
+    <UseTimeBasedCooldown>True</UseTimeBasedCooldown>
+    <CooldownSeconds>120</CooldownSeconds>
+    <LogBarDetails>False</LogBarDetails>
+    
+    <!-- 11. Risk Management -->
+    <EnableDailyLossLimit>True</EnableDailyLossLimit>
+    <DailyLossLimitUSD>300</DailyLossLimitUSD>
+    <ResetDailyPnLAtSessionStart>True</ResetDailyPnLAtSessionStart>
+    
+    <!-- Setup -->
+    <Calculate>OnBarClose</Calculate>
+    <BarsRequiredToTrade>20</BarsRequiredToTrade>
+    <MaximumBarsLookBack>TwoHundredFiftySix</MaximumBarsLookBack>
+    <EntriesPerDirection>1</EntriesPerDirection>
+    <EntryHandling>AllEntries</EntryHandling>
+    <StartBehavior>WaitUntilFlat</StartBehavior>
+    <TimeInForce>Gtc</TimeInForce>
+    <StopTargetHandling>PerEntryExecution</StopTargetHandling>
+    <IsExitOnSessionCloseStrategy>True</IsExitOnSessionCloseStrategy>
+    <ExitOnSessionCloseSeconds>30</ExitOnSessionCloseSeconds>
+    
+    <!-- Historical fill processing -->
+    <OrderFillResolution>Standard</OrderFillResolution>
+    <Slippage>0</Slippage>
+  </Strategy>
+</NinjaTrader>
