@@ -93,6 +93,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool dailyLossLimitHit = false;
         private int dailyTradeCount = 0;
         
+        // Dynamic exit tracking
+        private bool dynamicExitActive = false;
+        private double entryPrice = 0;
+        private double trailStopPrice = 0;
+        private ATR atrIndicator;
+        
         #region Parameters
         [NinjaScriptProperty]
         [Range(2, 6)]
@@ -316,6 +322,30 @@ namespace NinjaTrader.NinjaScript.Strategies
         [NinjaScriptProperty]
         [Display(Name="Reset Daily P&L at Session Start", Description="Reset daily P&L tracking at start of trading session", Order=3, GroupName="11. Risk Management")]
         public bool ResetDailyPnLAtSessionStart { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0, 10)]
+        [Display(Name="Stop Loss Buffer Ticks", Description="Extra ticks added to stop loss to reduce slippage (0=disabled)", Order=4, GroupName="11. Risk Management")]
+        public int StopLossBufferTicks { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Enable Dynamic Exit", Description="Let profits run when trend continues beyond TP", Order=1, GroupName="12. Dynamic Exit")]
+        public bool EnableDynamicExit { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(2, 6)]
+        [Display(Name="Min Confluence To Stay", Description="Minimum confluence to keep position open past TP (2-6)", Order=2, GroupName="12. Dynamic Exit")]
+        public int MinConfluenceToStay { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(0.25, 5.0)]
+        [Display(Name="Trail Stop ATR Multiplier", Description="Trail stop distance in ATR multiples once past TP", Order=3, GroupName="12. Dynamic Exit")]
+        public double TrailStopATRMultiplier { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(10, 1000)]
+        [Display(Name="Max Profit USD", Description="Maximum profit to ride before forcing exit", Order=4, GroupName="12. Dynamic Exit")]
+        public double MaxProfitUSD { get; set; }
         #endregion
 
         protected override void OnStateChange()
@@ -346,7 +376,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableAutoTrading = false;
                 MinConfluenceForAutoTrade = 5;
                 
-                // Trading hours filter
+                // Trading hours filter - Optimized based on backtest analysis
+                // Best performance: 09:00-10:59 (48% WR in first hour, 35% in second)
+                // Exclude: 11:00-15:59 (0% WR in 11:00-11:59, 0% in 14:00-15:59)
                 UseTradingHoursFilter = true;
                 Session1StartHour = 7;
                 Session1StartMinute = 0;
@@ -354,8 +386,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                 Session1EndMinute = 29;
                 Session2StartHour = 9;
                 Session2StartMinute = 0;
-                Session2EndHour = 16;
-                Session2EndMinute = 0;
+                Session2EndHour = 10;
+                Session2EndMinute = 59;
                 
                 // Auto-close positions
                 CloseBeforeNews = true;
@@ -427,6 +459,13 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableDailyLossLimit = true;
                 DailyLossLimitUSD = 300;
                 ResetDailyPnLAtSessionStart = true;
+                StopLossBufferTicks = 2;  // Add 2 ticks buffer to reduce slippage
+                
+                // Dynamic Exit - let profits run when trend continues
+                EnableDynamicExit = true;
+                MinConfluenceToStay = 4;  // Same as entry requirement
+                TrailStopATRMultiplier = 1.5;
+                MaxProfitUSD = 500;  // Force exit at $500 profit
             }
             else if (State == State.DataLoaded)
             {
@@ -456,7 +495,14 @@ namespace NinjaTrader.NinjaScript.Strategies
                 aiq1Equivalent = AIQ_1Equivalent(3, 0, AIQ1EquivMAMethod.MA1, true, 0.05, 0.05, 0.03, 0.03,
                     true, 15, 100, false, 4, Brushes.Orange, Brushes.Orange);
                 
+                // Initialize ATR for dynamic exit trailing stop
+                atrIndicator = ATR(14);
+                
                 LogAlways($"ActiveNikiTrader | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                if (StopLossBufferTicks > 0)
+                    LogAlways($"SL Buffer: {StopLossBufferTicks} ticks");
+                if (EnableDynamicExit)
+                    LogAlways($"🚀 Dynamic Exit: ON | MinConf={MinConfluenceToStay} | Trail={TrailStopATRMultiplier}xATR | MaxProfit=${MaxProfitUSD}");
                 if (UniRenkoMode)
                 {
                     LogAlways($"*** UNIRENKO MODE ENABLED ***");
@@ -1174,6 +1220,133 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
+            // ═══════════════════════════════════════════════════════════════════
+            // DYNAMIC EXIT MANAGEMENT - Let profits run when trend continues
+            // ═══════════════════════════════════════════════════════════════════
+            if (EnableDynamicExit && Position.MarketPosition != MarketPosition.Flat && entryPrice > 0)
+            {
+                double currentPrice = Close[0];
+                double pointValue = Instrument.MasterInstrument.PointValue;
+                double tpPoints = pointValue > 0 ? TakeProfitUSD / pointValue : 10;
+                double maxProfitPoints = pointValue > 0 ? MaxProfitUSD / pointValue : 25;
+                double atrValue = atrIndicator[0];
+                
+                var (bull, bear, total) = GetConfluence();
+                bool isLong = Position.MarketPosition == MarketPosition.Long;
+                
+                // Calculate unrealized P&L
+                double unrealizedPoints = isLong ? (currentPrice - entryPrice) : (entryPrice - currentPrice);
+                double unrealizedPnL = unrealizedPoints * pointValue;
+                
+                // Check if we've reached TP level
+                bool pastTpLevel = unrealizedPoints >= tpPoints;
+                
+                // Check for max profit limit
+                if (unrealizedPoints >= maxProfitPoints)
+                {
+                    if (isLong)
+                    {
+                        ExitLong("Long", "MaxProfit Exit");
+                        PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}");
+                    }
+                    else
+                    {
+                        ExitShort("Short", "MaxProfit Exit");
+                        PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}");
+                    }
+                    entryPrice = 0;
+                    dynamicExitActive = false;
+                }
+                else if (pastTpLevel)
+                {
+                    // We're past TP level - check confluence to decide whether to stay
+                    bool confluenceConfirmsTrend = isLong ? (bull >= MinConfluenceToStay) : (bear >= MinConfluenceToStay);
+                    bool trendStillValid = isLong ? RR_IsUp : !RR_IsUp;
+                    
+                    if (!dynamicExitActive)
+                    {
+                        // First time past TP - decide whether to activate dynamic mode
+                        if (confluenceConfirmsTrend && trendStillValid)
+                        {
+                            dynamicExitActive = true;
+                            // Set initial trail stop at entry + some profit
+                            double trailDistance = atrValue * TrailStopATRMultiplier;
+                            trailStopPrice = isLong ? (currentPrice - trailDistance) : (currentPrice + trailDistance);
+                            PrintAndLog($"🚀 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}");
+                        }
+                        else
+                        {
+                            // Confluence doesn't confirm - take profit now
+                            if (isLong)
+                            {
+                                ExitLong("Long", "DynamicTP Exit");
+                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}");
+                            }
+                            else
+                            {
+                                ExitShort("Short", "DynamicTP Exit");
+                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}");
+                            }
+                            entryPrice = 0;
+                        }
+                    }
+                    else
+                    {
+                        // Already in dynamic mode - update trail stop and check exit conditions
+                        double trailDistance = atrValue * TrailStopATRMultiplier;
+                        
+                        if (isLong)
+                        {
+                            double newTrailStop = currentPrice - trailDistance;
+                            if (newTrailStop > trailStopPrice)
+                            {
+                                trailStopPrice = newTrailStop;
+                                PrintAndLog($"📈 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
+                            }
+                            
+                            // Check exit conditions: trail stop hit OR trend reversed
+                            if (currentPrice <= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
+                            {
+                                ExitLong("Long", "DynamicTrail Exit");
+                                string reason = currentPrice <= trailStopPrice ? "Trail Stop Hit" : 
+                                                !trendStillValid ? "RR Flipped" : $"Conf={bull}<{MinConfluenceToStay}";
+                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}");
+                                entryPrice = 0;
+                                dynamicExitActive = false;
+                            }
+                        }
+                        else
+                        {
+                            double newTrailStop = currentPrice + trailDistance;
+                            if (newTrailStop < trailStopPrice)
+                            {
+                                trailStopPrice = newTrailStop;
+                                PrintAndLog($"📉 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
+                            }
+                            
+                            // Check exit conditions: trail stop hit OR trend reversed
+                            if (currentPrice >= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
+                            {
+                                ExitShort("Short", "DynamicTrail Exit");
+                                string reason = currentPrice >= trailStopPrice ? "Trail Stop Hit" : 
+                                                !trendStillValid ? "RR Flipped" : $"Conf={bear}<{MinConfluenceToStay}";
+                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}");
+                                entryPrice = 0;
+                                dynamicExitActive = false;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Reset dynamic exit tracking when flat
+            if (Position.MarketPosition == MarketPosition.Flat)
+            {
+                entryPrice = 0;
+                dynamicExitActive = false;
+                trailStopPrice = 0;
+            }
+            
             // Increment bar-based cooldown counter
             if (barsSinceLastSignal >= 0)
                 barsSinceLastSignal++;
@@ -1270,10 +1443,25 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
                                     double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
                                     
-                                    SetStopLoss("Long", CalculationMode.Ticks, stopPoints / TickSize, true);
-                                    SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
+                                    // Add buffer to stop loss to reduce slippage
+                                    double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
+                                    
+                                    if (EnableDynamicExit)
+                                    {
+                                        // Dynamic exit: only set stop loss, manage TP manually
+                                        SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
+                                        entryPrice = GetCurrentAsk();
+                                        dynamicExitActive = false;
+                                        trailStopPrice = 0;
+                                    }
+                                    else
+                                    {
+                                        // Fixed TP mode
+                                        SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
+                                        SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
+                                    }
                                     EnterLong("Long");
-                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts TP={tpPoints:F2}pts");
+                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{(EnableDynamicExit ? " [DYNAMIC]" : "")}");
                                 }
                                 else
                                 {
@@ -1317,10 +1505,25 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
                                     double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
                                     
-                                    SetStopLoss("Short", CalculationMode.Ticks, stopPoints / TickSize, true);
-                                    SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
+                                    // Add buffer to stop loss to reduce slippage
+                                    double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
+                                    
+                                    if (EnableDynamicExit)
+                                    {
+                                        // Dynamic exit: only set stop loss, manage TP manually
+                                        SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
+                                        entryPrice = GetCurrentBid();
+                                        dynamicExitActive = false;
+                                        trailStopPrice = 0;
+                                    }
+                                    else
+                                    {
+                                        // Fixed TP mode
+                                        SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
+                                        SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
+                                    }
                                     EnterShort("Short");
-                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts TP={tpPoints:F2}pts");
+                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{(EnableDynamicExit ? " [DYNAMIC]" : "")}");
                                 }
                                 else
                                 {
