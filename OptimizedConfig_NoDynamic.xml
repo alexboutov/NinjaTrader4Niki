@@ -831,7 +831,7 @@
       <DailyLossLimitUSD>300</DailyLossLimitUSD>
       <ResetDailyPnLAtSessionStart>true</ResetDailyPnLAtSessionStart>
       <StopLossBufferTicks>2</StopLossBufferTicks>
-      <EnableDynamicExit>true</EnableDynamicExit>
+      <EnableDynamicExit>false</EnableDynamicExit>
       <MinConfluenceToStay>4</MinConfluenceToStay>
       <TrailStopATRMultiplier>1.5</TrailStopATRMultiplier>
       <MaxProfitUSD>500</MaxProfitUSD>
