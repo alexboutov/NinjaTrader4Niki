@@ -1272,6 +1272,13 @@ namespace NinjaTrader.NinjaScript.Strategies
                             // Set initial trail stop at entry + some profit
                             double trailDistance = atrValue * TrailStopATRMultiplier;
                             trailStopPrice = isLong ? (currentPrice - trailDistance) : (currentPrice + trailDistance);
+                            
+                            // CRITICAL: Move broker's stop order to lock in profit!
+                            if (isLong)
+                                SetStopLoss("Long", CalculationMode.Price, trailStopPrice, true);
+                            else
+                                SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
+                                
                             PrintAndLog($"🚀 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}");
                         }
                         else
@@ -1301,6 +1308,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                             if (newTrailStop > trailStopPrice)
                             {
                                 trailStopPrice = newTrailStop;
+                                // CRITICAL: Actually move the broker's stop order!
+                                SetStopLoss("Long", CalculationMode.Price, trailStopPrice, true);
                                 PrintAndLog($"📈 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
                             }
                             
@@ -1321,6 +1330,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                             if (newTrailStop < trailStopPrice)
                             {
                                 trailStopPrice = newTrailStop;
+                                // CRITICAL: Actually move the broker's stop order!
+                                SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
                                 PrintAndLog($"📉 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
                             }
                             
