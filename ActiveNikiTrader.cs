@@ -87,6 +87,10 @@ namespace NinjaTrader.NinjaScript.Strategies
         private StreamWriter logWriter;
         private string chartSessionId;
         
+        // CSV debug logging for indicator comparison
+        private string csvLogFilePath;
+        private StreamWriter csvWriter;
+        
         // Daily P&L tracking
         private double dailyPnL = 0;
         private DateTime lastTradeDate = DateTime.MinValue;
@@ -346,6 +350,10 @@ namespace NinjaTrader.NinjaScript.Strategies
         [Range(10, 1000)]
         [Display(Name="Max Profit USD", Description="Maximum profit to ride before forcing exit", Order=4, GroupName="12. Dynamic Exit")]
         public double MaxProfitUSD { get; set; }
+        
+        [NinjaScriptProperty]
+        [Display(Name="Enable Indicator CSV Log", Description="Log raw indicator values to CSV for comparison/tuning", Order=1, GroupName="13. Debug")]
+        public bool EnableIndicatorCSVLog { get; set; }
         #endregion
 
         protected override void OnStateChange()
@@ -466,11 +474,15 @@ namespace NinjaTrader.NinjaScript.Strategies
                 MinConfluenceToStay = 4;  // Same as entry requirement
                 TrailStopATRMultiplier = 1.5;
                 MaxProfitUSD = 500;  // Force exit at $500 profit
+                
+                // Debug - CSV indicator logging OFF by default
+                EnableIndicatorCSVLog = false;
             }
             else if (State == State.DataLoaded)
             {
                 chartSessionId = DateTime.Now.ToString("HHmmss") + "_" + new Random().Next(1000, 9999);
                 InitializeLogFile();
+                InitializeCSVLog();
                 
                 // Initialize all equivalent indicators (hosted by strategy)
                 t3ProEquivalent = T3ProEquivalent(T3ProMAType.EMA, T3ProPeriod, T3ProTCount, T3ProVFactor,
@@ -519,6 +531,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     LogAlways($"Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
                 if (EnableDailyLossLimit)
                     LogAlways($"🛡️ Daily Loss Limit: ${DailyLossLimitUSD:F0}");
+                if (EnableIndicatorCSVLog)
+                    LogAlways($"📊 CSV Indicator Log: ENABLED");
             }
             else if (State == State.Historical)
             {
@@ -530,8 +544,59 @@ namespace NinjaTrader.NinjaScript.Strategies
             {
                 if (ChartControl != null) ChartControl.Dispatcher.InvokeAsync(RemoveControlPanel);
                 CloseLogFile();
+                CloseCSVLog();
             }
         }
+        
+        #region CSV Indicator Logging
+        private void InitializeCSVLog()
+        {
+            if (!EnableIndicatorCSVLog) return;
+            try
+            {
+                string dir = System.IO.Path.Combine(NinjaTrader.Core.Globals.UserDataDir, "log");
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                csvLogFilePath = System.IO.Path.Combine(dir, $"IndicatorValues_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.csv");
+                csvWriter = new StreamWriter(csvLogFilePath, false) { AutoFlush = true };
+                // Write CSV header
+                csvWriter.WriteLine("BarTime,Close,AIQ1_IsUp,RR_IsUp,DT_Signal,VY_IsUp,ET_IsUp,SW_IsUp,SW_Count,T3P_IsUp,BullConf,BearConf,Source");
+                LogAlways($"📊 CSV Log: {csvLogFilePath}");
+            }
+            catch (Exception ex) { Print($"CSV Init Error: {ex.Message}"); }
+        }
+        
+        private void WriteCSVRow(DateTime barTime)
+        {
+            if (csvWriter == null || !EnableIndicatorCSVLog) return;
+            try
+            {
+                var (bull, bear, total) = GetConfluence();
+                string source = GetIndicatorSourceSummary();
+                csvWriter.WriteLine($"{barTime:yyyy-MM-dd HH:mm:ss},{Close[0]:F2},{B2I(AIQ1_IsUp)},{B2I(RR_IsUp)},{DT_Signal:F2},{B2I(VY_IsUp)},{B2I(ET_IsUp)},{B2I(SW_IsUp)},{SW_Count},{B2I(T3P_IsUp)},{bull},{bear},{source}");
+            }
+            catch { }
+        }
+        
+        private int B2I(bool b) => b ? 1 : 0;
+        
+        private string GetIndicatorSourceSummary()
+        {
+            // Returns a short code indicating indicator sources: N=ninZa, C=Chart, H=Hosted
+            string aiq = useNativeAiq1 ? "N" : (useChartAiq1 ? "C" : "H");
+            string rr = rubyRiver != null ? "N" : (useChartRR ? "C" : "H");
+            string dt = dragonTrend != null ? "N" : (useChartDT ? "C" : "H");
+            string vy = vidyaPro != null ? "N" : (useChartVY ? "C" : "H");
+            string et = easyTrend != null ? "N" : (useChartET ? "C" : "H");
+            string sw = solarWave != null ? "N" : (useChartSW ? "C" : "H");
+            string t3 = ninZaT3Pro != null ? "N" : (useChartT3P ? "C" : "H");
+            return $"AIQ:{aiq}|RR:{rr}|DT:{dt}|VY:{vy}|ET:{et}|SW:{sw}|T3:{t3}";
+        }
+        
+        private void CloseCSVLog()
+        {
+            try { csvWriter?.Close(); } catch { }
+        }
+        #endregion
         
         private void LoadNinZaIndicators()
         {
@@ -1154,6 +1219,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (CurrentBar < BarsRequiredToTrade || !indicatorsReady) return;
             
             DateTime barTime = Time[0];
+            
+            // Write CSV log row (every bar if enabled)
+            WriteCSVRow(barTime);
             
             // Daily P&L reset check - reset at start of new trading day
             if (ResetDailyPnLAtSessionStart && barTime.Date != lastTradeDate.Date)
