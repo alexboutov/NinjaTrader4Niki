@@ -32,16 +32,24 @@ namespace NinjaTrader.NinjaScript.Strategies
         private FieldInfo nativeAiq1TrendState;  // Int32: 1=up, -1=down
         private bool useNativeAiq1;
         
+        // Native AIQ_SuperBands indicator reference
+        private object nativeAiqSuperBands;
+        private FieldInfo nativeAiqSBIsUptrend;
+        private bool useNativeAiqSB;
+        
         // Chart-attached equivalent indicator references
         private object chartAiq1Equivalent, chartRubyRiverEquiv, chartDragonTrendEquiv;
         private object chartVidyaProEquiv, chartEasyTrendEquiv, chartSolarWaveEquiv, chartT3ProEquiv;
         private object chartAAATrendSyncEquiv;
+        private object chartAiqSuperBandsEquiv;
         private PropertyInfo aiq1IsUptrend;
         private PropertyInfo rrEquivIsUptrend, dtEquivPrevSignal, vyEquivIsUptrend, etEquivIsUptrend;
         private PropertyInfo swEquivIsUptrend, swEquivCountWave, t3pEquivIsUptrend;
         private PropertyInfo aaaEquivIsUptrend;
+        private PropertyInfo sbEquivIsUptrend;
         private bool useChartAiq1, useChartRR, useChartDT, useChartVY, useChartET, useChartSW, useChartT3P;
         private bool useChartAAA;
+        private bool useChartSB;
         
         // Equivalent indicators (hosted by strategy - fallback only)
         private T3ProEquivalent t3ProEquivalent;
@@ -66,7 +74,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool isFirstBar = true;
         
         // Previous state tracking for confirmation detection
-        private bool prevRR_IsUp, prevDT_IsUp, prevVY_IsUp, prevET_IsUp, prevSW_IsUp, prevT3P_IsUp, prevAAA_IsUp;
+        private bool prevRR_IsUp, prevDT_IsUp, prevVY_IsUp, prevET_IsUp, prevSW_IsUp, prevT3P_IsUp, prevAAA_IsUp, prevSB_IsUp;
         
         
         
@@ -82,8 +90,8 @@ namespace NinjaTrader.NinjaScript.Strategies
         private ScaleTransform panelScale;
         private string panelSettingsFile;
         private Border resizeGrip;
-        private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro, chkAAASync;
-        private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro, lblAAASync;
+        private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro, chkAAASync, chkSuperBands;
+        private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro, lblAAASync, lblSuperBands;
         private TextBlock lblAIQ1Status, lblWindowStatus;
         private TextBlock lblTradeStatus, lblSessionStats, lblTriggerMode, lblLastSignal, lblSubtitle;
         private Border signalBorder;
@@ -114,7 +122,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         #region Parameters
         [NinjaScriptProperty]
-        [Range(2, 7)]
+        [Range(2, 8)]
         [Display(Name="Min Confluence Required", Description="Minimum indicators agreeing (2-7)", Order=1, GroupName="1. Signal Filters")]
         public int MinConfluenceRequired { get; set; }
         
@@ -148,7 +156,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         public bool EnableAutoTrading { get; set; }
         
         [NinjaScriptProperty]
-        [Range(2, 7)]
+        [Range(2, 8)]
         [Display(Name="Min Confluence For Auto Trade", Description="Higher confluence required to actually place orders (2-7)", Order=8, GroupName="1. Signal Filters")]
         public int MinConfluenceForAutoTrade { get; set; }
         
@@ -238,6 +246,8 @@ namespace NinjaTrader.NinjaScript.Strategies
         public bool UseT3Pro { get; set; }
         [NinjaScriptProperty][Display(Name="Use AAA TrendSync", Order=7, GroupName="2. Indicator Selection")]
         public bool UseAAATrendSync { get; set; }
+        [NinjaScriptProperty][Display(Name="Use AIQ SuperBands", Order=8, GroupName="2. Indicator Selection")]
+        public bool UseAIQSuperBands { get; set; }
         
         [NinjaScriptProperty][Range(1, 100)][Display(Name="T3Pro Period", Order=1, GroupName="3. T3 Pro Settings")]
         public int T3ProPeriod { get; set; }
@@ -357,7 +367,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         public bool EnableDynamicExit { get; set; }
         
         [NinjaScriptProperty]
-        [Range(2, 7)]
+        [Range(2, 8)]
         [Display(Name="Min Confluence To Stay", Description="Minimum confluence to keep position open past TP (2-7)", Order=2, GroupName="12. Dynamic Exit")]
         public int MinConfluenceToStay { get; set; }
         
@@ -381,7 +391,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (State == State.SetDefaults)
             {
                 Name = "ActiveNikiTrader";
-                Description = "AIQ_1 trigger + any indicator confirmation with 7-indicator confluence filter (LONG + SHORT)";
+                Description = "AIQ_1 trigger + any indicator confirmation with 8-indicator confluence filter (LONG + SHORT)";
                 Calculate = Calculate.OnBarClose;
                 EntriesPerDirection = 1;
                 EntryHandling = EntryHandling.AllEntries;
@@ -431,6 +441,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 UseEasyTrend = true;
                 UseT3Pro = true;
                 UseAAATrendSync = true;
+                UseAIQSuperBands = true;
                 
                 // T3 Pro defaults
                 T3ProPeriod = 14;
@@ -582,7 +593,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 csvLogFilePath = System.IO.Path.Combine(dir, $"IndicatorValues_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.csv");
                 csvWriter = new StreamWriter(csvLogFilePath, false) { AutoFlush = true };
                 // Write CSV header - includes AAA_IsUp
-                csvWriter.WriteLine("BarTime,Close,AIQ1_IsUp,RR_IsUp,DT_Signal,VY_IsUp,ET_IsUp,SW_IsUp,SW_Count,T3P_IsUp,AAA_IsUp,BullConf,BearConf,Source");
+                csvWriter.WriteLine("BarTime,Close,AIQ1_IsUp,RR_IsUp,DT_Signal,VY_IsUp,ET_IsUp,SW_IsUp,SW_Count,T3P_IsUp,AAA_IsUp,SB_IsUp,BullConf,BearConf,Source");
                 LogAlways($"📊 CSV Log: {csvLogFilePath}");
             }
             catch (Exception ex) { Print($"CSV Init Error: {ex.Message}"); }
@@ -596,7 +607,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 var (bull, bear, total) = GetConfluence();
                 string source = GetIndicatorSourceSummary();
                 // Include AAA_IsUp in CSV output
-                csvWriter.WriteLine($"{barTime:yyyy-MM-dd HH:mm:ss},{Close[0]:F2},{B2I(AIQ1_IsUp)},{B2I(RR_IsUp)},{DT_Signal:F2},{B2I(VY_IsUp)},{B2I(ET_IsUp)},{B2I(SW_IsUp)},{SW_Count},{B2I(T3P_IsUp)},{B2I(AAA_IsUp)},{bull},{bear},{source}");
+                csvWriter.WriteLine($"{barTime:yyyy-MM-dd HH:mm:ss},{Close[0]:F2},{B2I(AIQ1_IsUp)},{B2I(RR_IsUp)},{DT_Signal:F2},{B2I(VY_IsUp)},{B2I(ET_IsUp)},{B2I(SW_IsUp)},{SW_Count},{B2I(T3P_IsUp)},{B2I(AAA_IsUp)},{B2I(SB_IsUp)},{bull},{bear},{source}");
             }
             catch { }
         }
@@ -614,7 +625,8 @@ namespace NinjaTrader.NinjaScript.Strategies
             string sw = solarWave != null ? "N" : (useChartSW ? "C" : "H");
             string t3 = ninZaT3Pro != null ? "N" : (useChartT3P ? "C" : "H");
             string aaa = aaaTrendSync != null ? "N" : (useChartAAA ? "C" : "-");
-            return $"AIQ:{aiq}|RR:{rr}|DT:{dt}|VY:{vy}|ET:{et}|SW:{sw}|T3:{t3}|AAA:{aaa}";
+            string sb = useNativeAiqSB ? "N" : (useChartSB ? "C" : "-");
+            return $"AIQ:{aiq}|RR:{rr}|DT:{dt}|VY:{vy}|ET:{et}|SW:{sw}|T3:{t3}|AAA:{aaa}|SB:{sb}";
         }
         
         private void CloseCSVLog()
@@ -629,7 +641,8 @@ namespace NinjaTrader.NinjaScript.Strategies
             { 
                 useHostedT3Pro = useHostedVIDYAPro = useHostedEasyTrend = true;
                 useHostedRubyRiver = useHostedDragonTrend = useHostedSolarWave = true;
-                useNativeAiq1 = useChartAiq1 = useChartRR = useChartDT = useChartVY = useChartET = useChartSW = useChartT3P = useChartAAA = false;
+                useNativeAiq1 = useChartAiq1 = useChartRR = useChartDT = useChartVY = useChartET = useChartSW = useChartT3P = useChartAAA = useChartSB = false;
+                useNativeAiqSB = false;
                 indicatorsReady = true; 
                 return; 
             }
@@ -656,6 +669,14 @@ namespace NinjaTrader.NinjaScript.Strategies
                     case "AIQ_1":
                         nativeAiq1 = ind;
                         nativeAiq1TrendState = t.GetField("trendState", flagsPrivate);
+                        break;
+                    
+                    // Native AIQ_SuperBands indicator (from AIQ folder)
+                    case "AIQ_SuperBands":
+                        nativeAiqSuperBands = ind;
+                        nativeAiqSBIsUptrend = t.GetField("isUptrend", flagsPrivate);
+                        if (nativeAiqSBIsUptrend == null)
+                            nativeAiqSBIsUptrend = t.GetField("trendState", flagsPrivate);
                         break;
                     
                     // Chart-attached equivalent indicators
@@ -692,6 +713,10 @@ namespace NinjaTrader.NinjaScript.Strategies
                         chartAAATrendSyncEquiv = ind;
                         aaaEquivIsUptrend = t.GetProperty("IsUptrend", flagsPublic);
                         break;
+                    case "AIQ_SuperBandsEquivalent":
+                        chartAiqSuperBandsEquiv = ind;
+                        sbEquivIsUptrend = t.GetProperty("IsUptrend", flagsPublic);
+                        break;
                 }
             }
             
@@ -707,6 +732,10 @@ namespace NinjaTrader.NinjaScript.Strategies
             useChartSW = chartSolarWaveEquiv != null && swEquivIsUptrend != null;
             useChartT3P = chartT3ProEquiv != null && t3pEquivIsUptrend != null;
             useChartAAA = chartAAATrendSyncEquiv != null && aaaEquivIsUptrend != null;
+            
+            // Determine source priority for AIQ_SuperBands: native > chart-attached equivalent > N/A
+            useNativeAiqSB = nativeAiqSuperBands != null && nativeAiqSBIsUptrend != null;
+            useChartSB = !useNativeAiqSB && chartAiqSuperBandsEquiv != null && sbEquivIsUptrend != null;
             
             // Use hosted only if neither ninZa nor chart-attached found
             useHostedT3Pro = ninZaT3Pro == null && !useChartT3P;
@@ -730,6 +759,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             LogAlways($"  ninZaT3Pro:        {(ninZaT3Pro != null ? "FOUND" : "not found")}");
             LogAlways($"  ninZaAAATrendSync: {(aaaTrendSync != null ? "FOUND" : "not found")}");
             LogAlways($"  AIQ_1 (native):    {(nativeAiq1 != null ? "FOUND" : "not found")}");
+            LogAlways($"  AIQ_SuperBands:    {(nativeAiqSuperBands != null ? "FOUND" : "not found")}");
             
             LogAlways($"--- Indicator Sources (Priority: ninZa/native > chart > hosted) ---");
             LogAlways($"  RubyRiver:    {(rubyRiver != null ? "ninZa" : (useChartRR ? "CHART" : "hosted"))}");
@@ -777,6 +807,29 @@ namespace NinjaTrader.NinjaScript.Strategies
         [Browsable(false)] public bool AAA_IsUp => aaaTrendSync != null ? GetBool(aaaTrendSync, aaaIsUptrend) : (useChartAAA ? GetChartBool(chartAAATrendSyncEquiv, aaaEquivIsUptrend) : false);
         [Browsable(false)] public bool AAA_Available => aaaTrendSync != null || useChartAAA;
         
+        // AIQ_SuperBands - Priority: native > chart-attached equivalent > N/A (no hosted equivalent)
+        [Browsable(false)] public bool SB_IsUp 
+        {
+            get 
+            {
+                if (useNativeAiqSB)
+                {
+                    try 
+                    { 
+                        object val = nativeAiqSBIsUptrend.GetValue(nativeAiqSuperBands);
+                        if (val is bool boolVal) return boolVal;
+                        if (val is int intVal) return intVal > 0;
+                        return false;
+                    } 
+                    catch { return false; }
+                }
+                if (useChartSB)
+                    return GetChartBool(chartAiqSuperBandsEquiv, sbEquivIsUptrend);
+                return false;
+            }
+        }
+        [Browsable(false)] public bool SB_Available => useNativeAiqSB || useChartSB;
+        
         // AIQ_1 trigger indicator - Priority: native > chart-attached equivalent > hosted equivalent
         [Browsable(false)] public bool AIQ1_IsUp 
         {
@@ -795,7 +848,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private double GetChartDbl(object o, PropertyInfo p) { try { return o != null && p != null ? (double)p.GetValue(o) : 0; } catch { return 0; } }
         private int GetChartInt(object o, PropertyInfo p) { try { return o != null && p != null ? (int)p.GetValue(o) : 0; } catch { return 0; } }
         
-        private int GetEnabledCount() => (UseRubyRiver?1:0)+(UseDragonTrend?1:0)+(UseSolarWave?1:0)+(UseVIDYAPro?1:0)+(UseEasyTrend?1:0)+(UseT3Pro?1:0)+(UseAAATrendSync && AAA_Available?1:0);
+        private int GetEnabledCount() => (UseRubyRiver?1:0)+(UseDragonTrend?1:0)+(UseSolarWave?1:0)+(UseVIDYAPro?1:0)+(UseEasyTrend?1:0)+(UseT3Pro?1:0)+(UseAAATrendSync && AAA_Available?1:0)+(UseAIQSuperBands && SB_Available?1:0);
         
         private (int bull, int bear, int total) GetConfluence()
         {
@@ -807,6 +860,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (UseEasyTrend) { total++; if (ET_IsUp) bull++; else bear++; }
             if (UseT3Pro) { total++; if (T3P_IsUp) bull++; else bear++; }
             if (UseAAATrendSync && AAA_Available) { total++; if (AAA_IsUp) bull++; else bear++; }
+            if (UseAIQSuperBands && SB_Available) { total++; if (SB_IsUp) bull++; else bear++; }
             return (bull, bear, total);
         }
         
@@ -823,6 +877,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (UseSolarWave && SW_IsUp && !prevSW_IsUp) return "SW";
             if (UseT3Pro && T3P_IsUp && !prevT3P_IsUp) return "T3P";
             if (UseAAATrendSync && AAA_Available && AAA_IsUp && !prevAAA_IsUp) return "AAA";
+            if (UseAIQSuperBands && SB_Available && SB_IsUp && !prevSB_IsUp) return "SB";
             
             // Also check if indicator is already UP (in case it flipped same bar as AIQ1)
             if (UseRubyRiver && RR_IsUp) return "RR";
@@ -832,6 +887,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (UseSolarWave && SW_IsUp) return "SW";
             if (UseT3Pro && T3P_IsUp) return "T3P";
             if (UseAAATrendSync && AAA_Available && AAA_IsUp) return "AAA";
+            if (UseAIQSuperBands && SB_Available && SB_IsUp) return "SB";
             
             return null;
         }
@@ -849,6 +905,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (UseSolarWave && !SW_IsUp && prevSW_IsUp) return "SW";
             if (UseT3Pro && !T3P_IsUp && prevT3P_IsUp) return "T3P";
             if (UseAAATrendSync && AAA_Available && !AAA_IsUp && prevAAA_IsUp) return "AAA";
+            if (UseAIQSuperBands && SB_Available && !SB_IsUp && prevSB_IsUp) return "SB";
             
             // Also check if indicator is already DOWN (in case it flipped same bar as AIQ1)
             if (UseRubyRiver && !RR_IsUp) return "RR";
@@ -858,6 +915,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (UseSolarWave && !SW_IsUp) return "SW";
             if (UseT3Pro && !T3P_IsUp) return "T3P";
             if (UseAAATrendSync && AAA_Available && !AAA_IsUp) return "AAA";
+            if (UseAIQSuperBands && SB_Available && !SB_IsUp) return "SB";
             
             return null;
         }
@@ -925,7 +983,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 lblSubtitle = new TextBlock { Foreground = Brushes.LightGray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) };
                 stack.Children.Add(lblSubtitle);
                 
-                stack.Children.Add(new TextBlock { Text = "── Confluence (7) ──", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
+                stack.Children.Add(new TextBlock { Text = "── Confluence (8) ──", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 stack.Children.Add(CreateRow("Ruby River", ref chkRubyRiver, ref lblRubyRiver, UseRubyRiver));
                 stack.Children.Add(CreateRow("Dragon Trend", ref chkDragonTrend, ref lblDragonTrend, UseDragonTrend));
                 stack.Children.Add(CreateRow("VIDYA Pro", ref chkVIDYA, ref lblVIDYA, UseVIDYAPro));
@@ -1017,6 +1075,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             UseEasyTrend = chkEasyTrend?.IsChecked ?? false;
             UseT3Pro = chkT3Pro?.IsChecked ?? false;
             UseAAATrendSync = chkAAASync?.IsChecked ?? false;
+            UseAIQSuperBands = chkSuperBands?.IsChecked ?? false;
         }
         
         private void RemoveControlPanel()
@@ -1172,6 +1231,25 @@ namespace NinjaTrader.NinjaScript.Strategies
                     {
                         lblAAASync.Text = AAA_IsUp ? "UP" : "DN";
                         lblAAASync.Foreground = AAA_IsUp ? Brushes.Lime : Brushes.Red;
+                    }
+                }
+                // AIQ SuperBands - show N/A if not available, otherwise show UP/DN
+                if (lblSuperBands != null)
+                {
+                    if (!UseAIQSuperBands)
+                    {
+                        lblSuperBands.Text = "OFF";
+                        lblSuperBands.Foreground = Brushes.Gray;
+                    }
+                    else if (!SB_Available)
+                    {
+                        lblSuperBands.Text = "N/A";
+                        lblSuperBands.Foreground = Brushes.DarkGray;
+                    }
+                    else
+                    {
+                        lblSuperBands.Text = SB_IsUp ? "UP" : "DN";
+                        lblSuperBands.Foreground = SB_IsUp ? Brushes.Lime : Brushes.Red;
                     }
                 }
                 
@@ -1717,6 +1795,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             prevSW_IsUp = SW_IsUp;
             prevT3P_IsUp = T3P_IsUp;
             prevAAA_IsUp = AAA_IsUp;
+            prevSB_IsUp = SB_IsUp;
             prevAIQ1_IsUp = AIQ1_IsUp;
             isFirstBar = false;
         }
@@ -1761,7 +1840,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             PrintAndLog($"╠══════════════════════════════════════════════════════════╣");
             PrintAndLog($"║  Trigger: {trigger}");
             PrintAndLog($"║  Confluence: {confluenceCount}/{total}");
-            PrintAndLog($"║  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)}");
+            PrintAndLog($"║  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)} SB={Ts(SB_IsUp)}");
             PrintAndLog($"║  AIQ1={Ts(AIQ1_IsUp)} | Bars after {squareType}: {barsAfterSquare}");
             PrintAndLog($"╚══════════════════════════════════════════════════════════╝");
         }
@@ -1797,9 +1876,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                     logWriter.WriteLine($"    *** UNIRENKO MODE ***");
                     logWriter.WriteLine($"    Cooldown: {(UseTimeBasedCooldown ? $"{CooldownSeconds} seconds (time-based)" : $"{CooldownBars} bars")}");
                 }
-                logWriter.WriteLine($"    7-indicator confluence filter");
-                logWriter.WriteLine($"    Signal Filter: MinConf={MinConfluenceRequired}/7, MaxBars={MaxBarsAfterYellowSquare}, Cooldown={CooldownBars}");
-                logWriter.WriteLine($"    Auto Trade: {(EnableAutoTrading ? "ON" : "OFF")} | MinConf for Trade={MinConfluenceForAutoTrade}/7");
+                logWriter.WriteLine($"    8-indicator confluence filter");
+                logWriter.WriteLine($"    Signal Filter: MinConf={MinConfluenceRequired}/8, MaxBars={MaxBarsAfterYellowSquare}, Cooldown={CooldownBars}");
+                logWriter.WriteLine($"    Auto Trade: {(EnableAutoTrading ? "ON" : "OFF")} | MinConf for Trade={MinConfluenceForAutoTrade}/8");
                 logWriter.WriteLine($"    Risk: SL=${StopLossUSD:F0}, TP=${TakeProfitUSD:F0}");
                 if (EnableDailyLossLimit)
                     logWriter.WriteLine($"    Daily Loss Limit: ${DailyLossLimitUSD:F0}");
