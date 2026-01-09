@@ -41,6 +41,9 @@ namespace NinjaTrader.NinjaScript.Indicators
         private int totalBarsTracked;
         
         private bool isInitialized;
+        
+        // Trend state for strategy integration
+        private bool isUptrend;
         #endregion
 
         protected override void OnStateChange()
@@ -192,6 +195,9 @@ namespace NinjaTrader.NinjaScript.Indicators
             Values[3][0] = fastUpper;
             Values[4][0] = fastMiddle;
             Values[5][0] = fastLower;
+            
+            // Determine trend state: bullish when price is above main middle band
+            isUptrend = Close[0] > mainMiddle;
             
             // Determine price position relative to bands
             bool prevAboveMain = priceAboveMain;
@@ -470,6 +476,16 @@ namespace NinjaTrader.NinjaScript.Indicators
         public bool BearishSignal
         {
             get { return bearishSignal; }
+        }
+        
+        /// <summary>
+        /// Returns true when price is above the main middle band (bullish bias)
+        /// Used by ActiveNikiTrader strategy for confluence detection
+        /// </summary>
+        [Browsable(false)]
+        public bool IsUptrend
+        {
+            get { return isUptrend; }
         }
         
         [Browsable(false)]
