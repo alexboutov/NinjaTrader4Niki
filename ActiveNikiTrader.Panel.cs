@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Input;
 using NinjaTrader.Cbi;
 using NinjaTrader.Data;
 using NinjaTrader.Gui.Chart;
@@ -23,6 +24,32 @@ namespace NinjaTrader.NinjaScript.Strategies
 {
     public partial class ActiveNikiTrader
     {
+        #region Resize Edge Enum
+        private enum ResizeEdge
+        {
+            None,
+            Left,
+            Right,
+            Top,
+            Bottom,
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight
+        }
+        #endregion
+
+        #region Additional Panel Fields
+        private ResizeEdge currentResizeEdge = ResizeEdge.None;
+        private const double EdgeThreshold = 8;  // pixels from edge to trigger resize
+        private double panelWidth = 200;
+        private double panelHeight = 400;
+        private double minPanelWidth = 150;
+        private double minPanelHeight = 200;
+        private Point resizeStartMousePos;
+        private double resizeStartLeft, resizeStartTop;
+        #endregion
+
         #region Chart Panel
         private void CreateControlPanel()
         {
@@ -32,30 +59,30 @@ namespace NinjaTrader.NinjaScript.Strategies
                 panelSettingsFile = System.IO.Path.Combine(settingsDir, "ActiveNikiTrader_PanelSettings.txt");
                 panelTransform = new TranslateTransform(0, 0);
                 panelScale = new ScaleTransform(1, 1);
-                var transformGroup = new TransformGroup();
-                transformGroup.Children.Add(panelScale);
-                transformGroup.Children.Add(panelTransform);
+                
                 LoadPanelSettings();
 
                 controlPanel = new Grid
                 {
                     HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(10, 0, 0, 30),
-                    Background = new SolidColorBrush(Color.FromArgb(115, 30, 30, 40)),
-                    MinWidth = 200,
-                    RenderTransform = transformGroup,
-                    RenderTransformOrigin = new Point(0, 1),
-                    Cursor = System.Windows.Input.Cursors.Hand
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Background = new SolidColorBrush(Color.FromArgb(230, 30, 30, 40)),
+                    Width = panelWidth,
+                    MinWidth = minPanelWidth,
+                    MinHeight = minPanelHeight,
+                    RenderTransform = panelTransform,
+                    Cursor = Cursors.Arrow
                 };
+                
                 controlPanel.MouseLeftButtonDown += Panel_MouseLeftButtonDown;
                 controlPanel.MouseLeftButtonUp += Panel_MouseLeftButtonUp;
                 controlPanel.MouseMove += Panel_MouseMove;
+                controlPanel.MouseLeave += Panel_MouseLeave;
 
                 var border = new Border
                 {
                     BorderBrush = new SolidColorBrush(Color.FromRgb(80, 80, 100)),
-                    BorderThickness = new Thickness(1),
+                    BorderThickness = new Thickness(2),
                     CornerRadius = new CornerRadius(5),
                     Padding = new Thickness(8)
                 };
@@ -109,25 +136,24 @@ namespace NinjaTrader.NinjaScript.Strategies
                 signalBorder.Child = lblLastSignal;
                 stack.Children.Add(signalBorder);
                 
-                border.Child = stack;
-                controlPanel.Children.Add(border);
-
-                resizeGrip = new Border { Width = 16, Height = 16, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom, Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.SizeNWSE, Margin = new Thickness(0, 0, 2, 2) };
-                var gripCanvas = new Canvas { Width = 12, Height = 12 };
+                // Add resize grip indicator in bottom-right corner
+                var resizeIndicator = new Canvas { Width = 12, Height = 12, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 4, 0, 0) };
                 for (int i = 0; i < 3; i++)
                 {
                     var line = new Line { X1 = 10 - i * 4, Y1 = 10, X2 = 10, Y2 = 10 - i * 4, Stroke = new SolidColorBrush(Color.FromRgb(120, 120, 140)), StrokeThickness = 1 };
-                    gripCanvas.Children.Add(line);
+                    resizeIndicator.Children.Add(line);
                 }
-                resizeGrip.Child = gripCanvas;
-                resizeGrip.MouseLeftButtonDown += ResizeGrip_MouseLeftButtonDown;
-                resizeGrip.MouseLeftButtonUp += ResizeGrip_MouseLeftButtonUp;
-                resizeGrip.MouseMove += ResizeGrip_MouseMove;
-                controlPanel.Children.Add(resizeGrip);
+                stack.Children.Add(resizeIndicator);
+                
+                border.Child = stack;
+                controlPanel.Children.Add(border);
 
                 UIElementCollection panelHolder = (ChartControl.Parent as Grid)?.Children;
                 if (panelHolder != null) panelHolder.Add(controlPanel);
                 panelActive = true;
+                
+                // Apply initial position
+                ApplyPanelConstraints();
             }
             catch (Exception ex) { Print($"Panel error: {ex.Message}"); }
         }
@@ -172,12 +198,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     controlPanel.MouseLeftButtonDown -= Panel_MouseLeftButtonDown;
                     controlPanel.MouseLeftButtonUp -= Panel_MouseLeftButtonUp;
                     controlPanel.MouseMove -= Panel_MouseMove;
-                    if (resizeGrip != null)
-                    {
-                        resizeGrip.MouseLeftButtonDown -= ResizeGrip_MouseLeftButtonDown;
-                        resizeGrip.MouseLeftButtonUp -= ResizeGrip_MouseLeftButtonUp;
-                        resizeGrip.MouseMove -= ResizeGrip_MouseMove;
-                    }
+                    controlPanel.MouseLeave -= Panel_MouseLeave;
                     UIElementCollection panelHolder = (ChartControl?.Parent as Grid)?.Children;
                     if (panelHolder != null && panelHolder.Contains(controlPanel))
                         panelHolder.Remove(controlPanel);
@@ -187,74 +208,245 @@ namespace NinjaTrader.NinjaScript.Strategies
             catch { }
         }
 
-        private void Panel_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private ResizeEdge GetResizeEdge(Point mousePos)
         {
-            isDragging = true;
-            dragStartPoint = e.GetPosition(ChartControl?.Parent as UIElement);
-            dragStartPoint.X -= panelTransform.X;
-            dragStartPoint.Y -= panelTransform.Y;
-            controlPanel.CaptureMouse();
-            e.Handled = true;
+            double w = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth : panelWidth;
+            double h = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight : panelHeight;
+            
+            bool nearLeft = mousePos.X <= EdgeThreshold;
+            bool nearRight = mousePos.X >= w - EdgeThreshold;
+            bool nearTop = mousePos.Y <= EdgeThreshold;
+            bool nearBottom = mousePos.Y >= h - EdgeThreshold;
+            
+            if (nearTop && nearLeft) return ResizeEdge.TopLeft;
+            if (nearTop && nearRight) return ResizeEdge.TopRight;
+            if (nearBottom && nearLeft) return ResizeEdge.BottomLeft;
+            if (nearBottom && nearRight) return ResizeEdge.BottomRight;
+            if (nearLeft) return ResizeEdge.Left;
+            if (nearRight) return ResizeEdge.Right;
+            if (nearTop) return ResizeEdge.Top;
+            if (nearBottom) return ResizeEdge.Bottom;
+            
+            return ResizeEdge.None;
         }
-
-        private void Panel_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        
+        private Cursor GetCursorForEdge(ResizeEdge edge)
         {
-            if (isDragging) { isDragging = false; controlPanel.ReleaseMouseCapture(); SavePanelSettings(); e.Handled = true; }
-        }
-
-        private void Panel_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (isDragging)
+            switch (edge)
             {
-                Point currentPoint = e.GetPosition(ChartControl?.Parent as UIElement);
-                double newX = currentPoint.X - dragStartPoint.X;
-                double newY = currentPoint.Y - dragStartPoint.Y;
-                var parent = ChartControl?.Parent as FrameworkElement;
-                if (parent != null && controlPanel != null)
+                case ResizeEdge.Left:
+                case ResizeEdge.Right:
+                    return Cursors.SizeWE;
+                case ResizeEdge.Top:
+                case ResizeEdge.Bottom:
+                    return Cursors.SizeNS;
+                case ResizeEdge.TopLeft:
+                case ResizeEdge.BottomRight:
+                    return Cursors.SizeNWSE;
+                case ResizeEdge.TopRight:
+                case ResizeEdge.BottomLeft:
+                    return Cursors.SizeNESW;
+                default:
+                    return Cursors.Hand;
+            }
+        }
+
+        private void Panel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point mousePos = e.GetPosition(controlPanel);
+            ResizeEdge edge = GetResizeEdge(mousePos);
+            
+            if (edge != ResizeEdge.None)
+            {
+                // Start resizing
+                currentResizeEdge = edge;
+                isResizing = true;
+                resizeStartMousePos = e.GetPosition(ChartControl?.Parent as UIElement);
+                resizeStartWidth = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth : panelWidth;
+                resizeStartHeight = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight : panelHeight;
+                resizeStartLeft = panelTransform.X;
+                resizeStartTop = panelTransform.Y;
+                controlPanel.CaptureMouse();
+                e.Handled = true;
+            }
+            else
+            {
+                // Start dragging
+                isDragging = true;
+                dragStartPoint = e.GetPosition(ChartControl?.Parent as UIElement);
+                dragStartPoint.X -= panelTransform.X;
+                dragStartPoint.Y -= panelTransform.Y;
+                controlPanel.CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        private void Panel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging || isResizing)
+            {
+                isDragging = false;
+                isResizing = false;
+                currentResizeEdge = ResizeEdge.None;
+                controlPanel.ReleaseMouseCapture();
+                SavePanelSettings();
+                e.Handled = true;
+            }
+        }
+        
+        private void Panel_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (!isDragging && !isResizing)
+            {
+                controlPanel.Cursor = Cursors.Arrow;
+            }
+        }
+
+        private void Panel_MouseMove(object sender, MouseEventArgs e)
+        {
+            var parent = ChartControl?.Parent as FrameworkElement;
+            if (parent == null) return;
+            
+            Point currentMousePos = e.GetPosition(parent);
+            
+            if (isResizing && currentResizeEdge != ResizeEdge.None)
+            {
+                double deltaX = currentMousePos.X - resizeStartMousePos.X;
+                double deltaY = currentMousePos.Y - resizeStartMousePos.Y;
+                
+                double newWidth = resizeStartWidth;
+                double newHeight = resizeStartHeight;
+                double newLeft = resizeStartLeft;
+                double newTop = resizeStartTop;
+                
+                // Calculate new dimensions based on which edge is being dragged
+                switch (currentResizeEdge)
                 {
-                    double panelWidth = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth : 200;
-                    double panelHeight = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight : 300;
-                    double minX = -10, maxX = parent.ActualWidth - panelWidth - 10;
-                    double minY = -(parent.ActualHeight - panelHeight - 30), maxY = 0;
-                    newX = Math.Max(minX, Math.Min(maxX, newX));
-                    newY = Math.Max(minY, Math.Min(maxY, newY));
+                    case ResizeEdge.Right:
+                        newWidth = resizeStartWidth + deltaX;
+                        break;
+                    case ResizeEdge.Left:
+                        newWidth = resizeStartWidth - deltaX;
+                        newLeft = resizeStartLeft + deltaX;
+                        break;
+                    case ResizeEdge.Bottom:
+                        newHeight = resizeStartHeight + deltaY;
+                        break;
+                    case ResizeEdge.Top:
+                        newHeight = resizeStartHeight - deltaY;
+                        newTop = resizeStartTop + deltaY;
+                        break;
+                    case ResizeEdge.BottomRight:
+                        // Proportional resize - maintain aspect ratio
+                        double aspectRatio = resizeStartWidth / resizeStartHeight;
+                        double avgDelta = (deltaX + deltaY) / 2;
+                        newWidth = resizeStartWidth + avgDelta;
+                        newHeight = newWidth / aspectRatio;
+                        break;
+                    case ResizeEdge.BottomLeft:
+                        newWidth = resizeStartWidth - deltaX;
+                        newLeft = resizeStartLeft + deltaX;
+                        newHeight = resizeStartHeight + deltaY;
+                        break;
+                    case ResizeEdge.TopRight:
+                        newWidth = resizeStartWidth + deltaX;
+                        newHeight = resizeStartHeight - deltaY;
+                        newTop = resizeStartTop + deltaY;
+                        break;
+                    case ResizeEdge.TopLeft:
+                        newWidth = resizeStartWidth - deltaX;
+                        newLeft = resizeStartLeft + deltaX;
+                        newHeight = resizeStartHeight - deltaY;
+                        newTop = resizeStartTop + deltaY;
+                        break;
                 }
+                
+                // Apply minimum size constraints
+                if (newWidth < minPanelWidth)
+                {
+                    if (currentResizeEdge == ResizeEdge.Left || currentResizeEdge == ResizeEdge.TopLeft || currentResizeEdge == ResizeEdge.BottomLeft)
+                        newLeft = resizeStartLeft + (resizeStartWidth - minPanelWidth);
+                    newWidth = minPanelWidth;
+                }
+                if (newHeight < minPanelHeight)
+                {
+                    if (currentResizeEdge == ResizeEdge.Top || currentResizeEdge == ResizeEdge.TopLeft || currentResizeEdge == ResizeEdge.TopRight)
+                        newTop = resizeStartTop + (resizeStartHeight - minPanelHeight);
+                    newHeight = minPanelHeight;
+                }
+                
+                // Apply boundary constraints
+                if (newLeft < 0) 
+                {
+                    newWidth = newWidth + newLeft;  // Reduce width by the amount we went over
+                    newLeft = 0;
+                }
+                if (newTop < 0)
+                {
+                    newHeight = newHeight + newTop;  // Reduce height by the amount we went over
+                    newTop = 0;
+                }
+                if (newLeft + newWidth > parent.ActualWidth)
+                {
+                    newWidth = parent.ActualWidth - newLeft;
+                }
+                if (newTop + newHeight > parent.ActualHeight)
+                {
+                    newHeight = parent.ActualHeight - newTop;
+                }
+                
+                // Re-apply minimum constraints after boundary adjustments
+                newWidth = Math.Max(newWidth, minPanelWidth);
+                newHeight = Math.Max(newHeight, minPanelHeight);
+                
+                // Apply changes
+                panelWidth = newWidth;
+                panelHeight = newHeight;
+                controlPanel.Width = newWidth;
+                controlPanel.Height = newHeight;
+                panelTransform.X = newLeft;
+                panelTransform.Y = newTop;
+                
+                e.Handled = true;
+            }
+            else if (isDragging)
+            {
+                double newX = currentMousePos.X - dragStartPoint.X;
+                double newY = currentMousePos.Y - dragStartPoint.Y;
+                
+                double w = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth : panelWidth;
+                double h = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight : panelHeight;
+                
+                // Constrain to chart boundaries
+                newX = Math.Max(0, Math.Min(parent.ActualWidth - w, newX));
+                newY = Math.Max(0, Math.Min(parent.ActualHeight - h, newY));
+                
                 panelTransform.X = newX;
                 panelTransform.Y = newY;
                 e.Handled = true;
             }
-        }
-
-        private void ResizeGrip_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            isResizing = true;
-            resizeStartPoint = e.GetPosition(ChartControl?.Parent as UIElement);
-            resizeStartWidth = panelScale.ScaleX;
-            resizeStartHeight = panelScale.ScaleY;
-            resizeGrip.CaptureMouse();
-            e.Handled = true;
-        }
-
-        private void ResizeGrip_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (isResizing) { isResizing = false; resizeGrip.ReleaseMouseCapture(); SavePanelSettings(); e.Handled = true; }
-        }
-
-        private void ResizeGrip_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (isResizing)
+            else
             {
-                Point currentPoint = e.GetPosition(ChartControl?.Parent as UIElement);
-                double deltaX = currentPoint.X - resizeStartPoint.X;
-                double deltaY = currentPoint.Y - resizeStartPoint.Y;
-                double baseWidth = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth / panelScale.ScaleX : 200;
-                double avgDelta = (deltaX - deltaY) / 2;
-                double newScale = resizeStartWidth + avgDelta / baseWidth;
-                newScale = Math.Max(0.5, Math.Min(2.0, newScale));
-                panelScale.ScaleX = newScale;
-                panelScale.ScaleY = newScale;
-                e.Handled = true;
+                // Update cursor based on mouse position
+                Point mousePos = e.GetPosition(controlPanel);
+                ResizeEdge edge = GetResizeEdge(mousePos);
+                controlPanel.Cursor = GetCursorForEdge(edge);
             }
+        }
+
+        private void ApplyPanelConstraints()
+        {
+            var parent = ChartControl?.Parent as FrameworkElement;
+            if (parent == null || controlPanel == null) return;
+            
+            double maxX = Math.Max(0, parent.ActualWidth - panelWidth);
+            double maxY = Math.Max(0, parent.ActualHeight - panelHeight);
+            
+            panelTransform.X = Math.Max(0, Math.Min(maxX, panelTransform.X));
+            panelTransform.Y = Math.Max(0, Math.Min(maxY, panelTransform.Y));
+            
+            controlPanel.Width = panelWidth;
+            controlPanel.Height = panelHeight;
         }
 
         private void SavePanelSettings()
@@ -264,7 +456,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (string.IsNullOrEmpty(panelSettingsFile)) return;
                 string dir = System.IO.Path.GetDirectoryName(panelSettingsFile);
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                File.WriteAllText(panelSettingsFile, $"{panelTransform.X},{panelTransform.Y},{panelScale.ScaleX},{panelScale.ScaleY}");
+                
+                double w = controlPanel.ActualWidth > 0 ? controlPanel.ActualWidth : panelWidth;
+                double h = controlPanel.ActualHeight > 0 ? controlPanel.ActualHeight : panelHeight;
+                
+                // Save: X, Y, Width, Height
+                File.WriteAllText(panelSettingsFile, $"{panelTransform.X},{panelTransform.Y},{w},{h}");
             }
             catch { }
         }
@@ -276,10 +473,17 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (string.IsNullOrEmpty(panelSettingsFile) || !File.Exists(panelSettingsFile)) return;
                 string content = File.ReadAllText(panelSettingsFile);
                 string[] parts = content.Split(',');
+                
                 if (parts.Length >= 2 && double.TryParse(parts[0], out double x) && double.TryParse(parts[1], out double y))
-                { panelTransform.X = x; panelTransform.Y = y; }
-                if (parts.Length >= 4 && double.TryParse(parts[2], out double scaleX) && double.TryParse(parts[3], out double scaleY))
-                { panelScale.ScaleX = Math.Max(0.5, Math.Min(2.0, scaleX)); panelScale.ScaleY = Math.Max(0.5, Math.Min(2.0, scaleY)); }
+                {
+                    panelTransform.X = x;
+                    panelTransform.Y = y;
+                }
+                if (parts.Length >= 4 && double.TryParse(parts[2], out double w) && double.TryParse(parts[3], out double h))
+                {
+                    panelWidth = Math.Max(minPanelWidth, w);
+                    panelHeight = Math.Max(minPanelHeight, h);
+                }
             }
             catch { }
         }
