@@ -66,14 +66,16 @@ namespace NinjaTrader.NinjaScript.Strategies
                 stack.Children.Add(lblSubtitle);
                 
                 stack.Children.Add(new TextBlock { Text = "── Confluence (8) ──", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
-                stack.Children.Add(CreateRow("Ruby River", ref chkRubyRiver, ref lblRubyRiver, UseRubyRiver));
-                stack.Children.Add(CreateRow("Dragon Trend", ref chkDragonTrend, ref lblDragonTrend, UseDragonTrend));
-                stack.Children.Add(CreateRow("VIDYA Pro", ref chkVIDYA, ref lblVIDYA, UseVIDYAPro));
-                stack.Children.Add(CreateRow("Easy Trend", ref chkEasyTrend, ref lblEasyTrend, UseEasyTrend));
-                stack.Children.Add(CreateRow("Solar Wave", ref chkSolarWave, ref lblSolarWave, UseSolarWave));
-                stack.Children.Add(CreateRow("T3 Pro", ref chkT3Pro, ref lblT3Pro, UseT3Pro));
+                
+                // Indicators in alphabetical order
                 stack.Children.Add(CreateRow("AAA TrendSync", ref chkAAASync, ref lblAAASync, UseAAATrendSync));
                 stack.Children.Add(CreateRow("AIQ SuperBands", ref chkSuperBands, ref lblSuperBands, UseAIQSuperBands));
+                stack.Children.Add(CreateRow("Dragon Trend", ref chkDragonTrend, ref lblDragonTrend, UseDragonTrend));
+                stack.Children.Add(CreateRow("Easy Trend", ref chkEasyTrend, ref lblEasyTrend, UseEasyTrend));
+                stack.Children.Add(CreateRow("Ruby River", ref chkRubyRiver, ref lblRubyRiver, UseRubyRiver));
+                stack.Children.Add(CreateRow("Solar Wave", ref chkSolarWave, ref lblSolarWave, UseSolarWave));
+                stack.Children.Add(CreateRow("T3 Pro", ref chkT3Pro, ref lblT3Pro, UseT3Pro));
+                stack.Children.Add(CreateRow("VIDYA Pro", ref chkVIDYA, ref lblVIDYA, UseVIDYAPro));
                 
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
                 stack.Children.Add(new TextBlock { Text = "── Trigger ──", Foreground = Brushes.Orange, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
@@ -291,12 +293,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (lblSubtitle != null)
                     lblSubtitle.Text = enabled == 0 ? "No indicators" : $"Min {MinConfluenceRequired}/{enabled} for signal";
 
-                UpdLbl(lblRubyRiver, RR_IsUp, UseRubyRiver);
-                UpdLbl(lblDragonTrend, DT_IsUp, UseDragonTrend);
-                UpdLbl(lblSolarWave, SW_IsUp, UseSolarWave);
-                UpdLbl(lblVIDYA, VY_IsUp, UseVIDYAPro);
-                UpdLbl(lblEasyTrend, ET_IsUp, UseEasyTrend);
-                UpdLbl(lblT3Pro, T3P_IsUp, UseT3Pro);
+                // Update labels (alphabetical order for consistency)
                 // AAA TrendSync - show N/A if not available, otherwise show UP/DN
                 if (lblAAASync != null)
                 {
@@ -335,6 +332,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                         lblSuperBands.Foreground = SB_IsUp ? Brushes.Lime : Brushes.Red;
                     }
                 }
+                UpdLbl(lblDragonTrend, DT_IsUp, UseDragonTrend);
+                UpdLbl(lblEasyTrend, ET_IsUp, UseEasyTrend);
+                UpdLbl(lblRubyRiver, RR_IsUp, UseRubyRiver);
+                UpdLbl(lblSolarWave, SW_IsUp, UseSolarWave);
+                UpdLbl(lblT3Pro, T3P_IsUp, UseT3Pro);
+                UpdLbl(lblVIDYA, VY_IsUp, UseVIDYAPro);
                 
                 if (lblAIQ1Status != null)
                 {
