@@ -1,0 +1,565 @@
+#!/usr/bin/env python3
+"""
+Analyze-TradingSession.py
+Analyzes NinjaTrader trading logs and ActiveNiki monitor signals.
+Generates Dec{DD}_Trading_Analysis.txt report.
+
+Usage: python Analyze-TradingSession.py <folder_path> [--date YYYY-MM-DD]
+"""
+
+import sys
+import os
+import re
+from datetime import datetime, timedelta
+from collections import defaultdict
+
+# === CONFIGURATION ===
+SIGNAL_WINDOW_SECONDS = 120  # Match trades within 2 minutes of signal
+TICK_VALUE = 5.00  # NQ tick value in dollars
+
+def parse_trades(filepath):
+    """Parse trades_final.txt into list of trade dicts."""
+    trades = []
+    if not os.path.exists(filepath):
+        return trades
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or "New state='Filled'" not in line:
+                continue
+            
+            # Parse timestamp: 2025-12-19 08:07:46:809
+            ts_match = re.match(r'(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})', line)
+            if not ts_match:
+                continue
+            
+            date_str = ts_match.group(1)
+            time_str = ts_match.group(2)
+            timestamp = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
+            
+            # Parse action: Buy, Sell, Buy to cover
+            action_match = re.search(r"Action='([^']+)'", line)
+            action = action_match.group(1) if action_match else ""
+            
+            # Parse fill price
+            price_match = re.search(r"Fill price=(\d+\.?\d*)", line)
+            fill_price = float(price_match.group(1)) if price_match else 0
+            
+            # Parse if it's a close order
+            is_close = "Name='Close'" in line
+            
+            # Determine direction
+            if action in ['Buy', 'Buy to cover']:
+                direction = 'LONG' if not is_close else 'COVER'
+            else:  # Sell
+                direction = 'SHORT' if not is_close else 'CLOSE'
+            
+            trades.append({
+                'timestamp': timestamp,
+                'time_str': time_str,
+                'action': action,
+                'direction': direction,
+                'price': fill_price,
+                'is_close': is_close,
+                'raw': line
+            })
+    
+    return trades
+
+
+def parse_signals(filepath):
+    """Parse signals.txt into list of signal dicts."""
+    signals = []
+    flip_prices = {}  # Map flip time -> price
+    
+    if not os.path.exists(filepath):
+        return signals
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    # First pass: extract prices from flip lines
+    # Format: 07:56:26 | RR flip DN @ 07:55:47 | 25290.00
+    for line in lines:
+        line = line.strip()
+        flip_match = re.search(r'(RR|DT) flip (UP|DN) @ (\d{2}:\d{2}:\d{2}) \| (\d+\.\d+)', line)
+        if flip_match:
+            flip_time = flip_match.group(3)
+            price = float(flip_match.group(4))
+            flip_prices[flip_time] = price
+    
+    # Second pass: extract signals and look up prices
+    # Format: 07:56:26 | *** SIGNAL: SHORT @ 07:55:47 [RR_FLIP] ***
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        
+        signal_match = re.search(r'\*\*\* SIGNAL: (LONG|SHORT) @ (\d{2}:\d{2}:\d{2}) \[([^\]]+)\]', line)
+        if signal_match:
+            direction = signal_match.group(1)
+            time_str = signal_match.group(2)
+            trigger = signal_match.group(3)
+            
+            # Look up price from flip_prices
+            price = flip_prices.get(time_str, 0)
+            
+            # Get log timestamp from beginning
+            log_ts_match = re.match(r'(\d{2}:\d{2}:\d{2})', line)
+            log_time = log_ts_match.group(1) if log_ts_match else time_str
+            
+            signals.append({
+                'time_str': time_str,
+                'log_time': log_time,
+                'direction': direction,
+                'trigger': trigger,
+                'price': price
+            })
+    
+    return signals
+
+
+def build_roundtrips(trades):
+    """Match entry/exit trades into round-trips."""
+    roundtrips = []
+    pending_entry = None
+    
+    for trade in sorted(trades, key=lambda x: x['timestamp']):
+        if not trade['is_close']:
+            # This is an entry
+            if pending_entry:
+                # Previous entry was never closed - mark as incomplete
+                roundtrips.append({
+                    'entry': pending_entry,
+                    'exit': None,
+                    'direction': 'LONG' if pending_entry['action'] == 'Buy' else 'SHORT',
+                    'pnl_ticks': 0,
+                    'complete': False
+                })
+            pending_entry = trade
+        else:
+            # This is an exit
+            if pending_entry:
+                # Calculate P&L
+                if pending_entry['action'] == 'Buy':
+                    # Long trade: exit - entry
+                    pnl_ticks = (trade['price'] - pending_entry['price']) / 0.25
+                    direction = 'LONG'
+                else:
+                    # Short trade: entry - exit
+                    pnl_ticks = (pending_entry['price'] - trade['price']) / 0.25
+                    direction = 'SHORT'
+                
+                roundtrips.append({
+                    'entry': pending_entry,
+                    'exit': trade,
+                    'direction': direction,
+                    'pnl_ticks': pnl_ticks,
+                    'complete': True
+                })
+                pending_entry = None
+    
+    # Handle any remaining pending entry
+    if pending_entry:
+        roundtrips.append({
+            'entry': pending_entry,
+            'exit': None,
+            'direction': 'LONG' if pending_entry['action'] == 'Buy' else 'SHORT',
+            'pnl_ticks': 0,
+            'complete': False
+        })
+    
+    return roundtrips
+
+
+def match_signals_to_trades(roundtrips, signals, date_str):
+    """Match each round-trip to nearest signal within window."""
+    for rt in roundtrips:
+        if not rt['complete']:
+            rt['signal'] = None
+            rt['alignment'] = 'INCOMPLETE'
+            continue
+        
+        entry_time = rt['entry']['timestamp']
+        rt_direction = rt['direction']
+        
+        best_signal = None
+        best_delta = timedelta(seconds=SIGNAL_WINDOW_SECONDS + 1)
+        
+        for sig in signals:
+            # Create signal timestamp
+            sig_time = datetime.strptime(f"{date_str} {sig['time_str']}", "%Y-%m-%d %H:%M:%S")
+            
+            # Signal must be BEFORE or AT entry time
+            delta = entry_time - sig_time
+            if timedelta(0) <= delta <= timedelta(seconds=SIGNAL_WINDOW_SECONDS):
+                if delta < best_delta:
+                    best_delta = delta
+                    best_signal = sig
+        
+        if best_signal:
+            if best_signal['direction'] == rt_direction:
+                rt['alignment'] = 'ALIGNED'
+            else:
+                rt['alignment'] = 'COUNTER'
+            rt['signal'] = best_signal
+        else:
+            rt['alignment'] = 'NO_SIGNAL'
+            rt['signal'] = None
+    
+    return roundtrips
+
+
+def find_previous_analyses(folder_path, current_date_str):
+    """Find and parse previous analysis files for comparison."""
+    parent_dir = os.path.dirname(folder_path.rstrip('/\\'))
+    analyses = []
+    
+    # Look for dated folders with analysis files
+    for item in os.listdir(parent_dir):
+        item_path = os.path.join(parent_dir, item)
+        if not os.path.isdir(item_path):
+            continue
+        
+        # Check if folder name matches date pattern
+        if not re.match(r'\d{4}-\d{2}-\d{2}$', item):
+            continue
+        
+        # Look for analysis file
+        for f in os.listdir(item_path):
+            if f.endswith('_Trading_Analysis.txt'):
+                analysis_path = os.path.join(item_path, f)
+                stats = parse_analysis_file(analysis_path, item)
+                if stats:
+                    analyses.append(stats)
+                break
+    
+    # Sort by date
+    analyses.sort(key=lambda x: x['date'])
+    
+    return analyses
+
+
+def parse_analysis_file(filepath, date_str):
+    """Extract key stats from an existing analysis file."""
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        stats = {'date': date_str, 'filepath': filepath}
+        
+        # Extract total trades
+        match = re.search(r'Total Round-trips: (\d+)', content)
+        stats['trades'] = int(match.group(1)) if match else 0
+        
+        # Extract win rate
+        match = re.search(r'(\d+\.?\d*)% win rate', content)
+        stats['win_rate'] = float(match.group(1)) if match else 0
+        
+        # Extract total P&L
+        match = re.search(r'Total P&L: ([+-]?\d+) ticks', content)
+        stats['pnl'] = int(match.group(1)) if match else 0
+        
+        # Extract aligned stats
+        match = re.search(r'ALIGNED with signals: (\d+) trades, ([+-]?\d+)t', content)
+        if match:
+            stats['aligned_count'] = int(match.group(1))
+            stats['aligned_pnl'] = int(match.group(2))
+        else:
+            stats['aligned_count'] = 0
+            stats['aligned_pnl'] = 0
+        
+        # Extract no signal stats
+        match = re.search(r'NO SIGNAL nearby: (\d+) trades, ([+-]?\d+)t', content)
+        if match:
+            stats['no_signal_count'] = int(match.group(1))
+            stats['no_signal_pnl'] = int(match.group(2))
+        else:
+            stats['no_signal_count'] = 0
+            stats['no_signal_pnl'] = 0
+        
+        return stats
+    except Exception as e:
+        return None
+
+
+def generate_report(roundtrips, signals, date_str, folder_path=None):
+    """Generate the trading analysis report."""
+    
+    # Filter complete round-trips
+    complete_rts = [rt for rt in roundtrips if rt['complete']]
+    
+    # Basic stats
+    total_trades = len(complete_rts)
+    wins = sum(1 for rt in complete_rts if rt['pnl_ticks'] > 0)
+    losses = sum(1 for rt in complete_rts if rt['pnl_ticks'] < 0)
+    win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
+    
+    total_pnl = sum(rt['pnl_ticks'] for rt in complete_rts)
+    long_rts = [rt for rt in complete_rts if rt['direction'] == 'LONG']
+    short_rts = [rt for rt in complete_rts if rt['direction'] == 'SHORT']
+    long_pnl = sum(rt['pnl_ticks'] for rt in long_rts)
+    short_pnl = sum(rt['pnl_ticks'] for rt in short_rts)
+    
+    # Alignment stats
+    aligned = [rt for rt in complete_rts if rt['alignment'] == 'ALIGNED']
+    counter = [rt for rt in complete_rts if rt['alignment'] == 'COUNTER']
+    no_signal = [rt for rt in complete_rts if rt['alignment'] == 'NO_SIGNAL']
+    
+    aligned_pnl = sum(rt['pnl_ticks'] for rt in aligned)
+    counter_pnl = sum(rt['pnl_ticks'] for rt in counter)
+    no_signal_pnl = sum(rt['pnl_ticks'] for rt in no_signal)
+    
+    # Best/worst trades
+    sorted_by_pnl = sorted(complete_rts, key=lambda x: x['pnl_ticks'], reverse=True)
+    top_5 = sorted_by_pnl[:5]
+    bottom_5 = sorted_by_pnl[-5:]
+    
+    # Time-based analysis
+    time_buckets = defaultdict(lambda: {'trades': 0, 'wins': 0, 'pnl': 0})
+    for rt in complete_rts:
+        hour = rt['entry']['timestamp'].hour
+        minute = rt['entry']['timestamp'].minute
+        
+        if hour < 8 or (hour == 8 and minute < 30):
+            bucket = 'Pre-8:30'
+        elif hour == 8:
+            bucket = '8:30-9:00'
+        elif hour == 9:
+            bucket = '9:00-10:00'
+        elif hour == 10:
+            bucket = '10:00-11:00'
+        else:
+            bucket = '11:00+'
+        
+        time_buckets[bucket]['trades'] += 1
+        time_buckets[bucket]['pnl'] += rt['pnl_ticks']
+        if rt['pnl_ticks'] > 0:
+            time_buckets[bucket]['wins'] += 1
+    
+    # Format date for display
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    display_date = dt.strftime("%b %d, %Y").upper()
+    
+    # Build report
+    lines = []
+    lines.append("=" * 80)
+    lines.append(f"{display_date} TRADING SESSION ANALYSIS")
+    lines.append("=" * 80)
+    lines.append("")
+    lines.append("SESSION SUMMARY")
+    lines.append("-" * 15)
+    lines.append(f"Total Round-trips: {total_trades}")
+    lines.append(f"Win/Loss: {wins}W / {losses}L ({win_rate:.1f}% win rate)")
+    lines.append(f"Total P&L: {total_pnl:+.0f} ticks (${total_pnl * TICK_VALUE:+.2f})")
+    lines.append(f"  LONG:  {len(long_rts)} trades, {long_pnl:+.0f}t")
+    lines.append(f"  SHORT: {len(short_rts)} trades, {short_pnl:+.0f}t")
+    lines.append("")
+    
+    # Signals section
+    lines.append(f"ACTIVENIKI MONITOR: {len(signals)} SIGNALS FIRED")
+    lines.append("-" * 44)
+    lines.append("Time      Dir   Trigger       Price")
+    for sig in signals:
+        lines.append(f"{sig['time_str']}  {sig['direction']:5} [{sig['trigger']}]     {sig['price']:.2f}")
+    lines.append("")
+    
+    # Alignment section
+    lines.append("SIGNAL ALIGNMENT ANALYSIS")
+    lines.append("-" * 25)
+    lines.append("")
+    
+    lines.append(f"ALIGNED with signals: {len(aligned)} trades, {aligned_pnl:+.0f}t")
+    for rt in aligned:
+        sig = rt['signal']
+        pnl_marker = "OK" if rt['pnl_ticks'] > 0 else ""
+        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t <- Signal @ {sig['time_str']} [{sig['trigger']}] {pnl_marker}")
+    lines.append("")
+    
+    lines.append(f"COUNTER to signals: {len(counter)} trades, {counter_pnl:+.0f}t")
+    for rt in counter:
+        sig = rt['signal']
+        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t <- Against {sig['direction']} @ {sig['time_str']}")
+    lines.append("")
+    
+    lines.append(f"NO SIGNAL nearby: {len(no_signal)} trades, {no_signal_pnl:+.0f}t")
+    lines.append("")
+    
+    # Best/worst trades
+    lines.append("BEST & WORST TRADES")
+    lines.append("-" * 19)
+    lines.append("")
+    lines.append("TOP 5 WINNERS:")
+    for rt in top_5:
+        if rt['pnl_ticks'] > 0:
+            sig_info = f"[{rt['signal']['trigger']}]" if rt['signal'] else "[NO SIGNAL]"
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
+    lines.append("")
+    lines.append("BOTTOM 5 LOSERS:")
+    for rt in reversed(bottom_5):
+        if rt['pnl_ticks'] < 0:
+            sig_info = f"[{rt['signal']['trigger']}]" if rt['signal'] else "[NO SIGNAL]"
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
+    lines.append("")
+    
+    # Time-based analysis
+    lines.append("TIME-BASED ANALYSIS")
+    lines.append("-" * 19)
+    bucket_order = ['Pre-8:30', '8:30-9:00', '9:00-10:00', '10:00-11:00', '11:00+']
+    for bucket in bucket_order:
+        if bucket in time_buckets:
+            b = time_buckets[bucket]
+            lines.append(f"{bucket:12}: {b['trades']:2} trades, {b['wins']}W, {b['pnl']:+5.0f}t")
+    lines.append("")
+    
+    # Key insights
+    lines.append("=" * 80)
+    lines.append("KEY INSIGHTS")
+    lines.append("=" * 80)
+    lines.append("")
+    
+    # Insight 1: Signal hit rate
+    signal_rate = len(aligned) / total_trades * 100 if total_trades > 0 else 0
+    lines.append("1. SIGNAL HIT RATE:")
+    lines.append(f"   - {len(aligned)} of {total_trades} trades ({signal_rate:.0f}%) aligned with monitor signals")
+    if len(no_signal) > len(aligned):
+        lines.append(f"   - {len(no_signal)} trades ({len(no_signal)/total_trades*100:.0f}%) had no nearby signal")
+    lines.append("")
+    
+    # Insight 2: Where money was lost
+    lines.append("2. P&L BY ALIGNMENT:")
+    lines.append(f"   - ALIGNED trades: {aligned_pnl:+.0f}t")
+    lines.append(f"   - COUNTER trades: {counter_pnl:+.0f}t")
+    lines.append(f"   - NO SIGNAL trades: {no_signal_pnl:+.0f}t")
+    lines.append("")
+    
+    # Insight 3: Direction bias
+    lines.append("3. DIRECTION BIAS:")
+    lines.append(f"   - LONG:  {len(long_rts)} trades, {long_pnl:+.0f}t")
+    lines.append(f"   - SHORT: {len(short_rts)} trades, {short_pnl:+.0f}t")
+    better_dir = "LONG" if long_pnl > short_pnl else "SHORT"
+    lines.append(f"   - {better_dir} performed better today")
+    lines.append("")
+    
+    # Insight 4: Recommendation
+    lines.append("4. RECOMMENDATION:")
+    if no_signal_pnl < 0:
+        lines.append(f"   - Avoiding NO SIGNAL trades would have saved {abs(no_signal_pnl):.0f}t")
+    if len(signals) > 0:
+        lines.append(f"   - Monitor generated {len(signals)} signals - consider trading only when aligned")
+    lines.append("")
+    
+    # ==================== COMPARISON SECTION ====================
+    if folder_path:
+        prev_analyses = find_previous_analyses(folder_path, date_str)
+        
+        # Add current day's stats
+        current_stats = {
+            'date': date_str,
+            'trades': total_trades,
+            'win_rate': win_rate,
+            'pnl': int(total_pnl),
+            'aligned_count': len(aligned),
+            'aligned_pnl': int(aligned_pnl),
+            'no_signal_count': len(no_signal),
+            'no_signal_pnl': int(no_signal_pnl)
+        }
+        
+        # Combine and sort (keep only recent days, including current)
+        all_analyses = [a for a in prev_analyses if a['date'] != date_str]
+        all_analyses.append(current_stats)
+        all_analyses.sort(key=lambda x: x['date'])
+        
+        # Keep last 5 days max
+        all_analyses = all_analyses[-5:]
+        
+        if len(all_analyses) > 1:
+            lines.append("=" * 80)
+            lines.append("MULTI-DAY COMPARISON")
+            lines.append("=" * 80)
+            lines.append("")
+            lines.append("Date        Trades  Win%    P&L      Signal Alignment")
+            lines.append("-" * 60)
+            
+            for stats in all_analyses:
+                dt = datetime.strptime(stats['date'], "%Y-%m-%d")
+                date_display = dt.strftime("%b %d")
+                
+                # Format alignment info
+                if stats['aligned_count'] > 0 or stats['no_signal_count'] > 0:
+                    align_info = f"{stats['aligned_count']} aligned ({stats['aligned_pnl']:+d}t), {stats['no_signal_count']} no signal ({stats['no_signal_pnl']:+d}t)"
+                else:
+                    align_info = "N/A"
+                
+                lines.append(f"{date_display:11} {stats['trades']:3}     {stats['win_rate']:.0f}%   {stats['pnl']:+5d}t    {align_info}")
+            
+            lines.append("")
+    
+    lines.append("=" * 80)
+    
+    return "\n".join(lines)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python Analyze-TradingSession.py <folder_path> [--date YYYY-MM-DD]")
+        sys.exit(1)
+    
+    folder_path = sys.argv[1]
+    
+    # Get date from argument or folder name
+    date_str = None
+    if '--date' in sys.argv:
+        idx = sys.argv.index('--date')
+        if idx + 1 < len(sys.argv):
+            date_str = sys.argv[idx + 1]
+    
+    if not date_str:
+        # Try to extract from folder name (e.g., 2025-12-19)
+        folder_name = os.path.basename(folder_path.rstrip('/\\'))
+        if re.match(r'\d{4}-\d{2}-\d{2}', folder_name):
+            date_str = folder_name
+        else:
+            print("Error: Could not determine date. Use --date YYYY-MM-DD")
+            sys.exit(1)
+    
+    # Paths
+    trades_path = os.path.join(folder_path, 'trades_final.txt')
+    signals_path = os.path.join(folder_path, 'signals.txt')
+    
+    # Parse files
+    print(f"Parsing trades from: {trades_path}")
+    trades = parse_trades(trades_path)
+    print(f"  Found {len(trades)} trade records")
+    
+    print(f"Parsing signals from: {signals_path}")
+    signals = parse_signals(signals_path)
+    print(f"  Found {len(signals)} signals")
+    
+    # Build round-trips
+    roundtrips = build_roundtrips(trades)
+    complete_rts = [rt for rt in roundtrips if rt['complete']]
+    print(f"  Built {len(complete_rts)} complete round-trips")
+    
+    # Match signals
+    roundtrips = match_signals_to_trades(roundtrips, signals, date_str)
+    
+    # Generate report (pass folder_path for multi-day comparison)
+    report = generate_report(roundtrips, signals, date_str, folder_path)
+    
+    # Output file
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    month_abbr = dt.strftime("%b")
+    output_filename = f"{month_abbr}{dt.day:02d}_Trading_Analysis.txt"
+    output_path = os.path.join(folder_path, output_filename)
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(report)
+    
+    print(f"\nAnalysis saved to: {output_path}")
+    print(f"  File size: {os.path.getsize(output_path)} bytes")
+
+
+if __name__ == '__main__':
+    main()
