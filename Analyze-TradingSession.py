@@ -504,9 +504,14 @@ def analyze_indicator_correlation(roundtrips):
 
 
 def find_previous_analyses(folder_path, current_date_str):
-    """Find and parse previous analysis files for comparison."""
+    """Find and parse previous analysis files for comparison.
+    
+    If analyzing a _local folder, only compare with other _local folders.
+    If analyzing a VPS folder (no suffix), only compare with other VPS folders.
+    """
     # Get absolute path first, then find parent
     abs_folder = os.path.abspath(folder_path.rstrip('/\\'))
+    folder_name = os.path.basename(abs_folder)
     parent_dir = os.path.dirname(abs_folder)
     analyses = []
     
@@ -514,21 +519,36 @@ def find_previous_analyses(folder_path, current_date_str):
     if not parent_dir or not os.path.exists(parent_dir):
         return analyses
     
+    # Detect if we're analyzing a _local folder
+    is_local = folder_name.endswith('_local')
+    
+    # Set pattern based on folder type
+    if is_local:
+        # Match YYYY-MM-DD_local folders
+        folder_pattern = r'^(\d{4}-\d{2}-\d{2})_local$'
+    else:
+        # Match YYYY-MM-DD folders (no suffix)
+        folder_pattern = r'^(\d{4}-\d{2}-\d{2})$'
+    
     # Look for dated folders with analysis files
     for item in os.listdir(parent_dir):
         item_path = os.path.join(parent_dir, item)
         if not os.path.isdir(item_path):
             continue
         
-        # Check if folder name matches date pattern
-        if not re.match(r'\d{4}-\d{2}-\d{2}$', item):
+        # Check if folder name matches the appropriate pattern
+        match = re.match(folder_pattern, item)
+        if not match:
             continue
+        
+        # Extract the date portion
+        date_from_folder = match.group(1)
         
         # Look for analysis file
         for f in os.listdir(item_path):
             if f.endswith('_Trading_Analysis.txt'):
                 analysis_path = os.path.join(item_path, f)
-                stats = parse_analysis_file(analysis_path, item)
+                stats = parse_analysis_file(analysis_path, date_from_folder)
                 if stats:
                     analyses.append(stats)
                 break
@@ -843,9 +863,15 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
         # Keep last 5 days before current date
         prev_analyses = prev_analyses[-5:]
         
+        # Detect if this is a local folder for the header
+        abs_folder = os.path.abspath(folder_path.rstrip('/\\'))
+        folder_name = os.path.basename(abs_folder)
+        is_local = folder_name.endswith('_local')
+        source_label = "LOCAL" if is_local else "VPS"
+        
         if len(prev_analyses) > 0:
             lines.append("=" * 80)
-            lines.append("MULTI-DAY COMPARISON (Previous Days)")
+            lines.append(f"MULTI-DAY COMPARISON - {source_label} (Previous Days)")
             lines.append("=" * 80)
             lines.append("")
             lines.append("Date        Trades  Win%    P&L      Signal Alignment")
