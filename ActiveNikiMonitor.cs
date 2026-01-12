@@ -50,7 +50,7 @@ namespace NinjaTrader.NinjaScript.Indicators
         private string logFilePath;
         private StreamWriter logWriter;
         private string chartSessionId;
-        private TimeSpan startTime = new TimeSpan(6, 50, 0), endTime = new TimeSpan(11, 59, 0);
+        private TimeSpan startTime = new TimeSpan(6, 50, 0), endTime = new TimeSpan(11, 15, 0);
         
         #region Parameters
         [NinjaScriptProperty][Range(1, 6)][Display(Name="Min Indicators Required", Order=1, GroupName="1. Signal Filters")]
@@ -140,7 +140,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                 InitializeLogFile();
                 t3ProEquivalent = T3ProEquivalent(T3ProMAType.EMA, T3ProPeriod, T3ProTCount, T3ProVFactor,
                     T3ProChaosSmoothingEnabled, T3ProMAType.DEMA, T3ProChaosSmoothingPeriod,
-                    T3ProFilterEnabled, T3ProFilterMultiplier, 14, true, false, "Γû▓", "Γû╝", 10);
+                    T3ProFilterEnabled, T3ProFilterMultiplier, 14, true, false, "╬ô├╗Γûô", "╬ô├╗Γò¥", 10);
                 PrintAndLog($"ActiveNikiMonitor | Min={MinIndicatorsRequired}/6 | DT_AFTER_RR={EnableDTAfterRR}");
             }
             else if (State == State.Historical)
@@ -724,18 +724,13 @@ namespace NinjaTrader.NinjaScript.Indicators
         
         private void PrintAndLog(string msg)
         {
-            if (DateTime.Now.TimeOfDay < startTime || DateTime.Now.TimeOfDay > endTime)
-                return;
-
-            string timestampedMsg = $"{DateTime.Now:HH:mm:ss} | {msg}";
-            Print(timestampedMsg);
-            if (logWriter != null)
-                try { logWriter.WriteLine(timestampedMsg); } catch { }
+            Print(msg);
+            if (logWriter != null && DateTime.Now.TimeOfDay >= startTime && DateTime.Now.TimeOfDay <= endTime)
+                try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
         }
         #endregion
     }
 }
-
 
 #region NinjaScript generated code. Neither change nor remove.
 
