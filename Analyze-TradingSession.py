@@ -275,9 +275,96 @@ def parse_trader_signals(filepath, date_str):
     return signals
 
 
+def parse_trader_orders_and_closes(filepath, date_str):
+    """
+    Parse ActiveNikiTrader log for order placements and trade closes.
+    
+    ORDER PLACED format (right after signal box):
+        >>> ORDER PLACED: LONG @ Market | SL=10.00pts (+0t buffer) TP=30.00pts
+    
+    TRADE CLOSED format:
+        ✅ TRADE CLOSED: P&L $600.00 | Daily P&L: $600.00 (1 trades)
+        ❌ TRADE CLOSED: P&L $-185.00 | Daily P&L: $415.00 (2 trades)
+    
+    Returns tuple: (orders, closes)
+    """
+    orders = []
+    closes = []
+    
+    if not os.path.exists(filepath):
+        return orders, closes
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    # Track current signal context for orders
+    current_signal_time = None
+    current_signal_direction = None
+    current_signal_price = 0
+    
+    for i, line in enumerate(lines):
+        line_stripped = line.strip()
+        
+        # Track signal context (for associating orders with signals)
+        signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{2}:\d{2}:\d{2}) \*\*\*', line_stripped)
+        if signal_match:
+            current_signal_direction = signal_match.group(1)
+            current_signal_time = signal_match.group(2)
+            current_signal_price = 0
+            
+            # Look for price in next few lines
+            for j in range(1, 10):
+                if i + j < len(lines):
+                    next_line = lines[i + j].strip()
+                    ask_match = re.search(r'Ask: (\d+\.?\d*)', next_line)
+                    bid_match = re.search(r'Bid: (\d+\.?\d*)', next_line)
+                    if ask_match and current_signal_direction == 'LONG':
+                        current_signal_price = float(ask_match.group(1))
+                    if bid_match and current_signal_direction == 'SHORT':
+                        current_signal_price = float(bid_match.group(1))
+                    if '╚' in next_line:
+                        break
+        
+        # Parse ORDER PLACED
+        order_match = re.search(r'>>> ORDER PLACED: (LONG|SHORT) @ Market', line_stripped)
+        if order_match:
+            direction = order_match.group(1)
+            # Use the signal time/price as entry time/price
+            if current_signal_time:
+                orders.append({
+                    'timestamp': datetime.strptime(f"{date_str} {current_signal_time}", "%Y-%m-%d %H:%M:%S"),
+                    'time_str': current_signal_time,
+                    'direction': direction,
+                    'price': current_signal_price,
+                    'action': 'Buy' if direction == 'LONG' else 'Sell',
+                    'is_close': False
+                })
+        
+        # Parse TRADE CLOSED
+        closed_match = re.search(r'TRADE CLOSED: P&L \$([+-]?\d+\.?\d*)', line_stripped)
+        if closed_match:
+            pnl_dollars = float(closed_match.group(1))
+            
+            # Extract log timestamp (format: HH:MM:SS | at start of line after stripping pipe)
+            # The log format is: "22:11:40 | ✅ TRADE CLOSED..."
+            # But stripped line starts with emoji, look at original
+            time_match = re.search(r'(\d{2}:\d{2}:\d{2})', line)
+            time_str = time_match.group(1) if time_match else current_signal_time or '00:00:00'
+            
+            closes.append({
+                'timestamp': datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"),
+                'time_str': time_str,
+                'pnl_dollars': pnl_dollars,
+                'pnl_ticks': pnl_dollars / TICK_VALUE,
+                'is_win': pnl_dollars > 0
+            })
+    
+    return orders, closes
+
+
 def parse_trader_closed_trades(filepath, date_str):
     """
-    Parse ActiveNikiTrader log for trade results.
+    Parse ActiveNikiTrader log for trade results (legacy function for backward compat).
     Format: ❌ TRADE CLOSED: P&L $-340.00 | Daily P&L: $-340.00 (1 trades)
             ✅ TRADE CLOSED: P&L $200.00 | Daily P&L: $200.00 (1 trades)
     """
@@ -395,6 +482,56 @@ def build_roundtrips(trades):
             'direction': 'LONG' if pending_entry['action'] == 'Buy' else 'SHORT',
             'pnl_ticks': 0,
             'complete': False
+        })
+    
+    return roundtrips
+
+
+def build_roundtrips_from_trader_log(orders, closes):
+    """
+    Build round-trips by matching ORDER PLACED entries with TRADE CLOSED exits.
+    Uses P&L directly from TRADE CLOSED lines.
+    """
+    roundtrips = []
+    
+    # Sort both by timestamp
+    orders_sorted = sorted(orders, key=lambda x: x['timestamp'])
+    closes_sorted = sorted(closes, key=lambda x: x['timestamp'])
+    
+    # Match orders with closes sequentially (each order should have one close)
+    close_idx = 0
+    for order in orders_sorted:
+        if close_idx >= len(closes_sorted):
+            # No more closes - incomplete trade
+            roundtrips.append({
+                'entry': order,
+                'exit': None,
+                'direction': order['direction'],
+                'pnl_ticks': 0,
+                'pnl_dollars': 0,
+                'complete': False
+            })
+            continue
+        
+        close = closes_sorted[close_idx]
+        close_idx += 1
+        
+        # Create exit trade dict for compatibility
+        exit_trade = {
+            'timestamp': close['timestamp'],
+            'time_str': close['time_str'],
+            'is_close': True,
+            'pnl_dollars': close['pnl_dollars'],
+            'pnl_ticks': close['pnl_ticks']
+        }
+        
+        roundtrips.append({
+            'entry': order,
+            'exit': exit_trade,
+            'direction': order['direction'],
+            'pnl_ticks': close['pnl_ticks'],
+            'pnl_dollars': close['pnl_dollars'],
+            'complete': True
         })
     
     return roundtrips
@@ -715,16 +852,38 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
             lines.append(f"  {trigger}: {stats['count']} trades, {stats['wins']}W ({wr:.0f}%), {stats['pnl']:+.0f}t")
         lines.append("")
     
-    # All signals section
-    lines.append(f"ALL SIGNALS FIRED: {len(signals)}")
+    # All signals section - deduplicate by (time, direction)
+    unique_signals = []
+    seen = set()
+    for sig in signals:
+        key = (sig['time_str'], sig['direction'])
+        if key not in seen:
+            seen.add(key)
+            unique_signals.append(sig)
+    
+    lines.append(f"ALL SIGNALS FIRED: {len(unique_signals)}")
     lines.append("-" * 40)
     lines.append("Time      Dir   Source   Trigger              Conf   Price")
-    for sig in signals:
+    for sig in unique_signals:
         conf_str = f"{sig['confluence_count']}/{sig['confluence_total']}"
         order_marker = " ►" if sig.get('order_placed') else ""
         lines.append(f"{sig['time_str']}  {sig['direction']:5} {sig['source']:8} [{sig['trigger']:18}] {conf_str:5} {sig['price']:.2f}{order_marker}")
     lines.append("  (► = order placed by ActiveNikiTrader)")
     lines.append("")
+    
+    # Strategy trades section (new)
+    if total_trades > 0:
+        lines.append("STRATEGY TRADES")
+        lines.append("-" * 15)
+        for rt in complete_rts:
+            pnl_marker = "✓" if rt['pnl_ticks'] > 0 else "✗"
+            sig = rt.get('signal')
+            if sig:
+                sig_info = f"[{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
+            else:
+                sig_info = "[NO SIGNAL]"
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+6.0f}t (${rt['pnl_ticks'] * TICK_VALUE:+7.2f}) {pnl_marker} {sig_info}")
+        lines.append("")
     
     # Alignment section
     lines.append("SIGNAL ALIGNMENT ANALYSIS")
@@ -914,8 +1073,10 @@ def main():
     
     if not date_str:
         folder_name = os.path.basename(folder_path.rstrip('/\\'))
-        if re.match(r'\d{4}-\d{2}-\d{2}', folder_name):
-            date_str = folder_name
+        # Handle both YYYY-MM-DD and YYYY-MM-DD_local formats
+        match = re.match(r'(\d{4}-\d{2}-\d{2})', folder_name)
+        if match:
+            date_str = match.group(1)
         else:
             print("Error: Could not determine date. Use --date YYYY-MM-DD")
             sys.exit(1)
@@ -931,15 +1092,16 @@ def main():
     print(f"Monitor files: {len(monitor_files)}")
     print(f"Trader files: {len(trader_files)}")
     
-    # Parse trades
+    # Parse trades from trades_final.txt (for discretionary trades)
     print(f"\nParsing trades from: {trades_path}")
     trades = parse_trades(trades_path)
-    print(f"  Found {len(trades)} trade records")
+    print(f"  Found {len(trades)} trade records from trades_final.txt")
     
     # Parse all signal files
     all_monitor_signals = []
     all_trader_signals = []
-    all_trader_closed = []
+    all_trader_orders = []
+    all_trader_closes = []
     
     for f in monitor_files:
         print(f"Parsing Monitor: {os.path.basename(f)}")
@@ -950,17 +1112,24 @@ def main():
     for f in trader_files:
         print(f"Parsing Trader: {os.path.basename(f)}")
         sigs = parse_trader_signals(f, date_str)
-        closed = parse_trader_closed_trades(f, date_str)
-        print(f"  Found {len(sigs)} signals, {len(closed)} closed trades")
+        orders, closes = parse_trader_orders_and_closes(f, date_str)
+        print(f"  Found {len(sigs)} signals, {len(orders)} orders, {len(closes)} closed trades")
         all_trader_signals.extend(sigs)
-        all_trader_closed.extend(closed)
+        all_trader_orders.extend(orders)
+        all_trader_closes.extend(closes)
     
     # Merge signals
     all_signals = merge_signals(all_monitor_signals, all_trader_signals)
     print(f"\nTotal unique signals: {len(all_signals)}")
     
-    # Build round-trips
-    roundtrips = build_roundtrips(trades)
+    # Build round-trips - prefer trader log data if available, fall back to trades_final.txt
+    if all_trader_orders and all_trader_closes:
+        print(f"\nBuilding round-trips from trader log ({len(all_trader_orders)} orders, {len(all_trader_closes)} closes)")
+        roundtrips = build_roundtrips_from_trader_log(all_trader_orders, all_trader_closes)
+    else:
+        print("\nBuilding round-trips from trades_final.txt")
+        roundtrips = build_roundtrips(trades)
+    
     complete_rts = [rt for rt in roundtrips if rt['complete']]
     print(f"Built {len(complete_rts)} complete round-trips")
     
@@ -968,7 +1137,7 @@ def main():
     roundtrips = match_signals_to_trades(roundtrips, all_signals, date_str)
     
     # Generate report
-    report = generate_report(roundtrips, all_signals, date_str, folder_path, all_trader_closed)
+    report = generate_report(roundtrips, all_signals, date_str, folder_path)
     
     # Output file
     dt = datetime.strptime(date_str, "%Y-%m-%d")
