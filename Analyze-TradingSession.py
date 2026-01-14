@@ -3,7 +3,9 @@
 Analyze-TradingSession.py
 Analyzes NinjaTrader trading logs and ActiveNiki signal logs.
 Supports both ActiveNikiMonitor (6-indicator) and ActiveNikiTrader (8-indicator) formats.
-Generates Dec{DD}_Trading_Analysis.txt report.
+Parses IndicatorValues CSV for BAR-level analysis.
+Includes "what if exit on first adverse flip" analysis.
+Generates {Mon}{DD}_Trading_Analysis.txt report.
 
 Usage: python Analyze-TradingSession.py <folder_path> [--date YYYY-MM-DD]
 """
@@ -12,6 +14,7 @@ import sys
 import os
 import re
 import glob
+import csv
 from datetime import datetime, timedelta
 from collections import defaultdict
 
@@ -22,6 +25,19 @@ TICK_SIZE = 0.25   # NQ tick size
 
 # All possible indicators (superset)
 ALL_INDICATORS = ['AAA', 'SB', 'DT', 'ET', 'RR', 'SW', 'T3P', 'VY']
+
+# Indicator columns in CSV (maps CSV column to short name)
+CSV_INDICATOR_COLUMNS = {
+    'AIQ1_IsUp': 'AIQ1',
+    'RR_IsUp': 'RR',
+    'DT_Signal': 'DT',
+    'VY_IsUp': 'VY',
+    'ET_IsUp': 'ET',
+    'SW_IsUp': 'SW',
+    'T3P_IsUp': 'T3P',
+    'AAA_IsUp': 'AAA',
+    'SB_IsUp': 'SB'
+}
 
 
 def parse_trades(filepath):
@@ -98,6 +114,281 @@ def parse_indicator_state(indicator_str):
             states[name] = value
     
     return states
+
+
+def parse_indicator_csv(filepath, date_str):
+    """
+    Parse IndicatorValues CSV file into list of BAR dicts.
+    
+    CSV Format:
+    BarTime,Close,AIQ1_IsUp,RR_IsUp,DT_Signal,VY_IsUp,ET_IsUp,SW_IsUp,SW_Count,T3P_IsUp,AAA_IsUp,SB_IsUp,BullConf,BearConf,Source
+    
+    Returns list of dicts with timestamp, close, indicator states, confluence counts
+    """
+    bars = []
+    if not os.path.exists(filepath):
+        return bars
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        
+        for row in reader:
+            try:
+                # Parse timestamp - format varies: "1/13/2026 12:00:00 AM" or "2026-01-13 00:00:00"
+                bar_time_str = row.get('BarTime', '')
+                timestamp = None
+                
+                # Try different date formats
+                for fmt in ['%m/%d/%Y %I:%M:%S %p', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S']:
+                    try:
+                        timestamp = datetime.strptime(bar_time_str, fmt)
+                        break
+                    except ValueError:
+                        continue
+                
+                if not timestamp:
+                    continue
+                
+                # Parse close price
+                close = float(row.get('Close', 0))
+                
+                # Parse indicator states
+                indicators = {}
+                for csv_col, short_name in CSV_INDICATOR_COLUMNS.items():
+                    value = row.get(csv_col, '')
+                    if value.upper() == 'TRUE' or value == '1':
+                        indicators[short_name] = 'UP'
+                    elif value.upper() == 'FALSE' or value == '0':
+                        indicators[short_name] = 'DN'
+                    elif value.lstrip('-').isdigit():
+                        # Numeric (like DT_Signal): positive = UP
+                        indicators[short_name] = 'UP' if int(value) > 0 else 'DN'
+                    else:
+                        indicators[short_name] = value
+                
+                # Parse confluence counts
+                bull_conf = int(row.get('BullConf', 0))
+                bear_conf = int(row.get('BearConf', 0))
+                
+                # Parse SW_Count separately (numeric count, not boolean)
+                sw_count = int(row.get('SW_Count', 0)) if row.get('SW_Count', '').lstrip('-').isdigit() else 0
+                
+                # Parse source
+                source = row.get('Source', '')
+                
+                bars.append({
+                    'timestamp': timestamp,
+                    'time_str': timestamp.strftime('%H:%M:%S'),
+                    'close': close,
+                    'indicators': indicators,
+                    'bull_conf': bull_conf,
+                    'bear_conf': bear_conf,
+                    'sw_count': sw_count,
+                    'source': source
+                })
+                
+            except Exception as e:
+                # Skip malformed rows
+                continue
+    
+    # Sort by timestamp
+    bars.sort(key=lambda x: x['timestamp'])
+    
+    return bars
+
+
+def find_bar_at_time(bars, target_time, tolerance_seconds=60):
+    """
+    Find the BAR closest to target_time within tolerance.
+    Returns the bar dict or None.
+    """
+    if not bars:
+        return None
+    
+    best_bar = None
+    best_delta = timedelta(seconds=tolerance_seconds + 1)
+    
+    for bar in bars:
+        delta = abs(bar['timestamp'] - target_time)
+        if delta < best_delta:
+            best_delta = delta
+            best_bar = bar
+    
+    if best_delta <= timedelta(seconds=tolerance_seconds):
+        return best_bar
+    return None
+
+
+def find_bars_in_range(bars, start_time, end_time):
+    """
+    Find all BARs between start_time and end_time (inclusive).
+    Returns list of bar dicts.
+    """
+    return [b for b in bars if start_time <= b['timestamp'] <= end_time]
+
+
+def estimate_actual_exit_time(bars, entry_time, entry_price, direction, sl_points=10.0, tp_points=30.0):
+    """
+    Scan BARs forward from entry to find when price would have hit SL or TP.
+    Uses TIME-BASED limits (10 minutes) to handle both tick and minute data.
+    
+    Returns dict with:
+    - exit_time: timestamp when SL/TP was hit
+    - exit_price: price at exit
+    - exit_type: 'SL' or 'TP' or 'TIMEOUT' or 'NO_BARS'
+    - bars_in_trade: number of bars from entry to exit
+    
+    If no bars found for trade window, returns dict with exit_type='NO_BARS'.
+    """
+    if not bars or entry_price == 0:
+        return {'exit_type': 'NO_DATA', 'exit_time': entry_time, 'exit_price': entry_price, 'bars_in_trade': 0}
+    
+    # Calculate SL and TP levels
+    if direction == 'LONG':
+        sl_price = entry_price - sl_points
+        tp_price = entry_price + tp_points
+    else:  # SHORT
+        sl_price = entry_price + sl_points
+        tp_price = entry_price - tp_points
+    
+    # Time-based limit: search up to 10 minutes after entry
+    max_time = entry_time + timedelta(minutes=10)
+    
+    # Find bars in the trade window (entry_time to entry_time + 10 min)
+    bars_in_window = [b for b in bars if entry_time <= b['timestamp'] <= max_time]
+    
+    if not bars_in_window:
+        # No bars found for this time window - trade might be outside CSV coverage
+        return {'exit_type': 'NO_BARS', 'exit_time': entry_time, 'exit_price': entry_price, 'bars_in_trade': 0}
+    
+    # Scan forward looking for SL or TP hit
+    for i, bar in enumerate(bars_in_window):
+        close = bar['close']
+        
+        if direction == 'LONG':
+            # Check if TP hit (price went up)
+            if close >= tp_price:
+                return {
+                    'exit_time': bar['timestamp'],
+                    'exit_price': close,
+                    'exit_type': 'TP',
+                    'bars_in_trade': i + 1
+                }
+            # Check if SL hit (price went down)
+            if close <= sl_price:
+                return {
+                    'exit_time': bar['timestamp'],
+                    'exit_price': close,
+                    'exit_type': 'SL',
+                    'bars_in_trade': i + 1
+                }
+        else:  # SHORT
+            # Check if TP hit (price went down)
+            if close <= tp_price:
+                return {
+                    'exit_time': bar['timestamp'],
+                    'exit_price': close,
+                    'exit_type': 'TP',
+                    'bars_in_trade': i + 1
+                }
+            # Check if SL hit (price went up)
+            if close >= sl_price:
+                return {
+                    'exit_time': bar['timestamp'],
+                    'exit_price': close,
+                    'exit_type': 'SL',
+                    'bars_in_trade': i + 1
+                }
+    
+    # No SL/TP hit found in 10-minute window - return last bar as timeout
+    last_bar = bars_in_window[-1]
+    return {
+        'exit_time': last_bar['timestamp'],
+        'exit_price': last_bar['close'],
+        'exit_type': 'TIMEOUT',
+        'bars_in_trade': len(bars_in_window)
+    }
+
+
+def analyze_indicator_flips_during_trade(bars, entry_time, exit_time, direction, entry_price):
+    """
+    Analyze which indicators flipped against the trade direction during the trade.
+    
+    For LONG: track indicators that flipped from UP to DN
+    For SHORT: track indicators that flipped from DN to UP
+    
+    Also tracks the price at each flip to enable "what if" analysis.
+    
+    Returns dict with flip analysis including first adverse flip details
+    """
+    trade_bars = find_bars_in_range(bars, entry_time, exit_time)
+    
+    if len(trade_bars) < 2:
+        return {
+            'flips': [],
+            'bars_in_trade': len(trade_bars),
+            'adverse_flips': [],
+            'first_adverse_flip': None,
+            'trades_with_adverse_flip': 0
+        }
+    
+    flips = []
+    first_adverse_flip = None
+    
+    # Compare each bar to the previous
+    for i in range(1, len(trade_bars)):
+        prev_bar = trade_bars[i - 1]
+        curr_bar = trade_bars[i]
+        
+        for ind in ['RR', 'DT', 'VY', 'ET', 'SW', 'T3P', 'AAA']:
+            prev_state = prev_bar['indicators'].get(ind)
+            curr_state = curr_bar['indicators'].get(ind)
+            
+            if prev_state and curr_state and prev_state != curr_state:
+                # Determine if this is an adverse flip
+                adverse = False
+                if direction == 'LONG' and prev_state == 'UP' and curr_state == 'DN':
+                    adverse = True
+                elif direction == 'SHORT' and prev_state == 'DN' and curr_state == 'UP':
+                    adverse = True
+                
+                flip_record = {
+                    'indicator': ind,
+                    'time': curr_bar['time_str'],
+                    'timestamp': curr_bar['timestamp'],
+                    'from': prev_state,
+                    'to': curr_state,
+                    'adverse': adverse,
+                    'price_at_flip': curr_bar['close']
+                }
+                
+                flips.append(flip_record)
+                
+                # Track first adverse flip
+                if adverse and first_adverse_flip is None:
+                    # Calculate hypothetical P&L if we exited at this price
+                    if direction == 'LONG':
+                        hypo_pnl_ticks = (curr_bar['close'] - entry_price) / TICK_SIZE
+                    else:  # SHORT
+                        hypo_pnl_ticks = (entry_price - curr_bar['close']) / TICK_SIZE
+                    
+                    first_adverse_flip = {
+                        'indicator': ind,
+                        'time': curr_bar['time_str'],
+                        'timestamp': curr_bar['timestamp'],
+                        'price': curr_bar['close'],
+                        'hypothetical_pnl_ticks': hypo_pnl_ticks
+                    }
+    
+    adverse_flips = [f for f in flips if f['adverse']]
+    
+    return {
+        'flips': flips,
+        'bars_in_trade': len(trade_bars),
+        'adverse_flips': adverse_flips,
+        'first_adverse_flip': first_adverse_flip,
+        'had_adverse_flip': first_adverse_flip is not None
+    }
 
 
 def parse_monitor_signals(filepath, date_str):
@@ -275,9 +566,96 @@ def parse_trader_signals(filepath, date_str):
     return signals
 
 
+def parse_trader_orders_and_closes(filepath, date_str):
+    """
+    Parse ActiveNikiTrader log for order placements and trade closes.
+    
+    ORDER PLACED format (right after signal box):
+        >>> ORDER PLACED: LONG @ Market | SL=10.00pts (+0t buffer) TP=30.00pts
+    
+    TRADE CLOSED format:
+        ✅ TRADE CLOSED: P&L $600.00 | Daily P&L: $600.00 (1 trades)
+        ❌ TRADE CLOSED: P&L $-185.00 | Daily P&L: $415.00 (2 trades)
+    
+    Returns tuple: (orders, closes)
+    """
+    orders = []
+    closes = []
+    
+    if not os.path.exists(filepath):
+        return orders, closes
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    # Track current signal context for orders
+    current_signal_time = None
+    current_signal_direction = None
+    current_signal_price = 0
+    
+    for i, line in enumerate(lines):
+        line_stripped = line.strip()
+        
+        # Track signal context (for associating orders with signals)
+        signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{2}:\d{2}:\d{2}) \*\*\*', line_stripped)
+        if signal_match:
+            current_signal_direction = signal_match.group(1)
+            current_signal_time = signal_match.group(2)
+            current_signal_price = 0
+            
+            # Look for price in next few lines
+            for j in range(1, 10):
+                if i + j < len(lines):
+                    next_line = lines[i + j].strip()
+                    ask_match = re.search(r'Ask: (\d+\.?\d*)', next_line)
+                    bid_match = re.search(r'Bid: (\d+\.?\d*)', next_line)
+                    if ask_match and current_signal_direction == 'LONG':
+                        current_signal_price = float(ask_match.group(1))
+                    if bid_match and current_signal_direction == 'SHORT':
+                        current_signal_price = float(bid_match.group(1))
+                    if '╚' in next_line:
+                        break
+        
+        # Parse ORDER PLACED
+        order_match = re.search(r'>>> ORDER PLACED: (LONG|SHORT) @ Market', line_stripped)
+        if order_match:
+            direction = order_match.group(1)
+            # Use the signal time/price as entry time/price
+            if current_signal_time:
+                orders.append({
+                    'timestamp': datetime.strptime(f"{date_str} {current_signal_time}", "%Y-%m-%d %H:%M:%S"),
+                    'time_str': current_signal_time,
+                    'direction': direction,
+                    'price': current_signal_price,
+                    'action': 'Buy' if direction == 'LONG' else 'Sell',
+                    'is_close': False
+                })
+        
+        # Parse TRADE CLOSED
+        closed_match = re.search(r'TRADE CLOSED: P&L \$([+-]?\d+\.?\d*)', line_stripped)
+        if closed_match:
+            pnl_dollars = float(closed_match.group(1))
+            
+            # Extract log timestamp (format: HH:MM:SS | at start of line after stripping pipe)
+            # The log format is: "22:11:40 | ✅ TRADE CLOSED..."
+            # But stripped line starts with emoji, look at original
+            time_match = re.search(r'(\d{2}:\d{2}:\d{2})', line)
+            time_str = time_match.group(1) if time_match else current_signal_time or '00:00:00'
+            
+            closes.append({
+                'timestamp': datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"),
+                'time_str': time_str,
+                'pnl_dollars': pnl_dollars,
+                'pnl_ticks': pnl_dollars / TICK_VALUE,
+                'is_win': pnl_dollars > 0
+            })
+    
+    return orders, closes
+
+
 def parse_trader_closed_trades(filepath, date_str):
     """
-    Parse ActiveNikiTrader log for trade results.
+    Parse ActiveNikiTrader log for trade results (legacy function for backward compat).
     Format: ❌ TRADE CLOSED: P&L $-340.00 | Daily P&L: $-340.00 (1 trades)
             ✅ TRADE CLOSED: P&L $200.00 | Daily P&L: $200.00 (1 trades)
     """
@@ -319,6 +697,11 @@ def find_signal_files(folder_path, date_str):
         monitor_files.append(legacy_file)
     
     return monitor_files, trader_files
+
+
+def find_indicator_csv_files(folder_path):
+    """Find all IndicatorValues CSV files in the folder."""
+    return glob.glob(os.path.join(folder_path, 'IndicatorValues_*.csv'))
 
 
 def merge_signals(monitor_signals, trader_signals):
@@ -400,6 +783,56 @@ def build_roundtrips(trades):
     return roundtrips
 
 
+def build_roundtrips_from_trader_log(orders, closes):
+    """
+    Build round-trips by matching ORDER PLACED entries with TRADE CLOSED exits.
+    Uses P&L directly from TRADE CLOSED lines.
+    """
+    roundtrips = []
+    
+    # Sort both by timestamp
+    orders_sorted = sorted(orders, key=lambda x: x['timestamp'])
+    closes_sorted = sorted(closes, key=lambda x: x['timestamp'])
+    
+    # Match orders with closes sequentially (each order should have one close)
+    close_idx = 0
+    for order in orders_sorted:
+        if close_idx >= len(closes_sorted):
+            # No more closes - incomplete trade
+            roundtrips.append({
+                'entry': order,
+                'exit': None,
+                'direction': order['direction'],
+                'pnl_ticks': 0,
+                'pnl_dollars': 0,
+                'complete': False
+            })
+            continue
+        
+        close = closes_sorted[close_idx]
+        close_idx += 1
+        
+        # Create exit trade dict for compatibility
+        exit_trade = {
+            'timestamp': close['timestamp'],
+            'time_str': close['time_str'],
+            'is_close': True,
+            'pnl_dollars': close['pnl_dollars'],
+            'pnl_ticks': close['pnl_ticks']
+        }
+        
+        roundtrips.append({
+            'entry': order,
+            'exit': exit_trade,
+            'direction': order['direction'],
+            'pnl_ticks': close['pnl_ticks'],
+            'pnl_dollars': close['pnl_dollars'],
+            'complete': True
+        })
+    
+    return roundtrips
+
+
 def match_signals_to_trades(roundtrips, signals, date_str):
     """Match each round-trip to nearest signal within window."""
     for rt in roundtrips:
@@ -433,6 +866,70 @@ def match_signals_to_trades(roundtrips, signals, date_str):
         else:
             rt['alignment'] = 'NO_SIGNAL'
             rt['signal'] = None
+    
+    return roundtrips
+
+
+def enrich_roundtrips_with_bar_data(roundtrips, bars):
+    """
+    Add BAR-level data to each round-trip:
+    - Entry BAR state
+    - Estimated actual exit time (from BAR price hitting SL/TP)
+    - Indicator flips during trade
+    - First adverse flip with hypothetical P&L
+    """
+    for rt in roundtrips:
+        if not rt['complete']:
+            continue
+        
+        entry_time = rt['entry']['timestamp']
+        entry_price = rt['entry'].get('price', 0)
+        
+        # Find entry BAR
+        entry_bar = find_bar_at_time(bars, entry_time, tolerance_seconds=120)
+        rt['entry_bar'] = entry_bar
+        
+        # Estimate actual exit time by scanning BARs for SL/TP hit
+        # This is more accurate than using TRADE CLOSED log timestamp
+        estimated_exit = estimate_actual_exit_time(
+            bars, entry_time, entry_price, rt['direction'],
+            sl_points=10.0, tp_points=30.0
+        )
+        rt['estimated_exit'] = estimated_exit
+        
+        # Check if we have bar data for this trade
+        exit_type = estimated_exit.get('exit_type', '') if estimated_exit else ''
+        if exit_type in ['NO_BARS', 'NO_DATA']:
+            # No bar data for this trade - skip flip analysis
+            rt['flip_analysis'] = {
+                'flips': [],
+                'bars_in_trade': 0,
+                'adverse_flips': [],
+                'first_adverse_flip': None,
+                'had_adverse_flip': False,
+                'no_bar_data': True
+            }
+            rt['flip_exit_difference'] = None
+            continue
+        
+        # Determine exit time to use for flip analysis
+        exit_time = estimated_exit['exit_time']
+        
+        # Analyze indicator flips during trade (using estimated exit time)
+        flip_analysis = analyze_indicator_flips_during_trade(
+            bars, entry_time, exit_time, rt['direction'], entry_price
+        )
+        flip_analysis['no_bar_data'] = False
+        rt['flip_analysis'] = flip_analysis
+        
+        # Calculate savings/cost if we had exited on first adverse flip
+        first_flip = flip_analysis.get('first_adverse_flip')
+        if first_flip:
+            actual_pnl = rt['pnl_ticks']
+            hypo_pnl = first_flip['hypothetical_pnl_ticks']
+            rt['flip_exit_difference'] = hypo_pnl - actual_pnl  # Positive = would have been better
+        else:
+            rt['flip_exit_difference'] = None
     
     return roundtrips
 
@@ -501,6 +998,122 @@ def analyze_indicator_correlation(roundtrips):
                     indicator_stats[ind]['dn_losses'] += 1
     
     return dict(indicator_stats)
+
+
+def analyze_adverse_flips(roundtrips):
+    """
+    Analyze which indicators most frequently flip against trades.
+    Now counts TRADES affected, not total flip events.
+    Returns dict of indicator -> stats
+    """
+    # Track which trades had adverse flips from each indicator
+    indicator_trade_stats = defaultdict(lambda: {
+        'trades_with_flip': 0,
+        'losers_with_flip': 0,
+        'winners_with_flip': 0
+    })
+    
+    for rt in roundtrips:
+        if not rt['complete']:
+            continue
+        
+        flip_analysis = rt.get('flip_analysis', {})
+        adverse_flips = flip_analysis.get('adverse_flips', [])
+        is_win = rt['pnl_ticks'] > 0
+        
+        # Track which indicators flipped in THIS trade (deduplicate)
+        indicators_that_flipped = set(f['indicator'] for f in adverse_flips)
+        
+        for ind in indicators_that_flipped:
+            indicator_trade_stats[ind]['trades_with_flip'] += 1
+            if is_win:
+                indicator_trade_stats[ind]['winners_with_flip'] += 1
+            else:
+                indicator_trade_stats[ind]['losers_with_flip'] += 1
+    
+    return dict(indicator_trade_stats)
+
+
+def analyze_early_exit_impact(roundtrips):
+    """
+    Analyze the impact of hypothetical early exit on first adverse flip.
+    
+    Returns summary dict with:
+    - Total trades with adverse flips
+    - How many would have been better/worse with early exit
+    - Total ticks saved/lost
+    - Trades skipped due to no bar data
+    """
+    trades_with_flip = []
+    trades_without_flip = 0
+    trades_no_bar_data = 0
+    
+    for rt in roundtrips:
+        if not rt['complete']:
+            continue
+        
+        flip_analysis = rt.get('flip_analysis', {})
+        
+        # Check if this trade had bar data
+        if flip_analysis.get('no_bar_data', False):
+            trades_no_bar_data += 1
+            continue
+        
+        first_flip = flip_analysis.get('first_adverse_flip')
+        estimated_exit = rt.get('estimated_exit')
+        
+        if first_flip:
+            actual_pnl = rt['pnl_ticks']
+            hypo_pnl = first_flip['hypothetical_pnl_ticks']
+            difference = hypo_pnl - actual_pnl  # Positive = early exit better
+            
+            trades_with_flip.append({
+                'entry_time': rt['entry']['time_str'],
+                'direction': rt['direction'],
+                'actual_pnl': actual_pnl,
+                'hypo_pnl': hypo_pnl,
+                'difference': difference,
+                'flip_indicator': first_flip['indicator'],
+                'flip_time': first_flip['time'],
+                'flip_price': first_flip['price'],
+                'was_winner': actual_pnl > 0,
+                'early_exit_better': difference > 0,
+                'estimated_exit_type': estimated_exit['exit_type'] if estimated_exit else 'UNKNOWN',
+                'bars_in_trade': estimated_exit['bars_in_trade'] if estimated_exit else 0
+            })
+        else:
+            trades_without_flip += 1
+    
+    if not trades_with_flip and trades_no_bar_data == 0:
+        return None
+    
+    # Calculate summary stats
+    total_trades = len(trades_with_flip)
+    early_better_count = sum(1 for t in trades_with_flip if t['early_exit_better'])
+    early_worse_count = total_trades - early_better_count
+    
+    total_difference = sum(t['difference'] for t in trades_with_flip)
+    
+    # Separate analysis for winners and losers
+    losers = [t for t in trades_with_flip if not t['was_winner']]
+    winners = [t for t in trades_with_flip if t['was_winner']]
+    
+    loser_savings = sum(t['difference'] for t in losers) if losers else 0
+    winner_cost = sum(t['difference'] for t in winners) if winners else 0
+    
+    return {
+        'trades_analyzed': total_trades,
+        'trades_without_flip': trades_without_flip,
+        'trades_no_bar_data': trades_no_bar_data,
+        'early_exit_better_count': early_better_count,
+        'early_exit_worse_count': early_worse_count,
+        'total_difference_ticks': total_difference,
+        'loser_count': len(losers),
+        'loser_savings_ticks': loser_savings,
+        'winner_count': len(winners),
+        'winner_cost_ticks': winner_cost,
+        'trade_details': trades_with_flip
+    }
 
 
 def find_previous_analyses(folder_path, current_date_str):
@@ -602,7 +1215,7 @@ def parse_analysis_file(filepath, date_str):
         return None
 
 
-def generate_report(roundtrips, signals, date_str, folder_path=None, trader_closed=None):
+def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     """Generate the trading analysis report."""
     
     # Filter complete round-trips
@@ -638,6 +1251,10 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
     confluence_stats = analyze_confluence_effectiveness(roundtrips)
     trigger_stats = analyze_trigger_effectiveness(roundtrips)
     indicator_stats = analyze_indicator_correlation(roundtrips)
+    
+    # Adverse flip analysis (if BAR data available)
+    adverse_flip_stats = analyze_adverse_flips(roundtrips) if bars else {}
+    early_exit_analysis = analyze_early_exit_impact(roundtrips) if bars else None
     
     # Best/worst trades
     sorted_by_pnl = sorted(complete_rts, key=lambda x: x['pnl_ticks'], reverse=True)
@@ -685,6 +1302,8 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
     lines.append(f"  - Orders placed:         {len(trader_orders)}")
     lines.append(f"  - Outside hours:         {len([s for s in trader_signals if s['blocked_reason'] == 'OUTSIDE_HOURS'])}")
     lines.append(f"  - Blocked by cooldown:   {len([s for s in trader_signals if s['blocked_reason'] == 'COOLDOWN'])}")
+    if bars:
+        lines.append(f"BAR data loaded:           {len(bars)} bars from CSV")
     lines.append("")
     
     lines.append("SESSION SUMMARY")
@@ -715,18 +1334,115 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
             lines.append(f"  {trigger}: {stats['count']} trades, {stats['wins']}W ({wr:.0f}%), {stats['pnl']:+.0f}t")
         lines.append("")
     
-    # All signals section
-    lines.append(f"ALL SIGNALS FIRED: {len(signals)}")
+    # All signals section - deduplicate by (time, direction)
+    unique_signals = []
+    seen = set()
+    for sig in signals:
+        key = (sig['time_str'], sig['direction'])
+        if key not in seen:
+            seen.add(key)
+            unique_signals.append(sig)
+    
+    lines.append(f"ALL SIGNALS FIRED: {len(unique_signals)}")
     lines.append("-" * 40)
     lines.append("Time      Dir   Source   Trigger              Conf   Price")
-    for sig in signals:
+    for sig in unique_signals:
         conf_str = f"{sig['confluence_count']}/{sig['confluence_total']}"
         order_marker = " ►" if sig.get('order_placed') else ""
         lines.append(f"{sig['time_str']}  {sig['direction']:5} {sig['source']:8} [{sig['trigger']:18}] {conf_str:5} {sig['price']:.2f}{order_marker}")
     lines.append("  (► = order placed by ActiveNikiTrader)")
     lines.append("")
     
-    # Alignment section
+    # Strategy trades section with BAR data
+    if total_trades > 0:
+        lines.append("STRATEGY TRADES")
+        lines.append("-" * 15)
+        for rt in complete_rts:
+            pnl_marker = "✓" if rt['pnl_ticks'] > 0 else "✗"
+            sig = rt.get('signal')
+            if sig:
+                sig_info = f"[{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
+            else:
+                sig_info = "[NO SIGNAL]"
+            
+            # Add flip exit info if available
+            flip_info = ""
+            first_flip = rt.get('flip_analysis', {}).get('first_adverse_flip')
+            if first_flip:
+                hypo = first_flip['hypothetical_pnl_ticks']
+                diff = rt.get('flip_exit_difference', 0)
+                if diff and diff > 0:
+                    flip_info = f" [flip@{first_flip['time']}: {hypo:+.0f}t, save {diff:+.0f}t]"
+                elif diff and diff < 0:
+                    flip_info = f" [flip@{first_flip['time']}: {hypo:+.0f}t, cost {abs(diff):.0f}t]"
+            
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+6.0f}t (${rt['pnl_ticks'] * TICK_VALUE:+7.2f}) {pnl_marker} {sig_info}{flip_info}")
+        lines.append("")
+    
+    # === EARLY EXIT ANALYSIS (NEW SECTION) ===
+    if early_exit_analysis:
+        lines.append("=" * 80)
+        lines.append("EARLY EXIT ANALYSIS: What if we exited on first adverse indicator flip?")
+        lines.append("=" * 80)
+        lines.append("")
+        lines.append("(Exit times estimated by scanning BAR data for SL/TP price levels)")
+        lines.append("")
+        
+        ea = early_exit_analysis
+        
+        # Show trades without bar data first if any
+        if ea.get('trades_no_bar_data', 0) > 0:
+            lines.append(f"Trades SKIPPED (no BAR data for time window): {ea['trades_no_bar_data']}")
+            lines.append("  (These trades occurred outside CSV data coverage, e.g., overnight)")
+            lines.append("")
+        
+        if ea['trades_analyzed'] == 0:
+            lines.append("No trades with adverse flips to analyze.")
+            lines.append("(All trades either had no bar data or no indicator flipped against them)")
+            lines.append("")
+        else:
+            lines.append(f"Trades with adverse flips: {ea['trades_analyzed']} of {total_trades}")
+            if ea.get('trades_without_flip', 0) > 0:
+                lines.append(f"Trades without adverse flips: {ea['trades_without_flip']} (no flip before SL/TP)")
+            lines.append(f"  - Early exit would be BETTER:  {ea['early_exit_better_count']} trades")
+            lines.append(f"  - Early exit would be WORSE:   {ea['early_exit_worse_count']} trades")
+            lines.append("")
+            
+            lines.append(f"Impact on LOSING trades ({ea['loser_count']} trades that hit SL):")
+            lines.append(f"  - Ticks saved by early exit: {ea['loser_savings_ticks']:+.0f}t (${ea['loser_savings_ticks'] * TICK_VALUE:+.2f})")
+            lines.append("")
+            
+            lines.append(f"Impact on WINNING trades ({ea['winner_count']} trades that hit TP):")
+            lines.append(f"  - Ticks lost by early exit:  {ea['winner_cost_ticks']:+.0f}t (${ea['winner_cost_ticks'] * TICK_VALUE:+.2f})")
+            lines.append("")
+            
+            net_impact = ea['total_difference_ticks']
+            lines.append(f"NET IMPACT of early exit strategy: {net_impact:+.0f}t (${net_impact * TICK_VALUE:+.2f})")
+            if net_impact > 0:
+                lines.append(f"  → Early exit would have IMPROVED results by {net_impact:.0f}t")
+            else:
+                lines.append(f"  → Early exit would have REDUCED results by {abs(net_impact):.0f}t")
+            lines.append("")
+            
+            # Detailed breakdown
+            lines.append("TRADE-BY-TRADE BREAKDOWN:")
+            lines.append("-" * 85)
+            lines.append("Entry     Dir   Exit  Bars  Actual   Flip@     Ind    HypoP&L  Diff    Result")
+            lines.append("-" * 85)
+            
+            for t in ea['trade_details']:
+                result = "SAVE" if t['early_exit_better'] else "COST"
+                outcome = "W" if t['was_winner'] else "L"
+                exit_type = t.get('estimated_exit_type', '?')[:2]  # SL, TP, or TI(meout)
+                bars = t.get('bars_in_trade', 0)
+                lines.append(
+                    f"  {t['entry_time']} {t['direction']:5} {exit_type:4} {bars:4}  {t['actual_pnl']:+6.0f}t  "
+                    f"{t['flip_time']}  {t['flip_indicator']:5}  {t['hypo_pnl']:+6.0f}t  "
+                    f"{t['difference']:+5.0f}t  {result}({outcome})"
+                )
+            lines.append("")
+    
+    # Signal alignment section
     lines.append("SIGNAL ALIGNMENT ANALYSIS")
     lines.append("-" * 25)
     lines.append("")
@@ -748,6 +1464,17 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
     
     lines.append(f"NO SIGNAL nearby: {len(no_signal)} trades, {no_signal_pnl:+.0f}t")
     lines.append("")
+    
+    # Adverse flip analysis section (simplified - now counts trades, not events)
+    if adverse_flip_stats:
+        lines.append("INDICATOR FLIP ANALYSIS (during trades)")
+        lines.append("-" * 40)
+        lines.append("How many trades had each indicator flip against them:")
+        lines.append("Indicator   Trades   On Losers   On Winners")
+        for ind in sorted(adverse_flip_stats.keys()):
+            stats = adverse_flip_stats[ind]
+            lines.append(f"  {ind:8}  {stats['trades_with_flip']:6}   {stats['losers_with_flip']:9}   {stats['winners_with_flip']:10}")
+        lines.append("")
     
     # Indicator correlation analysis
     if indicator_stats:
@@ -792,7 +1519,14 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
                 sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
             else:
                 sig_info = "[NO SIGNAL]"
-            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
+            
+            # Add first adverse flip info
+            first_flip = rt.get('flip_analysis', {}).get('first_adverse_flip')
+            flip_info = ""
+            if first_flip:
+                flip_info = f" (1st flip: {first_flip['indicator']}@{first_flip['time']})"
+            
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}{flip_info}")
     lines.append("")
     
     # Time-based analysis
@@ -838,8 +1572,20 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, trader_clos
                 lines.append(f"   - High confluence (N-1 or higher): {high_conf_pnl:+.0f}t")
     lines.append("")
     
-    # Insight 4: Recommendations
-    lines.append("4. RECOMMENDATIONS:")
+    # Insight 4: Early exit analysis
+    if early_exit_analysis:
+        ea = early_exit_analysis
+        lines.append("4. EARLY EXIT STRATEGY:")
+        if ea['total_difference_ticks'] > 0:
+            lines.append(f"   - Exiting on first adverse flip would SAVE {ea['total_difference_ticks']:.0f}t")
+            lines.append(f"   - Reduces losses by {ea['loser_savings_ticks']:.0f}t, costs {abs(ea['winner_cost_ticks']):.0f}t from winners")
+        else:
+            lines.append(f"   - Exiting on first adverse flip would COST {abs(ea['total_difference_ticks']):.0f}t")
+            lines.append(f"   - Current SL/TP performs better than indicator-based exit")
+        lines.append("")
+    
+    # Insight 5: Recommendations
+    lines.append("5. RECOMMENDATIONS:")
     if no_signal_pnl < 0:
         lines.append(f"   - Avoiding NO SIGNAL trades would have saved {abs(no_signal_pnl):.0f}t")
     if counter_pnl < 0:
@@ -914,8 +1660,10 @@ def main():
     
     if not date_str:
         folder_name = os.path.basename(folder_path.rstrip('/\\'))
-        if re.match(r'\d{4}-\d{2}-\d{2}', folder_name):
-            date_str = folder_name
+        # Handle both YYYY-MM-DD and YYYY-MM-DD_local formats
+        match = re.match(r'(\d{4}-\d{2}-\d{2})', folder_name)
+        if match:
+            date_str = match.group(1)
         else:
             print("Error: Could not determine date. Use --date YYYY-MM-DD")
             sys.exit(1)
@@ -926,20 +1674,25 @@ def main():
     # Find signal files
     monitor_files, trader_files = find_signal_files(folder_path, date_str)
     
+    # Find indicator CSV files
+    csv_files = find_indicator_csv_files(folder_path)
+    
     print(f"Date: {date_str}")
     print(f"Folder: {folder_path}")
     print(f"Monitor files: {len(monitor_files)}")
     print(f"Trader files: {len(trader_files)}")
+    print(f"CSV files: {len(csv_files)}")
     
-    # Parse trades
+    # Parse trades from trades_final.txt (for discretionary trades)
     print(f"\nParsing trades from: {trades_path}")
     trades = parse_trades(trades_path)
-    print(f"  Found {len(trades)} trade records")
+    print(f"  Found {len(trades)} trade records from trades_final.txt")
     
     # Parse all signal files
     all_monitor_signals = []
     all_trader_signals = []
-    all_trader_closed = []
+    all_trader_orders = []
+    all_trader_closes = []
     
     for f in monitor_files:
         print(f"Parsing Monitor: {os.path.basename(f)}")
@@ -950,25 +1703,60 @@ def main():
     for f in trader_files:
         print(f"Parsing Trader: {os.path.basename(f)}")
         sigs = parse_trader_signals(f, date_str)
-        closed = parse_trader_closed_trades(f, date_str)
-        print(f"  Found {len(sigs)} signals, {len(closed)} closed trades")
+        orders, closes = parse_trader_orders_and_closes(f, date_str)
+        print(f"  Found {len(sigs)} signals, {len(orders)} orders, {len(closes)} closed trades")
         all_trader_signals.extend(sigs)
-        all_trader_closed.extend(closed)
+        all_trader_orders.extend(orders)
+        all_trader_closes.extend(closes)
+    
+    # Parse indicator CSV files for BAR data
+    all_bars = []
+    for f in csv_files:
+        print(f"Parsing CSV: {os.path.basename(f)}")
+        bars = parse_indicator_csv(f, date_str)
+        print(f"  Found {len(bars)} BAR records")
+        all_bars.extend(bars)
+    
+    # Sort bars by timestamp
+    all_bars.sort(key=lambda x: x['timestamp'])
+    
+    # Show time range of CSV data
+    if all_bars:
+        first_bar_time = all_bars[0]['timestamp']
+        last_bar_time = all_bars[-1]['timestamp']
+        print(f"  CSV time range: {first_bar_time.strftime('%H:%M:%S')} to {last_bar_time.strftime('%H:%M:%S')}")
     
     # Merge signals
     all_signals = merge_signals(all_monitor_signals, all_trader_signals)
     print(f"\nTotal unique signals: {len(all_signals)}")
     
-    # Build round-trips
-    roundtrips = build_roundtrips(trades)
+    # Build round-trips - prefer trader log data if available, fall back to trades_final.txt
+    if all_trader_orders and all_trader_closes:
+        print(f"\nBuilding round-trips from trader log ({len(all_trader_orders)} orders, {len(all_trader_closes)} closes)")
+        roundtrips = build_roundtrips_from_trader_log(all_trader_orders, all_trader_closes)
+    else:
+        print("\nBuilding round-trips from trades_final.txt")
+        roundtrips = build_roundtrips(trades)
+    
     complete_rts = [rt for rt in roundtrips if rt['complete']]
     print(f"Built {len(complete_rts)} complete round-trips")
     
     # Match signals
     roundtrips = match_signals_to_trades(roundtrips, all_signals, date_str)
     
+    # Enrich with BAR data if available
+    if all_bars:
+        print(f"\nEnriching round-trips with BAR data ({len(all_bars)} bars)")
+        roundtrips = enrich_roundtrips_with_bar_data(roundtrips, all_bars)
+        
+        # Count trades with/without bar data
+        trades_with_bars = sum(1 for rt in roundtrips if rt['complete'] and not rt.get('flip_analysis', {}).get('no_bar_data', False))
+        trades_no_bars = sum(1 for rt in roundtrips if rt['complete'] and rt.get('flip_analysis', {}).get('no_bar_data', False))
+        print(f"  Trades with BAR coverage: {trades_with_bars}")
+        print(f"  Trades without BAR coverage: {trades_no_bars}")
+    
     # Generate report
-    report = generate_report(roundtrips, all_signals, date_str, folder_path, all_trader_closed)
+    report = generate_report(roundtrips, all_signals, date_str, folder_path, all_bars)
     
     # Output file
     dt = datetime.strptime(date_str, "%Y-%m-%d")
