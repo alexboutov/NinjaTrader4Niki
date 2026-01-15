@@ -310,82 +310,101 @@ def estimate_actual_exit_time(bars, entry_time, entry_price, direction, sl_point
     }
 
 
-def analyze_indicator_flips_during_trade(bars, entry_time, exit_time, direction, entry_price):
+def analyze_indicator_flips_during_trade(bars, entry_time, exit_time, direction, entry_price, min_confluence=6):
     """
-    Analyze which indicators flipped against the trade direction during the trade.
+    Analyze both:
+    1. When confluence drops below threshold during the trade
+    2. When any single indicator flips against trade direction
     
-    For LONG: track indicators that flipped from UP to DN
-    For SHORT: track indicators that flipped from DN to UP
+    For LONG: 
+      - Confluence drop: BullConf drops below min_confluence
+      - Indicator flip: any indicator goes UP→DN
+    For SHORT: 
+      - Confluence drop: BearConf drops below min_confluence
+      - Indicator flip: any indicator goes DN→UP
     
-    Also tracks the price at each flip to enable "what if" analysis.
-    
-    Returns dict with flip analysis including first adverse flip details
+    Returns dict with both analyses
     """
     trade_bars = find_bars_in_range(bars, entry_time, exit_time)
     
     if len(trade_bars) < 2:
         return {
-            'flips': [],
             'bars_in_trade': len(trade_bars),
-            'adverse_flips': [],
+            'confluence_drop': None,
+            'had_confluence_drop': False,
             'first_adverse_flip': None,
-            'trades_with_adverse_flip': 0
+            'had_adverse_flip': False
         }
     
-    flips = []
+    first_confluence_drop = None
     first_adverse_flip = None
     
-    # Compare each bar to the previous
+    # Get entry confluence
+    entry_bar = trade_bars[0]
+    if direction == 'LONG':
+        entry_confluence = entry_bar.get('bull_conf', 0)
+    else:
+        entry_confluence = entry_bar.get('bear_conf', 0)
+    
+    # Scan bars for both conditions
     for i in range(1, len(trade_bars)):
         prev_bar = trade_bars[i - 1]
         curr_bar = trade_bars[i]
         
-        for ind in ['RR', 'DT', 'VY', 'ET', 'SW', 'T3P', 'AAA']:
-            prev_state = prev_bar['indicators'].get(ind)
-            curr_state = curr_bar['indicators'].get(ind)
+        # === Check confluence drop ===
+        if direction == 'LONG':
+            curr_confluence = curr_bar.get('bull_conf', 0)
+        else:
+            curr_confluence = curr_bar.get('bear_conf', 0)
+        
+        if curr_confluence < min_confluence and first_confluence_drop is None:
+            if direction == 'LONG':
+                hypo_pnl_ticks = (curr_bar['close'] - entry_price) / TICK_SIZE
+            else:
+                hypo_pnl_ticks = (entry_price - curr_bar['close']) / TICK_SIZE
             
-            if prev_state and curr_state and prev_state != curr_state:
-                # Determine if this is an adverse flip
-                adverse = False
-                if direction == 'LONG' and prev_state == 'UP' and curr_state == 'DN':
-                    adverse = True
-                elif direction == 'SHORT' and prev_state == 'DN' and curr_state == 'UP':
-                    adverse = True
+            first_confluence_drop = {
+                'time': curr_bar['time_str'],
+                'timestamp': curr_bar['timestamp'],
+                'price': curr_bar['close'],
+                'entry_confluence': entry_confluence,
+                'exit_confluence': curr_confluence,
+                'hypothetical_pnl_ticks': hypo_pnl_ticks
+            }
+        
+        # === Check single indicator flips ===
+        if first_adverse_flip is None:
+            for ind in ['RR', 'DT', 'VY', 'ET', 'SW', 'T3P', 'AAA']:
+                prev_state = prev_bar['indicators'].get(ind)
+                curr_state = curr_bar['indicators'].get(ind)
                 
-                flip_record = {
-                    'indicator': ind,
-                    'time': curr_bar['time_str'],
-                    'timestamp': curr_bar['timestamp'],
-                    'from': prev_state,
-                    'to': curr_state,
-                    'adverse': adverse,
-                    'price_at_flip': curr_bar['close']
-                }
-                
-                flips.append(flip_record)
-                
-                # Track first adverse flip
-                if adverse and first_adverse_flip is None:
-                    # Calculate hypothetical P&L if we exited at this price
-                    if direction == 'LONG':
-                        hypo_pnl_ticks = (curr_bar['close'] - entry_price) / TICK_SIZE
-                    else:  # SHORT
-                        hypo_pnl_ticks = (entry_price - curr_bar['close']) / TICK_SIZE
+                if prev_state and curr_state and prev_state != curr_state:
+                    adverse = False
+                    if direction == 'LONG' and prev_state == 'UP' and curr_state == 'DN':
+                        adverse = True
+                    elif direction == 'SHORT' and prev_state == 'DN' and curr_state == 'UP':
+                        adverse = True
                     
-                    first_adverse_flip = {
-                        'indicator': ind,
-                        'time': curr_bar['time_str'],
-                        'timestamp': curr_bar['timestamp'],
-                        'price': curr_bar['close'],
-                        'hypothetical_pnl_ticks': hypo_pnl_ticks
-                    }
-    
-    adverse_flips = [f for f in flips if f['adverse']]
+                    if adverse:
+                        if direction == 'LONG':
+                            hypo_pnl_ticks = (curr_bar['close'] - entry_price) / TICK_SIZE
+                        else:
+                            hypo_pnl_ticks = (entry_price - curr_bar['close']) / TICK_SIZE
+                        
+                        first_adverse_flip = {
+                            'indicator': ind,
+                            'time': curr_bar['time_str'],
+                            'timestamp': curr_bar['timestamp'],
+                            'price': curr_bar['close'],
+                            'hypothetical_pnl_ticks': hypo_pnl_ticks
+                        }
+                        break  # Found first flip, stop checking other indicators
     
     return {
-        'flips': flips,
         'bars_in_trade': len(trade_bars),
-        'adverse_flips': adverse_flips,
+        'entry_confluence': entry_confluence,
+        'confluence_drop': first_confluence_drop,
+        'had_confluence_drop': first_confluence_drop is not None,
         'first_adverse_flip': first_adverse_flip,
         'had_adverse_flip': first_adverse_flip is not None
     }
@@ -875,8 +894,8 @@ def enrich_roundtrips_with_bar_data(roundtrips, bars):
     Add BAR-level data to each round-trip:
     - Entry BAR state
     - Estimated actual exit time (from BAR price hitting SL/TP)
-    - Indicator flips during trade
-    - First adverse flip with hypothetical P&L
+    - Confluence drop analysis
+    - Single indicator flip analysis
     """
     for rt in roundtrips:
         if not rt['complete']:
@@ -900,34 +919,45 @@ def enrich_roundtrips_with_bar_data(roundtrips, bars):
         # Check if we have bar data for this trade
         exit_type = estimated_exit.get('exit_type', '') if estimated_exit else ''
         if exit_type in ['NO_BARS', 'NO_DATA']:
-            # No bar data for this trade - skip flip analysis
+            # No bar data for this trade - skip analysis
             rt['flip_analysis'] = {
-                'flips': [],
                 'bars_in_trade': 0,
-                'adverse_flips': [],
+                'confluence_drop': None,
+                'had_confluence_drop': False,
                 'first_adverse_flip': None,
                 'had_adverse_flip': False,
                 'no_bar_data': True
             }
+            rt['confluence_exit_difference'] = None
             rt['flip_exit_difference'] = None
             continue
         
-        # Determine exit time to use for flip analysis
+        # Determine exit time to use for analysis
         exit_time = estimated_exit['exit_time']
         
-        # Analyze indicator flips during trade (using estimated exit time)
+        # Analyze both exit strategies during trade
         flip_analysis = analyze_indicator_flips_during_trade(
-            bars, entry_time, exit_time, rt['direction'], entry_price
+            bars, entry_time, exit_time, rt['direction'], entry_price,
+            min_confluence=6  # MinConfluenceForAutoTrade threshold
         )
         flip_analysis['no_bar_data'] = False
         rt['flip_analysis'] = flip_analysis
         
-        # Calculate savings/cost if we had exited on first adverse flip
+        actual_pnl = rt['pnl_ticks']
+        
+        # Calculate difference for confluence drop exit
+        confluence_drop = flip_analysis.get('confluence_drop')
+        if confluence_drop:
+            hypo_pnl = confluence_drop['hypothetical_pnl_ticks']
+            rt['confluence_exit_difference'] = hypo_pnl - actual_pnl
+        else:
+            rt['confluence_exit_difference'] = None
+        
+        # Calculate difference for single indicator flip exit
         first_flip = flip_analysis.get('first_adverse_flip')
         if first_flip:
-            actual_pnl = rt['pnl_ticks']
             hypo_pnl = first_flip['hypothetical_pnl_ticks']
-            rt['flip_exit_difference'] = hypo_pnl - actual_pnl  # Positive = would have been better
+            rt['flip_exit_difference'] = hypo_pnl - actual_pnl
         else:
             rt['flip_exit_difference'] = None
     
@@ -1002,51 +1032,66 @@ def analyze_indicator_correlation(roundtrips):
 
 def analyze_adverse_flips(roundtrips):
     """
-    Analyze which indicators most frequently flip against trades.
-    Now counts TRADES affected, not total flip events.
-    Returns dict of indicator -> stats
+    Analyze how often confluence drops and indicator flips occur during trades.
+    Returns summary stats about both behaviors.
     """
-    # Track which trades had adverse flips from each indicator
-    indicator_trade_stats = defaultdict(lambda: {
+    stats = {
+        'total_trades_with_bars': 0,
+        # Confluence drop stats
+        'trades_with_conf_drop': 0,
+        'losers_with_conf_drop': 0,
+        'winners_with_conf_drop': 0,
+        # Indicator flip stats
         'trades_with_flip': 0,
         'losers_with_flip': 0,
         'winners_with_flip': 0
-    })
+    }
     
     for rt in roundtrips:
         if not rt['complete']:
             continue
         
         flip_analysis = rt.get('flip_analysis', {})
-        adverse_flips = flip_analysis.get('adverse_flips', [])
-        is_win = rt['pnl_ticks'] > 0
         
-        # Track which indicators flipped in THIS trade (deduplicate)
-        indicators_that_flipped = set(f['indicator'] for f in adverse_flips)
+        # Skip trades without bar data
+        if flip_analysis.get('no_bar_data', False):
+            continue
         
-        for ind in indicators_that_flipped:
-            indicator_trade_stats[ind]['trades_with_flip'] += 1
-            if is_win:
-                indicator_trade_stats[ind]['winners_with_flip'] += 1
+        stats['total_trades_with_bars'] += 1
+        is_winner = rt['pnl_ticks'] > 0
+        
+        # Track confluence drops
+        if flip_analysis.get('had_confluence_drop', False):
+            stats['trades_with_conf_drop'] += 1
+            if is_winner:
+                stats['winners_with_conf_drop'] += 1
             else:
-                indicator_trade_stats[ind]['losers_with_flip'] += 1
+                stats['losers_with_conf_drop'] += 1
+        
+        # Track indicator flips
+        if flip_analysis.get('had_adverse_flip', False):
+            stats['trades_with_flip'] += 1
+            if is_winner:
+                stats['winners_with_flip'] += 1
+            else:
+                stats['losers_with_flip'] += 1
     
-    return dict(indicator_trade_stats)
+    return stats
 
 
 def analyze_early_exit_impact(roundtrips):
     """
-    Analyze the impact of hypothetical early exit on first adverse flip.
+    Analyze the impact of both early exit strategies:
+    1. Confluence drop below threshold
+    2. Single indicator flip
     
-    Returns summary dict with:
-    - Total trades with adverse flips
-    - How many would have been better/worse with early exit
-    - Total ticks saved/lost
-    - Trades skipped due to no bar data
+    Returns dict with both analyses for side-by-side comparison
     """
-    trades_with_flip = []
-    trades_without_flip = 0
+    confluence_trades = []
+    flip_trades = []
     trades_no_bar_data = 0
+    trades_no_confluence_drop = 0
+    trades_no_flip = 0
     
     for rt in roundtrips:
         if not rt['complete']:
@@ -1059,60 +1104,86 @@ def analyze_early_exit_impact(roundtrips):
             trades_no_bar_data += 1
             continue
         
-        first_flip = flip_analysis.get('first_adverse_flip')
         estimated_exit = rt.get('estimated_exit')
+        actual_pnl = rt['pnl_ticks']
+        was_winner = actual_pnl > 0
         
-        if first_flip:
-            actual_pnl = rt['pnl_ticks']
-            hypo_pnl = first_flip['hypothetical_pnl_ticks']
-            difference = hypo_pnl - actual_pnl  # Positive = early exit better
+        # === Confluence drop analysis ===
+        confluence_drop = flip_analysis.get('confluence_drop')
+        if confluence_drop:
+            hypo_pnl = confluence_drop['hypothetical_pnl_ticks']
+            difference = hypo_pnl - actual_pnl
             
-            trades_with_flip.append({
+            confluence_trades.append({
                 'entry_time': rt['entry']['time_str'],
                 'direction': rt['direction'],
                 'actual_pnl': actual_pnl,
                 'hypo_pnl': hypo_pnl,
                 'difference': difference,
-                'flip_indicator': first_flip['indicator'],
-                'flip_time': first_flip['time'],
-                'flip_price': first_flip['price'],
-                'was_winner': actual_pnl > 0,
+                'entry_confluence': confluence_drop['entry_confluence'],
+                'exit_confluence': confluence_drop['exit_confluence'],
+                'trigger_time': confluence_drop['time'],
+                'trigger_price': confluence_drop['price'],
+                'was_winner': was_winner,
                 'early_exit_better': difference > 0,
                 'estimated_exit_type': estimated_exit['exit_type'] if estimated_exit else 'UNKNOWN',
                 'bars_in_trade': estimated_exit['bars_in_trade'] if estimated_exit else 0
             })
         else:
-            trades_without_flip += 1
+            trades_no_confluence_drop += 1
+        
+        # === Single indicator flip analysis ===
+        first_flip = flip_analysis.get('first_adverse_flip')
+        if first_flip:
+            hypo_pnl = first_flip['hypothetical_pnl_ticks']
+            difference = hypo_pnl - actual_pnl
+            
+            flip_trades.append({
+                'entry_time': rt['entry']['time_str'],
+                'direction': rt['direction'],
+                'actual_pnl': actual_pnl,
+                'hypo_pnl': hypo_pnl,
+                'difference': difference,
+                'indicator': first_flip['indicator'],
+                'trigger_time': first_flip['time'],
+                'trigger_price': first_flip['price'],
+                'was_winner': was_winner,
+                'early_exit_better': difference > 0,
+                'estimated_exit_type': estimated_exit['exit_type'] if estimated_exit else 'UNKNOWN',
+                'bars_in_trade': estimated_exit['bars_in_trade'] if estimated_exit else 0
+            })
+        else:
+            trades_no_flip += 1
     
-    if not trades_with_flip and trades_no_bar_data == 0:
-        return None
-    
-    # Calculate summary stats
-    total_trades = len(trades_with_flip)
-    early_better_count = sum(1 for t in trades_with_flip if t['early_exit_better'])
-    early_worse_count = total_trades - early_better_count
-    
-    total_difference = sum(t['difference'] for t in trades_with_flip)
-    
-    # Separate analysis for winners and losers
-    losers = [t for t in trades_with_flip if not t['was_winner']]
-    winners = [t for t in trades_with_flip if t['was_winner']]
-    
-    loser_savings = sum(t['difference'] for t in losers) if losers else 0
-    winner_cost = sum(t['difference'] for t in winners) if winners else 0
+    def summarize(trades_list):
+        if not trades_list:
+            return None
+        total = len(trades_list)
+        better = sum(1 for t in trades_list if t['early_exit_better'])
+        worse = total - better
+        total_diff = sum(t['difference'] for t in trades_list)
+        losers = [t for t in trades_list if not t['was_winner']]
+        winners = [t for t in trades_list if t['was_winner']]
+        loser_savings = sum(t['difference'] for t in losers) if losers else 0
+        winner_cost = sum(t['difference'] for t in winners) if winners else 0
+        return {
+            'trades_analyzed': total,
+            'early_exit_better_count': better,
+            'early_exit_worse_count': worse,
+            'total_difference_ticks': total_diff,
+            'loser_count': len(losers),
+            'loser_savings_ticks': loser_savings,
+            'winner_count': len(winners),
+            'winner_cost_ticks': winner_cost,
+            'trade_details': trades_list
+        }
     
     return {
-        'trades_analyzed': total_trades,
-        'trades_without_flip': trades_without_flip,
         'trades_no_bar_data': trades_no_bar_data,
-        'early_exit_better_count': early_better_count,
-        'early_exit_worse_count': early_worse_count,
-        'total_difference_ticks': total_difference,
-        'loser_count': len(losers),
-        'loser_savings_ticks': loser_savings,
-        'winner_count': len(winners),
-        'winner_cost_ticks': winner_cost,
-        'trade_details': trades_with_flip
+        'confluence': summarize(confluence_trades),
+        'trades_no_confluence_drop': trades_no_confluence_drop,
+        'flip': summarize(flip_trades),
+        'trades_no_flip': trades_no_flip
     }
 
 
@@ -1365,25 +1436,35 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             else:
                 sig_info = "[NO SIGNAL]"
             
-            # Add flip exit info if available
-            flip_info = ""
+            # Add exit trigger info if available (show first one that fired)
+            exit_info = ""
+            confluence_drop = rt.get('flip_analysis', {}).get('confluence_drop')
             first_flip = rt.get('flip_analysis', {}).get('first_adverse_flip')
-            if first_flip:
+            
+            if confluence_drop:
+                hypo = confluence_drop['hypothetical_pnl_ticks']
+                diff = rt.get('confluence_exit_difference', 0)
+                conf_change = f"{confluence_drop['entry_confluence']}→{confluence_drop['exit_confluence']}"
+                if diff and diff > 0:
+                    exit_info = f" [conf {conf_change}: save {diff:+.0f}t]"
+                elif diff and diff < 0:
+                    exit_info = f" [conf {conf_change}: cost {abs(diff):.0f}t]"
+            elif first_flip:
                 hypo = first_flip['hypothetical_pnl_ticks']
                 diff = rt.get('flip_exit_difference', 0)
                 if diff and diff > 0:
-                    flip_info = f" [flip@{first_flip['time']}: {hypo:+.0f}t, save {diff:+.0f}t]"
+                    exit_info = f" [{first_flip['indicator']} flip: save {diff:+.0f}t]"
                 elif diff and diff < 0:
-                    flip_info = f" [flip@{first_flip['time']}: {hypo:+.0f}t, cost {abs(diff):.0f}t]"
+                    exit_info = f" [{first_flip['indicator']} flip: cost {abs(diff):.0f}t]"
             
-            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+6.0f}t (${rt['pnl_ticks'] * TICK_VALUE:+7.2f}) {pnl_marker} {sig_info}{flip_info}")
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+6.0f}t (${rt['pnl_ticks'] * TICK_VALUE:+7.2f}) {pnl_marker} {sig_info}{exit_info}")
         lines.append("")
     
-    # === EARLY EXIT ANALYSIS (NEW SECTION) ===
+    # === EARLY EXIT ANALYSIS - THREE STRATEGIES COMPARED ===
     if early_exit_analysis:
-        lines.append("=" * 80)
-        lines.append("EARLY EXIT ANALYSIS: What if we exited on first adverse indicator flip?")
-        lines.append("=" * 80)
+        lines.append("=" * 90)
+        lines.append("EXIT STRATEGY COMPARISON: SL/TP vs Confluence Drop vs Single Indicator Flip")
+        lines.append("=" * 90)
         lines.append("")
         lines.append("(Exit times estimated by scanning BAR data for SL/TP price levels)")
         lines.append("")
@@ -1392,53 +1473,75 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
         
         # Show trades without bar data first if any
         if ea.get('trades_no_bar_data', 0) > 0:
-            lines.append(f"Trades SKIPPED (no BAR data for time window): {ea['trades_no_bar_data']}")
-            lines.append("  (These trades occurred outside CSV data coverage, e.g., overnight)")
+            lines.append(f"Trades SKIPPED (no BAR data): {ea['trades_no_bar_data']} (outside CSV coverage)")
             lines.append("")
         
-        if ea['trades_analyzed'] == 0:
-            lines.append("No trades with adverse flips to analyze.")
-            lines.append("(All trades either had no bar data or no indicator flipped against them)")
-            lines.append("")
+        # === SUMMARY TABLE ===
+        lines.append("STRATEGY COMPARISON SUMMARY")
+        lines.append("-" * 70)
+        lines.append(f"{'Strategy':<30} {'Trades':>8} {'Better':>8} {'Worse':>8} {'NET':>12}")
+        lines.append("-" * 70)
+        
+        # Current SL/TP (baseline)
+        lines.append(f"{'1. Current SL/TP (baseline)':<30} {total_trades:>8} {'---':>8} {'---':>8} {'+0t':>12}")
+        
+        # Confluence drop
+        conf_ea = ea.get('confluence')
+        if conf_ea and conf_ea['trades_analyzed'] > 0:
+            net_str = f"{conf_ea['total_difference_ticks']:+.0f}t"
+            lines.append(f"{'2. Confluence drop below 6':<30} {conf_ea['trades_analyzed']:>8} {conf_ea['early_exit_better_count']:>8} {conf_ea['early_exit_worse_count']:>8} {net_str:>12}")
         else:
-            lines.append(f"Trades with adverse flips: {ea['trades_analyzed']} of {total_trades}")
-            if ea.get('trades_without_flip', 0) > 0:
-                lines.append(f"Trades without adverse flips: {ea['trades_without_flip']} (no flip before SL/TP)")
-            lines.append(f"  - Early exit would be BETTER:  {ea['early_exit_better_count']} trades")
-            lines.append(f"  - Early exit would be WORSE:   {ea['early_exit_worse_count']} trades")
+            lines.append(f"{'2. Confluence drop below 6':<30} {'0':>8} {'---':>8} {'---':>8} {'+0t':>12}")
+        
+        # Single indicator flip
+        flip_ea = ea.get('flip')
+        if flip_ea and flip_ea['trades_analyzed'] > 0:
+            net_str = f"{flip_ea['total_difference_ticks']:+.0f}t"
+            lines.append(f"{'3. Single indicator flip':<30} {flip_ea['trades_analyzed']:>8} {flip_ea['early_exit_better_count']:>8} {flip_ea['early_exit_worse_count']:>8} {net_str:>12}")
+        else:
+            lines.append(f"{'3. Single indicator flip':<30} {'0':>8} {'---':>8} {'---':>8} {'+0t':>12}")
+        
+        lines.append("-" * 70)
+        lines.append("")
+        
+        # === DETAILED BREAKDOWN: CONFLUENCE DROP ===
+        if conf_ea and conf_ea['trades_analyzed'] > 0:
+            lines.append("STRATEGY 2: CONFLUENCE DROP BELOW 6")
+            lines.append("-" * 40)
+            lines.append(f"Trades affected: {conf_ea['trades_analyzed']} of {total_trades}")
+            lines.append(f"  Losers with drop: {conf_ea['loser_count']} → savings: {conf_ea['loser_savings_ticks']:+.0f}t")
+            lines.append(f"  Winners with drop: {conf_ea['winner_count']} → cost: {conf_ea['winner_cost_ticks']:+.0f}t")
+            lines.append(f"  NET: {conf_ea['total_difference_ticks']:+.0f}t")
             lines.append("")
-            
-            lines.append(f"Impact on LOSING trades ({ea['loser_count']} trades that hit SL):")
-            lines.append(f"  - Ticks saved by early exit: {ea['loser_savings_ticks']:+.0f}t (${ea['loser_savings_ticks'] * TICK_VALUE:+.2f})")
-            lines.append("")
-            
-            lines.append(f"Impact on WINNING trades ({ea['winner_count']} trades that hit TP):")
-            lines.append(f"  - Ticks lost by early exit:  {ea['winner_cost_ticks']:+.0f}t (${ea['winner_cost_ticks'] * TICK_VALUE:+.2f})")
-            lines.append("")
-            
-            net_impact = ea['total_difference_ticks']
-            lines.append(f"NET IMPACT of early exit strategy: {net_impact:+.0f}t (${net_impact * TICK_VALUE:+.2f})")
-            if net_impact > 0:
-                lines.append(f"  → Early exit would have IMPROVED results by {net_impact:.0f}t")
-            else:
-                lines.append(f"  → Early exit would have REDUCED results by {abs(net_impact):.0f}t")
-            lines.append("")
-            
-            # Detailed breakdown
-            lines.append("TRADE-BY-TRADE BREAKDOWN:")
-            lines.append("-" * 85)
-            lines.append("Entry     Dir   Exit  Bars  Actual   Flip@     Ind    HypoP&L  Diff    Result")
-            lines.append("-" * 85)
-            
-            for t in ea['trade_details']:
+            lines.append("  Entry     Dir   Exit  Actual  @Time     Conf   Hypo    Diff   Result")
+            for t in conf_ea['trade_details']:
                 result = "SAVE" if t['early_exit_better'] else "COST"
                 outcome = "W" if t['was_winner'] else "L"
-                exit_type = t.get('estimated_exit_type', '?')[:2]  # SL, TP, or TI(meout)
-                bars = t.get('bars_in_trade', 0)
+                exit_type = t.get('estimated_exit_type', '?')[:2]
+                conf_change = f"{t['entry_confluence']}→{t['exit_confluence']}"
                 lines.append(
-                    f"  {t['entry_time']} {t['direction']:5} {exit_type:4} {bars:4}  {t['actual_pnl']:+6.0f}t  "
-                    f"{t['flip_time']}  {t['flip_indicator']:5}  {t['hypo_pnl']:+6.0f}t  "
-                    f"{t['difference']:+5.0f}t  {result}({outcome})"
+                    f"  {t['entry_time']} {t['direction']:5} {exit_type:4} {t['actual_pnl']:+5.0f}t  "
+                    f"{t['trigger_time']}  {conf_change:5} {t['hypo_pnl']:+5.0f}t {t['difference']:+5.0f}t {result}({outcome})"
+                )
+            lines.append("")
+        
+        # === DETAILED BREAKDOWN: SINGLE INDICATOR FLIP ===
+        if flip_ea and flip_ea['trades_analyzed'] > 0:
+            lines.append("STRATEGY 3: SINGLE INDICATOR FLIP")
+            lines.append("-" * 40)
+            lines.append(f"Trades affected: {flip_ea['trades_analyzed']} of {total_trades}")
+            lines.append(f"  Losers with flip: {flip_ea['loser_count']} → savings: {flip_ea['loser_savings_ticks']:+.0f}t")
+            lines.append(f"  Winners with flip: {flip_ea['winner_count']} → cost: {flip_ea['winner_cost_ticks']:+.0f}t")
+            lines.append(f"  NET: {flip_ea['total_difference_ticks']:+.0f}t")
+            lines.append("")
+            lines.append("  Entry     Dir   Exit  Actual  @Time     Ind   Hypo    Diff   Result")
+            for t in flip_ea['trade_details']:
+                result = "SAVE" if t['early_exit_better'] else "COST"
+                outcome = "W" if t['was_winner'] else "L"
+                exit_type = t.get('estimated_exit_type', '?')[:2]
+                lines.append(
+                    f"  {t['entry_time']} {t['direction']:5} {exit_type:4} {t['actual_pnl']:+5.0f}t  "
+                    f"{t['trigger_time']}  {t['indicator']:5} {t['hypo_pnl']:+5.0f}t {t['difference']:+5.0f}t {result}({outcome})"
                 )
             lines.append("")
     
@@ -1465,15 +1568,28 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     lines.append(f"NO SIGNAL nearby: {len(no_signal)} trades, {no_signal_pnl:+.0f}t")
     lines.append("")
     
-    # Adverse flip analysis section (simplified - now counts trades, not events)
-    if adverse_flip_stats:
-        lines.append("INDICATOR FLIP ANALYSIS (during trades)")
-        lines.append("-" * 40)
-        lines.append("How many trades had each indicator flip against them:")
-        lines.append("Indicator   Trades   On Losers   On Winners")
-        for ind in sorted(adverse_flip_stats.keys()):
-            stats = adverse_flip_stats[ind]
-            lines.append(f"  {ind:8}  {stats['trades_with_flip']:6}   {stats['losers_with_flip']:9}   {stats['winners_with_flip']:10}")
+    # Exit trigger stats section
+    if adverse_flip_stats and adverse_flip_stats.get('total_trades_with_bars', 0) > 0:
+        lines.append("EXIT TRIGGER OCCURRENCE (during trades)")
+        lines.append("-" * 45)
+        total_with_bars = adverse_flip_stats['total_trades_with_bars']
+        
+        # Confluence drop stats
+        with_conf_drop = adverse_flip_stats['trades_with_conf_drop']
+        lines.append(f"Trades with BAR data: {total_with_bars}")
+        lines.append(f"  Confluence dropped below 6: {with_conf_drop} trades")
+        lines.append(f"    - On losers: {adverse_flip_stats['losers_with_conf_drop']}")
+        lines.append(f"    - On winners: {adverse_flip_stats['winners_with_conf_drop']}")
+        
+        # Indicator flip stats
+        with_flip = adverse_flip_stats['trades_with_flip']
+        lines.append(f"  Single indicator flipped: {with_flip} trades")
+        lines.append(f"    - On losers: {adverse_flip_stats['losers_with_flip']}")
+        lines.append(f"    - On winners: {adverse_flip_stats['winners_with_flip']}")
+        
+        # Neither triggered
+        neither = total_with_bars - max(with_conf_drop, with_flip)
+        lines.append(f"  Neither triggered: {total_with_bars - with_conf_drop} (conf) / {total_with_bars - with_flip} (flip)")
         lines.append("")
     
     # Indicator correlation analysis
@@ -1520,13 +1636,13 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             else:
                 sig_info = "[NO SIGNAL]"
             
-            # Add first adverse flip info
-            first_flip = rt.get('flip_analysis', {}).get('first_adverse_flip')
-            flip_info = ""
-            if first_flip:
-                flip_info = f" (1st flip: {first_flip['indicator']}@{first_flip['time']})"
+            # Add confluence drop info
+            confluence_drop = rt.get('flip_analysis', {}).get('confluence_drop')
+            drop_info = ""
+            if confluence_drop:
+                drop_info = f" (conf drop: {confluence_drop['entry_confluence']}→{confluence_drop['exit_confluence']}@{confluence_drop['time']})"
             
-            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}{flip_info}")
+            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}{drop_info}")
     lines.append("")
     
     # Time-based analysis
@@ -1572,16 +1688,40 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
                 lines.append(f"   - High confluence (N-1 or higher): {high_conf_pnl:+.0f}t")
     lines.append("")
     
-    # Insight 4: Early exit analysis
+    # Insight 4: Early exit analysis - both strategies
     if early_exit_analysis:
         ea = early_exit_analysis
-        lines.append("4. EARLY EXIT STRATEGY:")
-        if ea['total_difference_ticks'] > 0:
-            lines.append(f"   - Exiting on first adverse flip would SAVE {ea['total_difference_ticks']:.0f}t")
-            lines.append(f"   - Reduces losses by {ea['loser_savings_ticks']:.0f}t, costs {abs(ea['winner_cost_ticks']):.0f}t from winners")
+        conf_ea = ea.get('confluence')
+        flip_ea = ea.get('flip')
+        
+        lines.append("4. EXIT STRATEGY COMPARISON:")
+        
+        # Confluence drop summary
+        if conf_ea and conf_ea['trades_analyzed'] > 0:
+            net = conf_ea['total_difference_ticks']
+            verdict = "SAVE" if net > 0 else "COST"
+            lines.append(f"   - Confluence drop: {verdict} {abs(net):.0f}t ({conf_ea['trades_analyzed']} trades affected)")
         else:
-            lines.append(f"   - Exiting on first adverse flip would COST {abs(ea['total_difference_ticks']):.0f}t")
-            lines.append(f"   - Current SL/TP performs better than indicator-based exit")
+            lines.append(f"   - Confluence drop: no trades affected")
+        
+        # Single indicator flip summary
+        if flip_ea and flip_ea['trades_analyzed'] > 0:
+            net = flip_ea['total_difference_ticks']
+            verdict = "SAVE" if net > 0 else "COST"
+            lines.append(f"   - Indicator flip:  {verdict} {abs(net):.0f}t ({flip_ea['trades_analyzed']} trades affected)")
+        else:
+            lines.append(f"   - Indicator flip:  no trades affected")
+        
+        # Recommendation
+        conf_net = conf_ea['total_difference_ticks'] if conf_ea else 0
+        flip_net = flip_ea['total_difference_ticks'] if flip_ea else 0
+        if conf_net > 0 or flip_net > 0:
+            if conf_net >= flip_net and conf_net > 0:
+                lines.append(f"   → Confluence drop would improve results")
+            elif flip_net > conf_net and flip_net > 0:
+                lines.append(f"   → Indicator flip would improve results")
+        else:
+            lines.append(f"   → Current SL/TP performs best")
         lines.append("")
     
     # Insight 5: Recommendations
