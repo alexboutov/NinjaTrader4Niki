@@ -427,13 +427,14 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableAutoTrading = false;
                 MinConfluenceForAutoTrade = 5;
                 
-                // Trading hours filter - Optimized based on backtest analysis
+                // Trading hours filter - Optimized based on backtest analysis (10:00-11:00 only)
+                // Data: 182 trades, 38% win rate, +1,666t total, +9.2t per trade
                 UseTradingHoursFilter = true;
-                Session1StartHour = 7;
+                Session1StartHour = 10;
                 Session1StartMinute = 0;
-                Session1EndHour = 8;
-                Session1EndMinute = 29;
-                Session2StartHour = 9;
+                Session1EndHour = 10;
+                Session1EndMinute = 59;
+                Session2StartHour = 10;
                 Session2StartMinute = 0;
                 Session2EndHour = 10;
                 Session2EndMinute = 59;

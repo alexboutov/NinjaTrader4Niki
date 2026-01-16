@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StrategyTemplate>
+  <StrategyType>NinjaTrader.NinjaScript.Strategies.ActiveNikiTrader</StrategyType>
+  <OptimizerType>NinjaTrader.NinjaScript.Optimizers.DefaultOptimizer</OptimizerType>
+  <OptimizerParameters>
+    <ArrayOfParameterWrapper xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ParameterWrapper>
+        <DisplayName>IsStrategyGenerator</DisplayName>
+        <Name>IsStrategyGenerator</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Keep best # results</DisplayName>
+        <Name>KeepBestResults</Name>
+        <Value xsi:type="xsd:int">10</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>LogTypeName</DisplayName>
+        <Name>LogTypeName</Name>
+        <Value xsi:type="xsd:string">Optimizer</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Visible</DisplayName>
+        <Name>IsVisible</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Name</DisplayName>
+        <Name>Name</Name>
+        <Value xsi:type="xsd:string">Default</Value>
+      </ParameterWrapper>
+    </ArrayOfParameterWrapper>
+  </OptimizerParameters>
+  <OptimizationFitness>NinjaTrader.NinjaScript.OptimizationFitnesses.MaxProfitFactor</OptimizationFitness>
+  <OptimizationParameters>
+    <ArrayOfParameter xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>Session1StartHour</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>Session1StartMinute</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>Session1EndHour</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">59</Max>
+        <Min xsi:type="xsd:int">59</Min>
+        <Name>Session1EndMinute</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>59</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>Session2StartHour</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>Session2StartMinute</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>Session2EndHour</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">59</Max>
+        <Min xsi:type="xsd:int">59</Min>
+        <Name>Session2EndMinute</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>59</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>CloseBeforeNews</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">11</Max>
+        <Min xsi:type="xsd:int">11</Min>
+        <Name>EODCloseHour</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>11</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>EODCloseMinute</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0</ValueSerializable>
+      </Parameter>
+    </ArrayOfParameter>
+  </OptimizationParameters>
+  <Strategy>
+    <ActiveNikiTrader xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <IsVisible>true</IsVisible>
+      <calculate2>OnEachTick</calculate2>
+      <AreLinesConfigurable>true</AreLinesConfigurable>
+      <ArePlotsConfigurable>true</ArePlotsConfigurable>
+      <BarsPeriodSerializable>
+        <BarsPeriodTypeSerialize>501</BarsPeriodTypeSerialize>
+        <BaseBarsPeriodType>Minute</BaseBarsPeriodType>
+        <BaseBarsPeriodValue>27</BaseBarsPeriodValue>
+        <VolumetricDeltaType>BidAsk</VolumetricDeltaType>
+        <MarketDataType>Last</MarketDataType>
+        <PointAndFigurePriceType>Close</PointAndFigurePriceType>
+        <ReversalType>Tick</ReversalType>
+        <Value>10</Value>
+        <Value2>50</Value2>
+      </BarsPeriodSerializable>
+      <BarsToLoad>0</BarsToLoad>
+      <Calculate>OnEachTick</Calculate>
+      <Displacement>0</Displacement>
+      <DisplayInDataBox>true</DisplayInDataBox>
+      <From>2026-01-12T00:00:00</From>
+      <IsAutoScale>true</IsAutoScale>
+      <Lines />
+      <MaximumBarsLookBack>TwoHundredFiftySix</MaximumBarsLookBack>
+      <Name>ActiveNikiTrader</Name>
+      <Panel>-1</Panel>
+      <Plots />
+      <ScaleJustification>Right</ScaleJustification>
+      <ShowTransparentPlotsInDataBox>false</ShowTransparentPlotsInDataBox>
+      <To>2026-01-15T00:00:00</To>
+      <IsDataSeriesRequired>true</IsDataSeriesRequired>
+      <IsOverlay>true</IsOverlay>
+      <SelectedValueSeries>0</SelectedValueSeries>
+      <Gtd>1800-01-01T00:00:00</Gtd>
+      <Template />
+      <TimeInForce>Gtc</TimeInForce>
+      <BarsPeriodParameter>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name />
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0</ValueSerializable>
+      </BarsPeriodParameter>
+      <BarsRequiredToTrade>20</BarsRequiredToTrade>
+      <Category>NinjaScript</Category>
+      <ConnectionLossHandling>Recalculate</ConnectionLossHandling>
+      <DaysToLoad>5</DaysToLoad>
+      <DefaultQuantity>1</DefaultQuantity>
+      <DisconnectDelaySeconds>10</DisconnectDelaySeconds>
+      <EntriesPerDirection>1</EntriesPerDirection>
+      <EntryHandling>AllEntries</EntryHandling>
+      <ExitOnSessionCloseSeconds>30</ExitOnSessionCloseSeconds>
+      <IncludeCommission>false</IncludeCommission>
+      <InstrumentOrInstrumentList>NQ MAR26</InstrumentOrInstrumentList>
+      <IsAggregated>false</IsAggregated>
+      <IsExitOnSessionCloseStrategy>true</IsExitOnSessionCloseStrategy>
+      <IsFillLimitOnTouch>false</IsFillLimitOnTouch>
+      <IsOptimizeDataSeries>false</IsOptimizeDataSeries>
+      <IsStableSession>true</IsStableSession>
+      <IsTickReplay>false</IsTickReplay>
+      <IsTradingHoursBreakLineVisible>true</IsTradingHoursBreakLineVisible>
+      <IsWaitUntilFlat>false</IsWaitUntilFlat>
+      <NumberRestartAttempts>4</NumberRestartAttempts>
+      <OptimizationPeriod>10</OptimizationPeriod>
+      <OrderFillResolution>Standard</OrderFillResolution>
+      <OrderFillResolutionType>Tick</OrderFillResolutionType>
+      <OrderFillResolutionValue>1</OrderFillResolutionValue>
+      <RestartsWithinMinutes>5</RestartsWithinMinutes>
+      <SetOrderQuantity>Strategy</SetOrderQuantity>
+      <Slippage>0</Slippage>
+      <StartBehavior>WaitUntilFlat</StartBehavior>
+      <StopTargetHandling>PerEntryExecution</StopTargetHandling>
+      <SupportsOptimizationGraph>true</SupportsOptimizationGraph>
+      <TestPeriod>28</TestPeriod>
+      <TradingHoursSerializable />
+      <DrawOnPricePanel>false</DrawOnPricePanel>
+      <ZOrder>-2147483648</ZOrder>
+      <MinConfluenceRequired>6</MinConfluenceRequired>
+      <MaxBarsAfterYellowSquare>3</MaxBarsAfterYellowSquare>
+      <MinSolarWaveCount>1</MinSolarWaveCount>
+      <StopLossUSD>200</StopLossUSD>
+      <TakeProfitUSD>600</TakeProfitUSD>
+      <CooldownBars>10</CooldownBars>
+      <EnableAutoTrading>true</EnableAutoTrading>
+      <MinConfluenceForAutoTrade>6</MinConfluenceForAutoTrade>
+      <UseTradingHoursFilter>true</UseTradingHoursFilter>
+      <Session1StartHour>10</Session1StartHour>
+      <Session1StartMinute>0</Session1StartMinute>
+      <Session1EndHour>10</Session1EndHour>
+      <Session1EndMinute>59</Session1EndMinute>
+      <Session2StartHour>10</Session2StartHour>
+      <Session2StartMinute>0</Session2StartMinute>
+      <Session2EndHour>10</Session2EndHour>
+      <Session2EndMinute>59</Session2EndMinute>
+      <CloseBeforeNews>false</CloseBeforeNews>
+      <NewsCloseHour>8</NewsCloseHour>
+      <NewsCloseMinute>28</NewsCloseMinute>
+      <CloseAtEndOfDay>true</CloseAtEndOfDay>
+      <EODCloseHour>11</EODCloseHour>
+      <EODCloseMinute>0</EODCloseMinute>
+      <UseRubyRiver>true</UseRubyRiver>
+      <UseDragonTrend>true</UseDragonTrend>
+      <UseSolarWave>true</UseSolarWave>
+      <UseVIDYAPro>true</UseVIDYAPro>
+      <UseEasyTrend>true</UseEasyTrend>
+      <UseT3Pro>true</UseT3Pro>
+      <UseAAATrendSync>true</UseAAATrendSync>
+      <UseAIQSuperBands>true</UseAIQSuperBands>
+      <T3ProPeriod>14</T3ProPeriod>
+      <T3ProTCount>3</T3ProTCount>
+      <T3ProVFactor>0.7</T3ProVFactor>
+      <T3ProChaosSmoothingEnabled>true</T3ProChaosSmoothingEnabled>
+      <T3ProChaosSmoothingPeriod>5</T3ProChaosSmoothingPeriod>
+      <T3ProFilterEnabled>true</T3ProFilterEnabled>
+      <T3ProFilterMultiplier>4</T3ProFilterMultiplier>
+      <VIDYAPeriod>9</VIDYAPeriod>
+      <VIDYAVolatilityPeriod>9</VIDYAVolatilityPeriod>
+      <VIDYASmoothingEnabled>true</VIDYASmoothingEnabled>
+      <VIDYASmoothingPeriod>5</VIDYASmoothingPeriod>
+      <VIDYAFilterEnabled>true</VIDYAFilterEnabled>
+      <VIDYAFilterMultiplier>4</VIDYAFilterMultiplier>
+      <EasyTrendPeriod>30</EasyTrendPeriod>
+      <EasyTrendSmoothingEnabled>true</EasyTrendSmoothingEnabled>
+      <EasyTrendSmoothingPeriod>7</EasyTrendSmoothingPeriod>
+      <EasyTrendFilterEnabled>true</EasyTrendFilterEnabled>
+      <EasyTrendFilterMultiplier>0.5</EasyTrendFilterMultiplier>
+      <EasyTrendATRPeriod>100</EasyTrendATRPeriod>
+      <RubyRiverMAPeriod>20</RubyRiverMAPeriod>
+      <RubyRiverSmoothingEnabled>true</RubyRiverSmoothingEnabled>
+      <RubyRiverSmoothingPeriod>5</RubyRiverSmoothingPeriod>
+      <RubyRiverOffsetMultiplier>0.15</RubyRiverOffsetMultiplier>
+      <RubyRiverOffsetPeriod>100</RubyRiverOffsetPeriod>
+      <DragonTrendPeriod>10</DragonTrendPeriod>
+      <DragonTrendSmoothingEnabled>true</DragonTrendSmoothingEnabled>
+      <DragonTrendSmoothingPeriod>5</DragonTrendSmoothingPeriod>
+      <SolarWaveATRPeriod>100</SolarWaveATRPeriod>
+      <SolarWaveTrendMultiplier>2</SolarWaveTrendMultiplier>
+      <SolarWaveStopMultiplier>4</SolarWaveStopMultiplier>
+      <EnableSoundAlert>true</EnableSoundAlert>
+      <UniRenkoMode>true</UniRenkoMode>
+      <UseTimeBasedCooldown>true</UseTimeBasedCooldown>
+      <CooldownSeconds>90</CooldownSeconds>
+      <LogBarDetails>false</LogBarDetails>
+      <EnableDailyLossLimit>false</EnableDailyLossLimit>
+      <DailyLossLimitUSD>2000</DailyLossLimitUSD>
+      <ResetDailyPnLAtSessionStart>true</ResetDailyPnLAtSessionStart>
+      <EnableDailyProfitTarget>false</EnableDailyProfitTarget>
+      <DailyProfitTargetUSD>3000</DailyProfitTargetUSD>
+      <StopLossBufferTicks>0</StopLossBufferTicks>
+      <EnableDynamicExit>false</EnableDynamicExit>
+      <MinConfluenceToStay>4</MinConfluenceToStay>
+      <TrailStopATRMultiplier>1.5</TrailStopATRMultiplier>
+      <MaxProfitUSD>1000</MaxProfitUSD>
+      <EnableIndicatorCSVLog>true</EnableIndicatorCSVLog>
+    </ActiveNikiTrader>
+  </Strategy>
+</StrategyTemplate>
