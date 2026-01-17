@@ -5,6 +5,7 @@ Analyzes NinjaTrader trading logs and ActiveNiki signal logs.
 Supports both ActiveNikiMonitor (6-indicator) and ActiveNikiTrader (8-indicator) formats.
 Parses IndicatorValues CSV for BAR-level analysis.
 Includes "what if exit on first adverse flip" analysis.
+Includes TRAILING STOP simulation analysis.
 Generates {Mon}{DD}_Trading_Analysis.txt report.
 
 Usage: python Analyze-TradingSession.py <folder_path> [--date YYYY-MM-DD]
@@ -38,6 +39,29 @@ CSV_INDICATOR_COLUMNS = {
     'AAA_IsUp': 'AAA',
     'SB_IsUp': 'SB'
 }
+
+# === TRAILING STOP CONFIGURATION ===
+# Multiple configurations to test
+TRAILING_STOP_CONFIGS = [
+    {
+        'name': 'Trail-60/30',
+        'activation_ticks': 60,   # Activate trail after +60 ticks profit
+        'trail_distance_ticks': 30,  # Trail 30 ticks behind
+        'description': 'Activate at +60t, trail 30t'
+    },
+    {
+        'name': 'Trail-80/40',
+        'activation_ticks': 80,   # Activate trail after +80 ticks profit (2x SL)
+        'trail_distance_ticks': 40,  # Trail 40 ticks behind (1x SL)
+        'description': 'Activate at +80t, trail 40t'
+    },
+    {
+        'name': 'Trail-40/20',
+        'activation_ticks': 40,   # Activate trail after +40 ticks profit (1x SL)
+        'trail_distance_ticks': 20,  # Trail 20 ticks behind (tight)
+        'description': 'Activate at +40t, trail 20t (tight)'
+    },
+]
 
 
 def parse_trades(filepath):
@@ -310,6 +334,226 @@ def estimate_actual_exit_time(bars, entry_time, entry_price, direction, sl_point
     }
 
 
+def simulate_trailing_stop(bars, entry_time, entry_price, direction, 
+                           sl_ticks=40, tp_ticks=120,
+                           activation_ticks=60, trail_distance_ticks=30):
+    """
+    Simulate a trailing stop exit strategy by scanning BAR data.
+    
+    Parameters:
+    - bars: List of BAR data dicts
+    - entry_time: Entry timestamp
+    - entry_price: Entry price
+    - direction: 'LONG' or 'SHORT'
+    - sl_ticks: Fixed stop loss in ticks (e.g., 40 = 10 points for NQ)
+    - tp_ticks: Fixed take profit in ticks (e.g., 120 = 30 points for NQ)
+    - activation_ticks: Profit level (in ticks) to activate trailing stop
+    - trail_distance_ticks: Trail distance behind price (in ticks)
+    
+    Returns dict with:
+    - exit_type: 'TP', 'SL', 'TRAIL', 'TIMEOUT', 'NO_BARS'
+    - exit_price: Price at exit
+    - exit_time: Timestamp of exit
+    - exit_pnl_ticks: P&L in ticks at exit
+    - trail_activated: Whether trail was activated
+    - max_profit_ticks: Maximum profit reached during trade
+    - trail_details: List of trail stop movements (for debugging)
+    """
+    if not bars or entry_price == 0:
+        return {
+            'exit_type': 'NO_DATA',
+            'exit_time': entry_time,
+            'exit_price': entry_price,
+            'exit_pnl_ticks': 0,
+            'trail_activated': False,
+            'max_profit_ticks': 0,
+            'trail_details': []
+        }
+    
+    # Convert ticks to price points (NQ: 4 ticks = 1 point)
+    sl_points = sl_ticks * TICK_SIZE
+    tp_points = tp_ticks * TICK_SIZE
+    activation_points = activation_ticks * TICK_SIZE
+    trail_distance_points = trail_distance_ticks * TICK_SIZE
+    
+    # Calculate fixed SL and TP levels
+    if direction == 'LONG':
+        fixed_sl = entry_price - sl_points
+        fixed_tp = entry_price + tp_points
+    else:  # SHORT
+        fixed_sl = entry_price + sl_points
+        fixed_tp = entry_price - tp_points
+    
+    # Time-based limit: search up to 10 minutes after entry
+    max_time = entry_time + timedelta(minutes=10)
+    
+    # Find bars in the trade window
+    bars_in_window = [b for b in bars if entry_time <= b['timestamp'] <= max_time]
+    
+    if not bars_in_window:
+        return {
+            'exit_type': 'NO_BARS',
+            'exit_time': entry_time,
+            'exit_price': entry_price,
+            'exit_pnl_ticks': 0,
+            'trail_activated': False,
+            'max_profit_ticks': 0,
+            'trail_details': []
+        }
+    
+    # Initialize trailing stop state
+    trail_activated = False
+    trail_stop = None
+    max_profit_points = 0
+    trail_details = []
+    
+    # Scan bars
+    for bar in bars_in_window:
+        close = bar['close']
+        
+        # Calculate current P&L
+        if direction == 'LONG':
+            current_pnl_points = close - entry_price
+        else:
+            current_pnl_points = entry_price - close
+        
+        current_pnl_ticks = current_pnl_points / TICK_SIZE
+        
+        # Track max profit
+        if current_pnl_points > max_profit_points:
+            max_profit_points = current_pnl_points
+        
+        # Check fixed TP first (always honored)
+        if direction == 'LONG' and close >= fixed_tp:
+            return {
+                'exit_type': 'TP',
+                'exit_time': bar['timestamp'],
+                'exit_price': close,
+                'exit_pnl_ticks': tp_ticks,
+                'trail_activated': trail_activated,
+                'max_profit_ticks': max_profit_points / TICK_SIZE,
+                'trail_details': trail_details
+            }
+        elif direction == 'SHORT' and close <= fixed_tp:
+            return {
+                'exit_type': 'TP',
+                'exit_time': bar['timestamp'],
+                'exit_price': close,
+                'exit_pnl_ticks': tp_ticks,
+                'trail_activated': trail_activated,
+                'max_profit_ticks': max_profit_points / TICK_SIZE,
+                'trail_details': trail_details
+            }
+        
+        # Check if trailing stop should activate
+        if not trail_activated and current_pnl_points >= activation_points:
+            trail_activated = True
+            # Set initial trail stop
+            if direction == 'LONG':
+                trail_stop = close - trail_distance_points
+            else:
+                trail_stop = close + trail_distance_points
+            trail_details.append({
+                'time': bar['time_str'],
+                'action': 'ACTIVATED',
+                'price': close,
+                'trail_stop': trail_stop,
+                'pnl_ticks': current_pnl_ticks
+            })
+        
+        # Update trailing stop if activated
+        if trail_activated:
+            if direction == 'LONG':
+                # Move trail up only
+                new_trail = close - trail_distance_points
+                if new_trail > trail_stop:
+                    trail_stop = new_trail
+                    trail_details.append({
+                        'time': bar['time_str'],
+                        'action': 'TRAIL_UP',
+                        'price': close,
+                        'trail_stop': trail_stop,
+                        'pnl_ticks': current_pnl_ticks
+                    })
+                
+                # Check if trail stop hit
+                if close <= trail_stop:
+                    exit_pnl_ticks = (trail_stop - entry_price) / TICK_SIZE
+                    return {
+                        'exit_type': 'TRAIL',
+                        'exit_time': bar['timestamp'],
+                        'exit_price': trail_stop,
+                        'exit_pnl_ticks': exit_pnl_ticks,
+                        'trail_activated': True,
+                        'max_profit_ticks': max_profit_points / TICK_SIZE,
+                        'trail_details': trail_details
+                    }
+            else:  # SHORT
+                # Move trail down only
+                new_trail = close + trail_distance_points
+                if new_trail < trail_stop:
+                    trail_stop = new_trail
+                    trail_details.append({
+                        'time': bar['time_str'],
+                        'action': 'TRAIL_DN',
+                        'price': close,
+                        'trail_stop': trail_stop,
+                        'pnl_ticks': current_pnl_ticks
+                    })
+                
+                # Check if trail stop hit
+                if close >= trail_stop:
+                    exit_pnl_ticks = (entry_price - trail_stop) / TICK_SIZE
+                    return {
+                        'exit_type': 'TRAIL',
+                        'exit_time': bar['timestamp'],
+                        'exit_price': trail_stop,
+                        'exit_pnl_ticks': exit_pnl_ticks,
+                        'trail_activated': True,
+                        'max_profit_ticks': max_profit_points / TICK_SIZE,
+                        'trail_details': trail_details
+                    }
+        
+        # Check fixed SL (if trail not activated or price went below trail)
+        if direction == 'LONG' and close <= fixed_sl:
+            return {
+                'exit_type': 'SL',
+                'exit_time': bar['timestamp'],
+                'exit_price': close,
+                'exit_pnl_ticks': -sl_ticks,
+                'trail_activated': trail_activated,
+                'max_profit_ticks': max_profit_points / TICK_SIZE,
+                'trail_details': trail_details
+            }
+        elif direction == 'SHORT' and close >= fixed_sl:
+            return {
+                'exit_type': 'SL',
+                'exit_time': bar['timestamp'],
+                'exit_price': close,
+                'exit_pnl_ticks': -sl_ticks,
+                'trail_activated': trail_activated,
+                'max_profit_ticks': max_profit_points / TICK_SIZE,
+                'trail_details': trail_details
+            }
+    
+    # Timeout - use last bar price
+    last_bar = bars_in_window[-1]
+    if direction == 'LONG':
+        exit_pnl_ticks = (last_bar['close'] - entry_price) / TICK_SIZE
+    else:
+        exit_pnl_ticks = (entry_price - last_bar['close']) / TICK_SIZE
+    
+    return {
+        'exit_type': 'TIMEOUT',
+        'exit_time': last_bar['timestamp'],
+        'exit_price': last_bar['close'],
+        'exit_pnl_ticks': exit_pnl_ticks,
+        'trail_activated': trail_activated,
+        'max_profit_ticks': max_profit_points / TICK_SIZE,
+        'trail_details': trail_details
+    }
+
+
 def analyze_indicator_flips_during_trade(bars, entry_time, exit_time, direction, entry_price, min_confluence=6):
     """
     Analyze both:
@@ -482,7 +726,8 @@ def parse_monitor_signals(filepath, date_str):
 def parse_trader_signals(filepath, date_str):
     """
     Parse ActiveNikiTrader log file.
-    Format: ║  *** LONG SIGNAL @ 09:32:34 ***
+    Format (NEW with date): ║  *** LONG SIGNAL @ 2025-12-07 09:32:34 ***
+    Format (OLD time only): ║  *** LONG SIGNAL @ 09:32:34 ***
             ║  Trigger: YellowSquare+RR
             ║  Confluence: 4/5
             ║  RR=UP DT=1 VY=UP ET=UP SW=2 T3P=UP AAA=DN SB=DN
@@ -498,11 +743,23 @@ def parse_trader_signals(filepath, date_str):
     while i < len(lines):
         line = lines[i].strip()
         
-        # Look for signal line (box format)
-        signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{2}:\d{2}:\d{2}) \*\*\*', line)
+        # Look for signal line (box format) - try NEW format with date first
+        signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \*\*\*', line)
+        if not signal_match:
+            # Fall back to OLD format (time only)
+            signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{2}:\d{2}:\d{2}) \*\*\*', line)
         if signal_match:
             direction = signal_match.group(1)
-            time_str = signal_match.group(2)
+            
+            # Check which format was matched (NEW has 3 groups, OLD has 2)
+            if len(signal_match.groups()) == 3:
+                # NEW format with date: groups are (direction, date, time)
+                signal_date = signal_match.group(2)
+                time_str = signal_match.group(3)
+            else:
+                # OLD format: groups are (direction, time) - use provided date_str
+                signal_date = date_str
+                time_str = signal_match.group(2)
             
             # Parse following lines
             trigger = ''
@@ -569,7 +826,7 @@ def parse_trader_signals(filepath, date_str):
             signals.append({
                 'source': 'Trader',
                 'time_str': time_str,
-                'timestamp': datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"),
+                'timestamp': datetime.strptime(f"{signal_date} {time_str}", "%Y-%m-%d %H:%M:%S"),
                 'direction': direction,
                 'trigger': trigger,
                 'price': price,
@@ -609,6 +866,7 @@ def parse_trader_orders_and_closes(filepath, date_str):
     
     # Track current signal context for orders
     current_signal_time = None
+    current_signal_date = None
     current_signal_direction = None
     current_signal_price = 0
     
@@ -616,11 +874,23 @@ def parse_trader_orders_and_closes(filepath, date_str):
         line_stripped = line.strip()
         
         # Track signal context (for associating orders with signals)
-        signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{2}:\d{2}:\d{2}) \*\*\*', line_stripped)
+        # Try NEW format with date first
+        signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \*\*\*', line_stripped)
         if signal_match:
             current_signal_direction = signal_match.group(1)
-            current_signal_time = signal_match.group(2)
+            current_signal_date = signal_match.group(2)
+            current_signal_time = signal_match.group(3)
             current_signal_price = 0
+        else:
+            # Fall back to OLD format (time only)
+            signal_match = re.search(r'\*\*\* (LONG|SHORT) SIGNAL @ (\d{2}:\d{2}:\d{2}) \*\*\*', line_stripped)
+            if signal_match:
+                current_signal_direction = signal_match.group(1)
+                current_signal_date = date_str  # Use provided date
+                current_signal_time = signal_match.group(2)
+                current_signal_price = 0
+        
+        if signal_match:
             
             # Look for price in next few lines
             for j in range(1, 10):
@@ -639,10 +909,10 @@ def parse_trader_orders_and_closes(filepath, date_str):
         order_match = re.search(r'>>> ORDER PLACED: (LONG|SHORT) @ Market', line_stripped)
         if order_match:
             direction = order_match.group(1)
-            # Use the signal time/price as entry time/price
-            if current_signal_time:
+            # Use the signal date/time/price as entry
+            if current_signal_time and current_signal_date:
                 orders.append({
-                    'timestamp': datetime.strptime(f"{date_str} {current_signal_time}", "%Y-%m-%d %H:%M:%S"),
+                    'timestamp': datetime.strptime(f"{current_signal_date} {current_signal_time}", "%Y-%m-%d %H:%M:%S"),
                     'time_str': current_signal_time,
                     'direction': direction,
                     'price': current_signal_price,
@@ -661,8 +931,11 @@ def parse_trader_orders_and_closes(filepath, date_str):
             time_match = re.search(r'(\d{2}:\d{2}:\d{2})', line)
             time_str = time_match.group(1) if time_match else current_signal_time or '00:00:00'
             
+            # Use signal date (the trade belongs to the same day as the entry signal)
+            close_date = current_signal_date if current_signal_date else date_str
+            
             closes.append({
-                'timestamp': datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"),
+                'timestamp': datetime.strptime(f"{close_date} {time_str}", "%Y-%m-%d %H:%M:%S"),
                 'time_str': time_str,
                 'pnl_dollars': pnl_dollars,
                 'pnl_ticks': pnl_dollars / TICK_VALUE,
@@ -896,6 +1169,7 @@ def enrich_roundtrips_with_bar_data(roundtrips, bars):
     - Estimated actual exit time (from BAR price hitting SL/TP)
     - Confluence drop analysis
     - Single indicator flip analysis
+    - Trailing stop simulations
     """
     for rt in roundtrips:
         if not rt['complete']:
@@ -930,6 +1204,7 @@ def enrich_roundtrips_with_bar_data(roundtrips, bars):
             }
             rt['confluence_exit_difference'] = None
             rt['flip_exit_difference'] = None
+            rt['trailing_stop_analysis'] = {}
             continue
         
         # Determine exit time to use for analysis
@@ -960,6 +1235,29 @@ def enrich_roundtrips_with_bar_data(roundtrips, bars):
             rt['flip_exit_difference'] = hypo_pnl - actual_pnl
         else:
             rt['flip_exit_difference'] = None
+        
+        # === TRAILING STOP SIMULATIONS ===
+        rt['trailing_stop_analysis'] = {}
+        for config in TRAILING_STOP_CONFIGS:
+            trail_result = simulate_trailing_stop(
+                bars, entry_time, entry_price, rt['direction'],
+                sl_ticks=40, tp_ticks=120,
+                activation_ticks=config['activation_ticks'],
+                trail_distance_ticks=config['trail_distance_ticks']
+            )
+            
+            # Calculate difference vs actual
+            trail_pnl = trail_result['exit_pnl_ticks']
+            trail_difference = trail_pnl - actual_pnl
+            
+            rt['trailing_stop_analysis'][config['name']] = {
+                'config': config,
+                'result': trail_result,
+                'trail_pnl': trail_pnl,
+                'actual_pnl': actual_pnl,
+                'difference': trail_difference,
+                'is_better': trail_difference > 0
+            }
     
     return roundtrips
 
@@ -1187,6 +1485,126 @@ def analyze_early_exit_impact(roundtrips):
     }
 
 
+def analyze_trailing_stop_impact(roundtrips):
+    """
+    Analyze the impact of trailing stop strategies across all trades.
+    
+    Returns dict with analysis for each trailing stop configuration.
+    """
+    results = {}
+    trades_no_bar_data = 0
+    
+    for config in TRAILING_STOP_CONFIGS:
+        config_name = config['name']
+        results[config_name] = {
+            'config': config,
+            'trades_analyzed': 0,
+            'trades_better': 0,
+            'trades_worse': 0,
+            'trades_same': 0,
+            'total_difference_ticks': 0,
+            'total_actual_pnl': 0,
+            'total_trail_pnl': 0,
+            # Breakdown by actual outcome
+            'winners_analyzed': 0,
+            'winners_better_with_trail': 0,
+            'winners_worse_with_trail': 0,
+            'winners_difference': 0,
+            'losers_analyzed': 0,
+            'losers_better_with_trail': 0,
+            'losers_worse_with_trail': 0,
+            'losers_difference': 0,
+            # Exit type breakdown
+            'trail_exits_by_type': defaultdict(int),
+            # Let winners run analysis
+            'trades_exceeded_tp': 0,  # Trades where price went beyond 120t
+            'max_profit_sum': 0,
+            # Trade details for report
+            'trade_details': []
+        }
+    
+    for rt in roundtrips:
+        if not rt['complete']:
+            continue
+        
+        trail_analysis = rt.get('trailing_stop_analysis', {})
+        if not trail_analysis:
+            trades_no_bar_data += 1
+            continue
+        
+        actual_pnl = rt['pnl_ticks']
+        was_winner = actual_pnl > 0
+        
+        for config_name, analysis in trail_analysis.items():
+            if config_name not in results:
+                continue
+            
+            result = analysis['result']
+            trail_pnl = analysis['trail_pnl']
+            difference = analysis['difference']
+            
+            r = results[config_name]
+            r['trades_analyzed'] += 1
+            r['total_actual_pnl'] += actual_pnl
+            r['total_trail_pnl'] += trail_pnl
+            r['total_difference_ticks'] += difference
+            
+            # Track exit types
+            r['trail_exits_by_type'][result['exit_type']] += 1
+            
+            # Max profit tracking
+            r['max_profit_sum'] += result.get('max_profit_ticks', 0)
+            if result.get('max_profit_ticks', 0) > 120:
+                r['trades_exceeded_tp'] += 1
+            
+            # Comparison
+            if difference > 0:
+                r['trades_better'] += 1
+            elif difference < 0:
+                r['trades_worse'] += 1
+            else:
+                r['trades_same'] += 1
+            
+            # Breakdown by winner/loser
+            if was_winner:
+                r['winners_analyzed'] += 1
+                r['winners_difference'] += difference
+                if difference > 0:
+                    r['winners_better_with_trail'] += 1
+                elif difference < 0:
+                    r['winners_worse_with_trail'] += 1
+            else:
+                r['losers_analyzed'] += 1
+                r['losers_difference'] += difference
+                if difference > 0:
+                    r['losers_better_with_trail'] += 1
+                elif difference < 0:
+                    r['losers_worse_with_trail'] += 1
+            
+            # Store detail
+            r['trade_details'].append({
+                'entry_time': rt['entry']['time_str'],
+                'direction': rt['direction'],
+                'actual_pnl': actual_pnl,
+                'trail_pnl': trail_pnl,
+                'difference': difference,
+                'exit_type': result['exit_type'],
+                'trail_activated': result['trail_activated'],
+                'max_profit_ticks': result.get('max_profit_ticks', 0),
+                'was_winner': was_winner,
+                'is_better': difference > 0
+            })
+    
+    # Convert defaultdicts
+    for config_name in results:
+        results[config_name]['trail_exits_by_type'] = dict(results[config_name]['trail_exits_by_type'])
+    
+    return {
+        'trades_no_bar_data': trades_no_bar_data,
+        'configs': results
+    }
+
+
 def find_previous_analyses(folder_path, current_date_str):
     """Find and parse previous analysis files for comparison.
     
@@ -1326,6 +1744,9 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     # Adverse flip analysis (if BAR data available)
     adverse_flip_stats = analyze_adverse_flips(roundtrips) if bars else {}
     early_exit_analysis = analyze_early_exit_impact(roundtrips) if bars else None
+    
+    # Trailing stop analysis (if BAR data available)
+    trailing_stop_analysis = analyze_trailing_stop_impact(roundtrips) if bars else None
     
     # Best/worst trades
     sorted_by_pnl = sorted(complete_rts, key=lambda x: x['pnl_ticks'], reverse=True)
@@ -1545,6 +1966,126 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
                 )
             lines.append("")
     
+    # === TRAILING STOP ANALYSIS ===
+    if trailing_stop_analysis and trailing_stop_analysis.get('configs'):
+        lines.append("=" * 90)
+        lines.append("TRAILING STOP SIMULATION ANALYSIS")
+        lines.append("=" * 90)
+        lines.append("")
+        lines.append("Simulates trailing stops that activate after reaching profit threshold,")
+        lines.append("then trail behind price by specified distance. Fixed SL/TP still honored.")
+        lines.append("")
+        
+        if trailing_stop_analysis.get('trades_no_bar_data', 0) > 0:
+            lines.append(f"Trades SKIPPED (no BAR data): {trailing_stop_analysis['trades_no_bar_data']}")
+            lines.append("")
+        
+        # Summary comparison table
+        lines.append("TRAILING STOP COMPARISON SUMMARY")
+        lines.append("-" * 90)
+        lines.append(f"{'Strategy':<25} {'Trades':>7} {'Better':>7} {'Worse':>7} {'Same':>6} {'Actual':>10} {'Trail':>10} {'NET':>10}")
+        lines.append("-" * 90)
+        
+        # Baseline
+        baseline_pnl = sum(rt['pnl_ticks'] for rt in complete_rts)
+        lines.append(f"{'Fixed SL/TP (baseline)':<25} {total_trades:>7} {'---':>7} {'---':>7} {'---':>6} {baseline_pnl:>+10.0f}t {'---':>10} {'+0t':>10}")
+        
+        # Each trailing config
+        for config_name in sorted(trailing_stop_analysis['configs'].keys()):
+            ts = trailing_stop_analysis['configs'][config_name]
+            if ts['trades_analyzed'] == 0:
+                continue
+            
+            net_str = f"{ts['total_difference_ticks']:+.0f}t"
+            actual_str = f"{ts['total_actual_pnl']:+.0f}t"
+            trail_str = f"{ts['total_trail_pnl']:+.0f}t"
+            
+            lines.append(
+                f"{config_name:<25} {ts['trades_analyzed']:>7} {ts['trades_better']:>7} "
+                f"{ts['trades_worse']:>7} {ts['trades_same']:>6} {actual_str:>10} {trail_str:>10} {net_str:>10}"
+            )
+        
+        lines.append("-" * 90)
+        lines.append("")
+        
+        # Detailed breakdown for each config
+        for config_name in sorted(trailing_stop_analysis['configs'].keys()):
+            ts = trailing_stop_analysis['configs'][config_name]
+            if ts['trades_analyzed'] == 0:
+                continue
+            
+            config = ts['config']
+            lines.append(f"TRAILING STOP: {config_name}")
+            lines.append(f"  Configuration: {config['description']}")
+            lines.append(f"  - Activation threshold: +{config['activation_ticks']} ticks (+${config['activation_ticks'] * TICK_VALUE / 4:.0f})")
+            lines.append(f"  - Trail distance: {config['trail_distance_ticks']} ticks (${config['trail_distance_ticks'] * TICK_VALUE / 4:.0f})")
+            lines.append("-" * 50)
+            
+            lines.append(f"  Trades analyzed: {ts['trades_analyzed']}")
+            lines.append(f"  NET impact: {ts['total_difference_ticks']:+.0f}t (${ts['total_difference_ticks'] * TICK_VALUE:+.2f})")
+            lines.append("")
+            
+            # Exit type breakdown
+            lines.append("  Exit Type Breakdown:")
+            for exit_type, count in sorted(ts['trail_exits_by_type'].items()):
+                pct = count / ts['trades_analyzed'] * 100 if ts['trades_analyzed'] > 0 else 0
+                lines.append(f"    {exit_type}: {count} ({pct:.0f}%)")
+            lines.append("")
+            
+            # Winners vs Losers impact
+            lines.append("  Impact on Winners (actual result was profitable):")
+            lines.append(f"    Analyzed: {ts['winners_analyzed']}")
+            lines.append(f"    Trail better: {ts['winners_better_with_trail']}, Trail worse: {ts['winners_worse_with_trail']}")
+            lines.append(f"    Winner P&L change: {ts['winners_difference']:+.0f}t")
+            lines.append("")
+            
+            lines.append("  Impact on Losers (actual result was loss):")
+            lines.append(f"    Analyzed: {ts['losers_analyzed']}")
+            lines.append(f"    Trail better: {ts['losers_better_with_trail']}, Trail worse: {ts['losers_worse_with_trail']}")
+            lines.append(f"    Loser P&L change: {ts['losers_difference']:+.0f}t")
+            lines.append("")
+            
+            # Let winners run analysis
+            if ts['trades_exceeded_tp'] > 0:
+                avg_max = ts['max_profit_sum'] / ts['trades_analyzed'] if ts['trades_analyzed'] > 0 else 0
+                lines.append(f"  'Let Winners Run' Analysis:")
+                lines.append(f"    Trades where price exceeded 120t TP: {ts['trades_exceeded_tp']}")
+                lines.append(f"    Average max profit reached: {avg_max:.0f}t")
+                lines.append("")
+            
+            # Trade details (first 20)
+            lines.append("  Trade Details (showing impact per trade):")
+            lines.append("  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?")
+            for t in ts['trade_details'][:30]:  # Limit to 30 for readability
+                result = "+" if t['is_better'] else ("-" if t['difference'] < 0 else "=")
+                trail_flag = "Yes" if t['trail_activated'] else "No"
+                lines.append(
+                    f"  {t['entry_time']} {t['direction']:5} {t['actual_pnl']:+6.0f}t {t['trail_pnl']:+6.0f}t "
+                    f"{t['difference']:+5.0f}t {t['exit_type']:5} {t['max_profit_ticks']:+6.0f}t  {trail_flag}"
+                )
+            
+            if len(ts['trade_details']) > 30:
+                lines.append(f"  ... and {len(ts['trade_details']) - 30} more trades")
+            lines.append("")
+        
+        # Recommendation
+        lines.append("TRAILING STOP RECOMMENDATION")
+        lines.append("-" * 30)
+        best_config = None
+        best_net = 0
+        for config_name, ts in trailing_stop_analysis['configs'].items():
+            if ts['total_difference_ticks'] > best_net:
+                best_net = ts['total_difference_ticks']
+                best_config = config_name
+        
+        if best_config and best_net > 0:
+            lines.append(f"  Best trailing config: {best_config} with {best_net:+.0f}t improvement")
+            lines.append(f"  Consider implementing this trailing stop strategy.")
+        else:
+            lines.append(f"  No trailing stop configuration improved results.")
+            lines.append(f"  Current fixed SL/TP strategy performs best.")
+        lines.append("")
+    
     # Signal alignment section
     lines.append("SIGNAL ALIGNMENT ANALYSIS")
     lines.append("-" * 25)
@@ -1604,13 +2145,14 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             up_wr = (stats['up_wins'] / up_total * 100) if up_total > 0 else 0
             dn_wr = (stats['dn_wins'] / dn_total * 100) if dn_total > 0 else 0
             
-            note = ""
-            if up_wr > 60 and up_total >= 3:
-                note = "← Strong when UP"
-            elif dn_wr > 60 and dn_total >= 3:
-                note = "← Strong when DN"
+            # Notes
+            notes = ""
+            if up_wr > dn_wr + 10:
+                notes = "Better when UP"
+            elif dn_wr > up_wr + 10:
+                notes = "Better when DN"
             
-            lines.append(f"  {ind:8}  {stats['up_wins']}/{stats['up_losses']} ({up_wr:4.0f}%)  {stats['dn_wins']}/{stats['dn_losses']} ({dn_wr:4.0f}%)  {note}")
+            lines.append(f"  {ind:6}    {stats['up_wins']}/{stats['up_losses']} ({up_wr:4.0f}%)  {stats['dn_wins']}/{stats['dn_losses']} ({dn_wr:4.0f}%)  {notes}")
         lines.append("")
     
     # Best/worst trades
@@ -1619,30 +2161,22 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     lines.append("")
     lines.append("TOP 5 WINNERS:")
     for rt in top_5:
-        if rt['pnl_ticks'] > 0:
-            sig = rt.get('signal')
-            if sig:
-                sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
-            else:
-                sig_info = "[NO SIGNAL]"
-            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
+        sig = rt.get('signal')
+        if sig:
+            sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
+        else:
+            sig_info = "[NO SIGNAL]"
+        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
     lines.append("")
+    
     lines.append("BOTTOM 5 LOSERS:")
-    for rt in reversed(bottom_5):
-        if rt['pnl_ticks'] < 0:
-            sig = rt.get('signal')
-            if sig:
-                sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
-            else:
-                sig_info = "[NO SIGNAL]"
-            
-            # Add confluence drop info
-            confluence_drop = rt.get('flip_analysis', {}).get('confluence_drop')
-            drop_info = ""
-            if confluence_drop:
-                drop_info = f" (conf drop: {confluence_drop['entry_confluence']}→{confluence_drop['exit_confluence']}@{confluence_drop['time']})"
-            
-            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}{drop_info}")
+    for rt in bottom_5:
+        sig = rt.get('signal')
+        if sig:
+            sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
+        else:
+            sig_info = "[NO SIGNAL]"
+        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
     lines.append("")
     
     # Time-based analysis
@@ -1651,8 +2185,8 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     bucket_order = ['Pre-8:30', '8:30-9:00', '9:00-10:00', '10:00-11:00', '11:00+']
     for bucket in bucket_order:
         if bucket in time_buckets:
-            b = time_buckets[bucket]
-            lines.append(f"{bucket:12}: {b['trades']:2} trades, {b['wins']}W, {b['pnl']:+5.0f}t")
+            stats = time_buckets[bucket]
+            lines.append(f"{bucket:12}: {stats['trades']} trades, {stats['wins']}W, {stats['pnl']:+.0f}t")
     lines.append("")
     
     # Key insights
@@ -1661,12 +2195,11 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     lines.append("=" * 80)
     lines.append("")
     
-    # Insight 1: Signal hit rate
-    signal_rate = len(aligned) / total_trades * 100 if total_trades > 0 else 0
+    # Insight 1: Signal alignment
     lines.append("1. SIGNAL ALIGNMENT:")
-    lines.append(f"   - {len(aligned)} of {total_trades} trades ({signal_rate:.0f}%) aligned with signals")
-    if len(no_signal) > 0:
-        lines.append(f"   - {len(no_signal)} trades ({len(no_signal)/total_trades*100:.0f}%) had no nearby signal")
+    if total_trades > 0:
+        align_pct = len(aligned) / total_trades * 100
+        lines.append(f"   - {len(aligned)} of {total_trades} trades ({align_pct:.0f}%) aligned with signals")
     lines.append("")
     
     # Insight 2: P&L by alignment
@@ -1676,25 +2209,26 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     lines.append(f"   - NO SIGNAL trades: {no_signal_pnl:+.0f}t (${no_signal_pnl * TICK_VALUE:+.2f})")
     lines.append("")
     
-    # Insight 3: Best confluence level
+    # Insight 3: Confluence effectiveness
+    lines.append("3. CONFLUENCE INSIGHTS:")
     if confluence_stats:
         best_conf = max(confluence_stats.items(), key=lambda x: x[1]['pnl']) if confluence_stats else None
         if best_conf:
-            lines.append("3. CONFLUENCE INSIGHTS:")
             lines.append(f"   - Best performing: {best_conf[0]} with {best_conf[1]['pnl']:+.0f}t")
-            high_conf = [k for k, v in confluence_stats.items() if int(k.split('/')[0]) >= int(k.split('/')[1]) - 1]
-            if high_conf:
-                high_conf_pnl = sum(confluence_stats[k]['pnl'] for k in high_conf)
-                lines.append(f"   - High confluence (N-1 or higher): {high_conf_pnl:+.0f}t")
+        
+        # High confluence performance
+        high_conf_pnl = sum(
+            stats['pnl'] for key, stats in confluence_stats.items()
+            if key.split('/')[0].isdigit() and int(key.split('/')[0]) >= int(key.split('/')[1]) - 1
+        )
+        lines.append(f"   - High confluence (N-1 or higher): {high_conf_pnl:+.0f}t")
     lines.append("")
     
-    # Insight 4: Early exit analysis - both strategies
+    # Insight 4: Exit strategy comparison
     if early_exit_analysis:
-        ea = early_exit_analysis
-        conf_ea = ea.get('confluence')
-        flip_ea = ea.get('flip')
-        
         lines.append("4. EXIT STRATEGY COMPARISON:")
+        conf_ea = early_exit_analysis.get('confluence')
+        flip_ea = early_exit_analysis.get('flip')
         
         # Confluence drop summary
         if conf_ea and conf_ea['trades_analyzed'] > 0:
@@ -1712,14 +2246,40 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
         else:
             lines.append(f"   - Indicator flip:  no trades affected")
         
+        # Trailing stop summary
+        if trailing_stop_analysis and trailing_stop_analysis.get('configs'):
+            best_trail = None
+            best_trail_net = 0
+            for config_name, ts in trailing_stop_analysis['configs'].items():
+                if ts['total_difference_ticks'] > best_trail_net:
+                    best_trail_net = ts['total_difference_ticks']
+                    best_trail = config_name
+            
+            if best_trail and best_trail_net > 0:
+                lines.append(f"   - Trailing stop:   SAVE {best_trail_net:.0f}t (best: {best_trail})")
+            else:
+                lines.append(f"   - Trailing stop:   no improvement found")
+        
         # Recommendation
         conf_net = conf_ea['total_difference_ticks'] if conf_ea else 0
         flip_net = flip_ea['total_difference_ticks'] if flip_ea else 0
-        if conf_net > 0 or flip_net > 0:
-            if conf_net >= flip_net and conf_net > 0:
-                lines.append(f"   → Confluence drop would improve results")
-            elif flip_net > conf_net and flip_net > 0:
-                lines.append(f"   → Indicator flip would improve results")
+        trail_net = best_trail_net if trailing_stop_analysis else 0
+        
+        if conf_net > 0 or flip_net > 0 or trail_net > 0:
+            best_strategy = "Current SL/TP"
+            best_improvement = 0
+            if conf_net > best_improvement:
+                best_improvement = conf_net
+                best_strategy = "Confluence drop"
+            if flip_net > best_improvement:
+                best_improvement = flip_net
+                best_strategy = "Indicator flip"
+            if trail_net > best_improvement:
+                best_improvement = trail_net
+                best_strategy = f"Trailing stop ({best_trail})"
+            
+            if best_improvement > 0:
+                lines.append(f"   → {best_strategy} would improve results by {best_improvement:+.0f}t")
         else:
             lines.append(f"   → Current SL/TP performs best")
         lines.append("")
@@ -1894,6 +2454,11 @@ def main():
         trades_no_bars = sum(1 for rt in roundtrips if rt['complete'] and rt.get('flip_analysis', {}).get('no_bar_data', False))
         print(f"  Trades with BAR coverage: {trades_with_bars}")
         print(f"  Trades without BAR coverage: {trades_no_bars}")
+        
+        # Show trailing stop configs being tested
+        print(f"\nSimulating {len(TRAILING_STOP_CONFIGS)} trailing stop configurations:")
+        for config in TRAILING_STOP_CONFIGS:
+            print(f"  - {config['name']}: {config['description']}")
     
     # Generate report
     report = generate_report(roundtrips, all_signals, date_str, folder_path, all_bars)

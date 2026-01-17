@@ -47,7 +47,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             {
                 var (bull, bear, total) = GetConfluence();
                 string source = GetIndicatorSourceSummary();
-                // Include AAA_IsUp in CSV output
+                // Include AAA_IsUp in CSV output - barTime includes full date
                 csvWriter.WriteLine($"{barTime:yyyy-MM-dd HH:mm:ss},{Close[0]:F2},{B2I(AIQ1_IsUp)},{B2I(RR_IsUp)},{DT_Signal:F2},{B2I(VY_IsUp)},{B2I(ET_IsUp)},{B2I(SW_IsUp)},{SW_Count},{B2I(T3P_IsUp)},{B2I(AAA_IsUp)},{B2I(SB_IsUp)},{bull},{bear},{source}");
             }
             catch { }
@@ -120,22 +120,23 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
             
             string instrumentName = Instrument.FullName;
-            string squareType = dir == "LONG" ? "Yellow■" : "Orange■";
+            string squareType = dir == "LONG" ? "Yellow🟨" : "Orange🟧";
             
             PrintAndLog($"");
-            PrintAndLog($"╔═══════════════════════════════════════════════════════════════╗");
-            PrintAndLog($"║  *** {dir} SIGNAL @ {t:HH:mm:ss} ***");
-            PrintAndLog($"╠═══════════════════════════════════════════════════════════════╣");
+            PrintAndLog($"╔══════════════════════════════════════════════════════════════════════════╗");
+            // FIXED: Include full date in signal timestamp for Market Replay analysis
+            PrintAndLog($"║  *** {dir} SIGNAL @ {t:yyyy-MM-dd HH:mm:ss} ***");
+            PrintAndLog($"╠══════════════════════════════════════════════════════════════════════════╣");
             PrintAndLog($"║  Instrument: {instrumentName}");
             PrintAndLog($"║  Ask: {askPrice:F2}    Bid: {bidPrice:F2}");
             PrintAndLog($"║  STOP: {stopPrice:F2}  (${StopLossUSD:F0} = {stopPoints:F2} pts)");
             PrintAndLog($"║  TP:   {tpPrice:F2}  (${TakeProfitUSD:F0} = {tpPoints:F2} pts)");
-            PrintAndLog($"╠═══════════════════════════════════════════════════════════════╣");
+            PrintAndLog($"╠══════════════════════════════════════════════════════════════════════════╣");
             PrintAndLog($"║  Trigger: {trigger}");
             PrintAndLog($"║  Confluence: {confluenceCount}/{total}");
             PrintAndLog($"║  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)} SB={Ts(SB_IsUp)}");
             PrintAndLog($"║  AIQ1={Ts(AIQ1_IsUp)} | Bars after {squareType}: {barsAfterSquare}");
-            PrintAndLog($"╚═══════════════════════════════════════════════════════════════╝");
+            PrintAndLog($"╚══════════════════════════════════════════════════════════════════════════╝");
         }
         
         private string Ts(bool up) => up ? "UP" : "DN";
@@ -170,8 +171,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     logWriter.WriteLine($"    Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2}");
                 if (CloseAtEndOfDay)
                     logWriter.WriteLine($"    Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
-                logWriter.WriteLine($"    LONG:  Yellow■ (AIQ1 UP) → Any indicator confirms → Bull Confluence ≥ {MinConfluenceRequired}");
-                logWriter.WriteLine($"    SHORT: Orange■ (AIQ1 DN) → Any indicator confirms → Bear Confluence ≥ {MinConfluenceRequired}\n");
+                logWriter.WriteLine($"    LONG:  Yellow🟨 (AIQ1 UP) → Any indicator confirms → Bull Confluence ≥ {MinConfluenceRequired}");
+                logWriter.WriteLine($"    SHORT: Orange🟧 (AIQ1 DN) → Any indicator confirms → Bear Confluence ≥ {MinConfluenceRequired}\n");
             }
             catch { }
         }
