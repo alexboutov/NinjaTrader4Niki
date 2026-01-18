@@ -131,6 +131,10 @@ namespace NinjaTrader.NinjaScript.Strategies
         private double trailStopPrice = 0;
         private ATR atrIndicator;
         
+        // Simple trailing stop tracking (tick-based)
+        private bool simpleTrailActive = false;
+        private double simpleTrailStopLevel = 0;
+        
         #endregion
         
         #region Parameters
@@ -395,6 +399,20 @@ namespace NinjaTrader.NinjaScript.Strategies
         public double MaxProfitUSD { get; set; }
         
         [NinjaScriptProperty]
+        [Display(Name="Enable Trailing Stop", Description="Simple tick-based trailing stop (activates at profit threshold)", Order=1, GroupName="12a. Trailing Stop")]
+        public bool EnableTrailingStop { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(10, 200)]
+        [Display(Name="Trail Activation Ticks", Description="Profit in ticks before trailing stop activates", Order=2, GroupName="12a. Trailing Stop")]
+        public int TrailActivationTicks { get; set; }
+        
+        [NinjaScriptProperty]
+        [Range(5, 100)]
+        [Display(Name="Trail Distance Ticks", Description="Trailing stop distance in ticks behind price", Order=3, GroupName="12a. Trailing Stop")]
+        public int TrailDistanceTicks { get; set; }
+        
+        [NinjaScriptProperty]
         [Display(Name="Enable Indicator CSV Log", Description="Log raw indicator values to CSV for comparison/tuning", Order=1, GroupName="13. Debug")]
         public bool EnableIndicatorCSVLog { get; set; }
         #endregion
@@ -516,10 +534,16 @@ namespace NinjaTrader.NinjaScript.Strategies
                 StopLossBufferTicks = 2;  // Add 2 ticks buffer to reduce slippage
                 
                 // Dynamic Exit - let profits run when trend continues
-                EnableDynamicExit = true;
+                EnableDynamicExit = false;  // Disabled - using simpler trailing stop instead
                 MinConfluenceToStay = 4;
                 TrailStopATRMultiplier = 1.5;
                 MaxProfitUSD = 500;  // Force exit at $500 profit
+                
+                // Simple Trailing Stop - tick-based (optimized via backtest)
+                // Analysis: Trail-60/30 improved P&L by +1,271 ticks vs fixed SL/TP
+                EnableTrailingStop = true;
+                TrailActivationTicks = 60;  // Activate trail after +60 ticks profit
+                TrailDistanceTicks = 30;    // Trail 30 ticks behind price
                 
                 // Debug - CSV indicator logging OFF by default
                 EnableIndicatorCSVLog = false;
@@ -561,6 +585,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     LogAlways($"SL Buffer: {StopLossBufferTicks} ticks");
                 if (EnableDynamicExit)
                     LogAlways($"🚀 Dynamic Exit: ON | MinConf={MinConfluenceToStay} | Trail={TrailStopATRMultiplier}xATR | MaxProfit=${MaxProfitUSD}");
+                if (EnableTrailingStop)
+                    LogAlways($"📈 Trailing Stop: ON | Activate={TrailActivationTicks}t | Distance={TrailDistanceTicks}t");
                 if (UniRenkoMode)
                 {
                     LogAlways($"*** UNIRENKO MODE ENABLED ***");
@@ -785,11 +811,68 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
+            // SIMPLE TRAILING STOP MANAGEMENT (tick-based)
+            if (EnableTrailingStop && !EnableDynamicExit && Position.MarketPosition != MarketPosition.Flat && entryPrice > 0)
+            {
+                double currentPrice = Close[0];
+                bool isLong = Position.MarketPosition == MarketPosition.Long;
+                
+                // Calculate current profit in ticks
+                double profitTicks = isLong 
+                    ? (currentPrice - entryPrice) / TickSize 
+                    : (entryPrice - currentPrice) / TickSize;
+                
+                double trailDistancePoints = TrailDistanceTicks * TickSize;
+                
+                // Check if we should activate the trail
+                if (!simpleTrailActive && profitTicks >= TrailActivationTicks)
+                {
+                    simpleTrailActive = true;
+                    simpleTrailStopLevel = isLong 
+                        ? currentPrice - trailDistancePoints 
+                        : currentPrice + trailDistancePoints;
+                    
+                    // Update stop loss to trailing level
+                    if (isLong)
+                        SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
+                    else
+                        SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
+                    
+                    PrintAndLog($"📈 TRAIL ACTIVATED @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | Trail Stop={simpleTrailStopLevel:F2}");
+                }
+                // Update trailing stop if already active (only move in favorable direction)
+                else if (simpleTrailActive)
+                {
+                    if (isLong)
+                    {
+                        double newTrailStop = currentPrice - trailDistancePoints;
+                        if (newTrailStop > simpleTrailStopLevel)
+                        {
+                            simpleTrailStopLevel = newTrailStop;
+                            SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
+                            PrintAndLog($"📈 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t");
+                        }
+                    }
+                    else
+                    {
+                        double newTrailStop = currentPrice + trailDistancePoints;
+                        if (newTrailStop < simpleTrailStopLevel)
+                        {
+                            simpleTrailStopLevel = newTrailStop;
+                            SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
+                            PrintAndLog($"📉 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t");
+                        }
+                    }
+                }
+            }
+            
             if (Position.MarketPosition == MarketPosition.Flat)
             {
                 entryPrice = 0;
                 dynamicExitActive = false;
                 trailStopPrice = 0;
+                simpleTrailActive = false;
+                simpleTrailStopLevel = 0;
             }
             
             if (barsSinceLastSignal >= 0)
@@ -895,13 +978,23 @@ namespace NinjaTrader.NinjaScript.Strategies
                                         dynamicExitActive = false;
                                         trailStopPrice = 0;
                                     }
+                                    else if (EnableTrailingStop)
+                                    {
+                                        // Trailing stop: Set SL and TP, track entry for trail activation
+                                        SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
+                                        SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
+                                        entryPrice = GetCurrentAsk();
+                                        simpleTrailActive = false;
+                                        simpleTrailStopLevel = 0;
+                                    }
                                     else
                                     {
                                         SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
                                     }
                                     EnterLong("Long");
-                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{(EnableDynamicExit ? " [DYNAMIC]" : "")}");
+                                    string exitMode = EnableDynamicExit ? " [DYNAMIC]" : (EnableTrailingStop ? " [TRAIL]" : "");
+                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
                                 }
                                 else
                                 {
@@ -956,13 +1049,23 @@ namespace NinjaTrader.NinjaScript.Strategies
                                         dynamicExitActive = false;
                                         trailStopPrice = 0;
                                     }
+                                    else if (EnableTrailingStop)
+                                    {
+                                        // Trailing stop: Set SL and TP, track entry for trail activation
+                                        SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
+                                        SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
+                                        entryPrice = GetCurrentBid();
+                                        simpleTrailActive = false;
+                                        simpleTrailStopLevel = 0;
+                                    }
                                     else
                                     {
                                         SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
                                     }
                                     EnterShort("Short");
-                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{(EnableDynamicExit ? " [DYNAMIC]" : "")}");
+                                    string exitMode = EnableDynamicExit ? " [DYNAMIC]" : (EnableTrailingStop ? " [TRAIL]" : "");
+                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
                                 }
                                 else
                                 {

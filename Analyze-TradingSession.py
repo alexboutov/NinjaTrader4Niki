@@ -41,25 +41,90 @@ CSV_INDICATOR_COLUMNS = {
 }
 
 # === TRAILING STOP CONFIGURATION ===
-# Multiple configurations to test
+# Grid search: Test multiple activation/trail combinations to find optimum
 TRAILING_STOP_CONFIGS = [
+    # Original configs
+    {
+        'name': 'Trail-40/20',
+        'activation_ticks': 40,
+        'trail_distance_ticks': 20,
+        'description': 'Activate at +40t, trail 20t (tight)'
+    },
     {
         'name': 'Trail-60/30',
-        'activation_ticks': 60,   # Activate trail after +60 ticks profit
-        'trail_distance_ticks': 30,  # Trail 30 ticks behind
+        'activation_ticks': 60,
+        'trail_distance_ticks': 30,
         'description': 'Activate at +60t, trail 30t'
     },
     {
         'name': 'Trail-80/40',
-        'activation_ticks': 80,   # Activate trail after +80 ticks profit (2x SL)
-        'trail_distance_ticks': 40,  # Trail 40 ticks behind (1x SL)
+        'activation_ticks': 80,
+        'trail_distance_ticks': 40,
         'description': 'Activate at +80t, trail 40t'
     },
+    # Extended grid search - higher activations
     {
-        'name': 'Trail-40/20',
-        'activation_ticks': 40,   # Activate trail after +40 ticks profit (1x SL)
-        'trail_distance_ticks': 20,  # Trail 20 ticks behind (tight)
-        'description': 'Activate at +40t, trail 20t (tight)'
+        'name': 'Trail-90/45',
+        'activation_ticks': 90,
+        'trail_distance_ticks': 45,
+        'description': 'Activate at +90t, trail 45t'
+    },
+    {
+        'name': 'Trail-100/50',
+        'activation_ticks': 100,
+        'trail_distance_ticks': 50,
+        'description': 'Activate at +100t, trail 50t'
+    },
+    {
+        'name': 'Trail-110/55',
+        'activation_ticks': 110,
+        'trail_distance_ticks': 55,
+        'description': 'Activate at +110t, trail 55t (near TP)'
+    },
+    # Test different ratios at 80t activation
+    {
+        'name': 'Trail-80/30',
+        'activation_ticks': 80,
+        'trail_distance_ticks': 30,
+        'description': 'Activate at +80t, trail 30t (tighter)'
+    },
+    {
+        'name': 'Trail-80/50',
+        'activation_ticks': 80,
+        'trail_distance_ticks': 50,
+        'description': 'Activate at +80t, trail 50t (looser)'
+    },
+    # Test different ratios at 100t activation
+    {
+        'name': 'Trail-100/40',
+        'activation_ticks': 100,
+        'trail_distance_ticks': 40,
+        'description': 'Activate at +100t, trail 40t (tight)'
+    },
+    {
+        'name': 'Trail-100/30',
+        'activation_ticks': 100,
+        'trail_distance_ticks': 30,
+        'description': 'Activate at +100t, trail 30t (very tight)'
+    },
+    # Test 2:1 ratio at different levels
+    {
+        'name': 'Trail-50/25',
+        'activation_ticks': 50,
+        'trail_distance_ticks': 25,
+        'description': 'Activate at +50t, trail 25t'
+    },
+    {
+        'name': 'Trail-70/35',
+        'activation_ticks': 70,
+        'trail_distance_ticks': 35,
+        'description': 'Activate at +70t, trail 35t'
+    },
+    {
+        'name': 'Trail-90/40',
+        'activation_ticks': 90,
+        'trail_distance_ticks': 40,
+        'description': 'Activate at +90t, trail 40t'
     },
 ]
 
