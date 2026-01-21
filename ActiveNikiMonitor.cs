@@ -94,6 +94,7 @@ namespace NinjaTrader.NinjaScript.Indicators
         private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro, chkAAASync, chkSuperBands;
         private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro, lblAAASync, lblSuperBands;
         private TextBlock lblAIQ1Status, lblWindowStatus;
+        private TextBlock lblAIQ1Name;  // Dynamic trigger label
         private TextBlock lblTradeStatus, lblSessionStats, lblTriggerMode, lblLastSignal, lblSubtitle;
         private Border signalBorder;
         
@@ -852,7 +853,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                 var aiqRow = new Grid { Margin = new Thickness(0, 1, 0, 1) };
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-                var lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow ■)", Foreground = Brushes.Orange, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
+                lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow ■)", Foreground = Brushes.Yellow, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
                 Grid.SetColumn(lblAIQ1Name, 0); aiqRow.Children.Add(lblAIQ1Name);
                 lblAIQ1Status = new TextBlock { Text = "---", Foreground = Brushes.Gray, FontSize = 9, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Right };
                 Grid.SetColumn(lblAIQ1Status, 1); aiqRow.Children.Add(lblAIQ1Status);
@@ -1254,6 +1255,41 @@ namespace NinjaTrader.NinjaScript.Indicators
                 {
                     lblAIQ1Status.Text = AIQ1_IsUp ? "UP" : "DN";
                     lblAIQ1Status.Foreground = AIQ1_IsUp ? Brushes.Lime : Brushes.Red;
+                }
+                
+                // Dynamic trigger label - shows Yellow/Orange based on current state
+                if (lblAIQ1Name != null)
+                {
+                    bool longWindowOpen = barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare;
+                    bool shortWindowOpen = barsSinceOrangeSquare >= 0 && barsSinceOrangeSquare <= MaxBarsAfterYellowSquare;
+                    var (bullConf, bearConf, _) = GetConfluence();
+                    
+                    if (longWindowOpen)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow ■)";
+                        lblAIQ1Name.Foreground = Brushes.Yellow;
+                    }
+                    else if (shortWindowOpen)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Foreground = Brushes.Orange;
+                    }
+                    else if (bearConf >= MinConfluenceRequired)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Foreground = Brushes.Orange;
+                    }
+                    else if (bullConf >= MinConfluenceRequired)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow ■)";
+                        lblAIQ1Name.Foreground = Brushes.Yellow;
+                    }
+                    else
+                    {
+                        // Low confluence - show based on current AIQ1 state
+                        lblAIQ1Name.Text = AIQ1_IsUp ? "AIQ_1 (Yellow ■)" : "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Foreground = Brushes.Gray;
+                    }
                 }
                 
                 // Window status

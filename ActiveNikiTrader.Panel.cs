@@ -48,6 +48,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private double minPanelHeight = 200;
         private Point resizeStartMousePos;
         private double resizeStartLeft, resizeStartTop;
+        private TextBlock lblAIQ1Name;  // Dynamic trigger label
         #endregion
 
         #region Chart Panel
@@ -110,7 +111,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 var aiqRow = new Grid { Margin = new Thickness(0, 1, 0, 1) };
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-                var lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow ■)", Foreground = Brushes.Orange, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
+                lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow ■)", Foreground = Brushes.Yellow, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
                 Grid.SetColumn(lblAIQ1Name, 0); aiqRow.Children.Add(lblAIQ1Name);
                 lblAIQ1Status = new TextBlock { Text = "---", Foreground = Brushes.Gray, FontSize = 9, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Right };
                 Grid.SetColumn(lblAIQ1Status, 1); aiqRow.Children.Add(lblAIQ1Status);
@@ -547,6 +548,41 @@ namespace NinjaTrader.NinjaScript.Strategies
                 {
                     lblAIQ1Status.Text = AIQ1_IsUp ? "UP" : "DN";
                     lblAIQ1Status.Foreground = AIQ1_IsUp ? Brushes.Lime : Brushes.Red;
+                }
+                
+                // Dynamic trigger label - shows Yellow/Orange based on current state
+                if (lblAIQ1Name != null)
+                {
+                    bool longWindowOpen = barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare;
+                    bool shortWindowOpen = barsSinceOrangeSquare >= 0 && barsSinceOrangeSquare <= MaxBarsAfterYellowSquare;
+                    var (bullConf, bearConf, _) = GetConfluence();
+                    
+                    if (longWindowOpen)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow ■)";
+                        lblAIQ1Name.Foreground = Brushes.Yellow;
+                    }
+                    else if (shortWindowOpen)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Foreground = Brushes.Orange;
+                    }
+                    else if (bearConf >= MinConfluenceRequired)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Foreground = Brushes.Orange;
+                    }
+                    else if (bullConf >= MinConfluenceRequired)
+                    {
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow ■)";
+                        lblAIQ1Name.Foreground = Brushes.Yellow;
+                    }
+                    else
+                    {
+                        // Low confluence - show based on current AIQ1 state
+                        lblAIQ1Name.Text = AIQ1_IsUp ? "AIQ_1 (Yellow ■)" : "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Foreground = Brushes.Gray;
+                    }
                 }
                 
                 if (lblWindowStatus != null)
