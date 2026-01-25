@@ -985,36 +985,61 @@ def parse_trader_orders_and_closes(filepath, date_str):
                     'is_close': False
                 })
         
-        # Parse TRADE CLOSED
-        closed_match = re.search(r'TRADE CLOSED: P&L \$([+-]?\d+\.?\d*)', line_stripped)
+        # Parse TRADE CLOSED - NEW FORMAT with direction, entry, exit, reason
+        # Format: ✅ TRADE CLOSED: SHORT | Entry=25187.00 Exit=25165.00 | +88t $434.84 | Reason: TRAIL
+        closed_match = re.search(r'TRADE CLOSED:\s*(LONG|SHORT)\s*\|\s*Entry=(\d+\.?\d*)\s*Exit=(\d+\.?\d*)\s*\|\s*([+-]?\d+)t\s*\$([+-]?\d+\.?\d*)\s*\|\s*Reason:\s*(\w+)', line_stripped)
         if closed_match:
-            pnl_dollars = float(closed_match.group(1))
+            direction = closed_match.group(1)
+            entry_price = float(closed_match.group(2))
+            exit_price = float(closed_match.group(3))
+            pnl_ticks = int(closed_match.group(4))
+            pnl_dollars = float(closed_match.group(5))
+            exit_reason = closed_match.group(6)
             
-            # Extract log timestamp (format: HH:MM:SS | at start of line after stripping pipe)
-            # The log format is: "22:11:40 | ✅ TRADE CLOSED..."
-            # But stripped line starts with emoji, look at original
+            # Extract log timestamp
             time_match = re.search(r'(\d{2}:\d{2}:\d{2})', line)
             time_str = time_match.group(1) if time_match else current_signal_time or '00:00:00'
             
-            # Use signal date (the trade belongs to the same day as the entry signal)
+            # Use signal date
             close_date = current_signal_date if current_signal_date else date_str
             
             closes.append({
                 'timestamp': datetime.strptime(f"{close_date} {time_str}", "%Y-%m-%d %H:%M:%S"),
                 'time_str': time_str,
+                'direction': direction,
+                'entry_price': entry_price,
+                'exit_price': exit_price,
+                'pnl_ticks': pnl_ticks,
                 'pnl_dollars': pnl_dollars,
-                'pnl_ticks': pnl_dollars / TICK_VALUE,
+                'exit_reason': exit_reason,
                 'is_win': pnl_dollars > 0
             })
+        else:
+            # Fallback: OLD FORMAT - TRADE CLOSED: P&L $X.XX
+            closed_match_old = re.search(r'TRADE CLOSED: P&L \$([+-]?\d+\.?\d*)', line_stripped)
+            if closed_match_old:
+                pnl_dollars = float(closed_match_old.group(1))
+                
+                time_match = re.search(r'(\d{2}:\d{2}:\d{2})', line)
+                time_str = time_match.group(1) if time_match else current_signal_time or '00:00:00'
+                close_date = current_signal_date if current_signal_date else date_str
+                
+                closes.append({
+                    'timestamp': datetime.strptime(f"{close_date} {time_str}", "%Y-%m-%d %H:%M:%S"),
+                    'time_str': time_str,
+                    'pnl_dollars': pnl_dollars,
+                    'pnl_ticks': pnl_dollars / TICK_VALUE,
+                    'is_win': pnl_dollars > 0
+                })
     
     return orders, closes
 
 
 def parse_trader_closed_trades(filepath, date_str):
     """
-    Parse ActiveNikiTrader log for trade results (legacy function for backward compat).
-    Format: ❌ TRADE CLOSED: P&L $-340.00 | Daily P&L: $-340.00 (1 trades)
-            ✅ TRADE CLOSED: P&L $200.00 | Daily P&L: $200.00 (1 trades)
+    Parse ActiveNikiTrader log for trade results.
+    NEW Format: ✅ TRADE CLOSED: SHORT | Entry=25187.00 Exit=25165.00 | +88t $434.84 | Reason: TRAIL
+    OLD Format: ❌ TRADE CLOSED: P&L $-340.00 | Daily P&L: $-340.00 (1 trades)
     """
     closed_trades = []
     if not os.path.exists(filepath):
@@ -1024,21 +1049,44 @@ def parse_trader_closed_trades(filepath, date_str):
         for line in f:
             line = line.strip()
             
-            # Look for trade closed line
-            closed_match = re.search(r'TRADE CLOSED: P&L \$([+-]?\d+\.?\d*)', line)
+            # Try NEW FORMAT first
+            closed_match = re.search(r'TRADE CLOSED:\s*(LONG|SHORT)\s*\|\s*Entry=(\d+\.?\d*)\s*Exit=(\d+\.?\d*)\s*\|\s*([+-]?\d+)t\s*\$([+-]?\d+\.?\d*)\s*\|\s*Reason:\s*(\w+)', line)
             if closed_match:
-                pnl = float(closed_match.group(1))
+                direction = closed_match.group(1)
+                entry_price = float(closed_match.group(2))
+                exit_price = float(closed_match.group(3))
+                pnl_ticks = int(closed_match.group(4))
+                pnl_dollars = float(closed_match.group(5))
+                exit_reason = closed_match.group(6)
                 
-                # Extract log timestamp
                 time_match = re.match(r'(\d{2}:\d{2}:\d{2})', line)
                 time_str = time_match.group(1) if time_match else '00:00:00'
                 
                 closed_trades.append({
                     'time_str': time_str,
                     'timestamp': datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"),
-                    'pnl_dollars': pnl,
-                    'pnl_ticks': pnl / TICK_VALUE
+                    'direction': direction,
+                    'entry_price': entry_price,
+                    'exit_price': exit_price,
+                    'pnl_ticks': pnl_ticks,
+                    'pnl_dollars': pnl_dollars,
+                    'exit_reason': exit_reason
                 })
+            else:
+                # Try OLD FORMAT
+                closed_match_old = re.search(r'TRADE CLOSED: P&L \$([+-]?\d+\.?\d*)', line)
+                if closed_match_old:
+                    pnl = float(closed_match_old.group(1))
+                    
+                    time_match = re.match(r'(\d{2}:\d{2}:\d{2})', line)
+                    time_str = time_match.group(1) if time_match else '00:00:00'
+                    
+                    closed_trades.append({
+                        'time_str': time_str,
+                        'timestamp': datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"),
+                        'pnl_dollars': pnl,
+                        'pnl_ticks': pnl / TICK_VALUE
+                    })
     
     return closed_trades
 
@@ -1144,6 +1192,7 @@ def build_roundtrips_from_trader_log(orders, closes):
     """
     Build round-trips by matching ORDER PLACED entries with TRADE CLOSED exits.
     Uses P&L directly from TRADE CLOSED lines.
+    NEW FORMAT includes: direction, entry_price, exit_price, pnl_ticks, exit_reason
     """
     roundtrips = []
     
@@ -1160,8 +1209,11 @@ def build_roundtrips_from_trader_log(orders, closes):
                 'entry': order,
                 'exit': None,
                 'direction': order['direction'],
+                'entry_price': order.get('entry_price', 0),
+                'exit_price': 0,
                 'pnl_ticks': 0,
                 'pnl_dollars': 0,
+                'exit_reason': 'INCOMPLETE',
                 'complete': False
             })
             continue
@@ -1169,21 +1221,31 @@ def build_roundtrips_from_trader_log(orders, closes):
         close = closes_sorted[close_idx]
         close_idx += 1
         
+        # Get entry price - prefer from close data (more accurate fill price), fallback to order
+        entry_price = close.get('entry_price', order.get('entry_price', 0))
+        exit_price = close.get('exit_price', 0)
+        exit_reason = close.get('exit_reason', 'UNKNOWN')
+        
         # Create exit trade dict for compatibility
         exit_trade = {
             'timestamp': close['timestamp'],
             'time_str': close['time_str'],
             'is_close': True,
             'pnl_dollars': close['pnl_dollars'],
-            'pnl_ticks': close['pnl_ticks']
+            'pnl_ticks': close['pnl_ticks'],
+            'exit_price': exit_price,
+            'exit_reason': exit_reason
         }
         
         roundtrips.append({
             'entry': order,
             'exit': exit_trade,
-            'direction': order['direction'],
+            'direction': close.get('direction', order['direction']),
+            'entry_price': entry_price,
+            'exit_price': exit_price,
             'pnl_ticks': close['pnl_ticks'],
             'pnl_dollars': close['pnl_dollars'],
+            'exit_reason': exit_reason,
             'complete': True
         })
     

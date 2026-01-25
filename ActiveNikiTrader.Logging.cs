@@ -23,6 +23,14 @@ namespace NinjaTrader.NinjaScript.Strategies
 {
     public partial class ActiveNikiTrader
     {
+        #region Trade Tracking Fields
+        // Entry tracking for detailed exit logging
+        private string tradeEntryDirection = "";
+        private double tradeEntryPrice = 0;
+        private DateTime tradeEntryTime = DateTime.MinValue;
+        private string lastExitReason = "";
+        #endregion
+        
         #region CSV Indicator Logging
         private void InitializeCSVLog()
         {
@@ -89,6 +97,21 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (BarsInProgress == 0 && GetCurrentBid(0) > 0)
                 return GetCurrentBid(0);
             return Close[0];
+        }
+        
+        // Call this when entering a trade to track details for exit logging
+        private void SetTradeEntry(string direction, double price, DateTime time)
+        {
+            tradeEntryDirection = direction;
+            tradeEntryPrice = price;
+            tradeEntryTime = time;
+            lastExitReason = "";
+        }
+        
+        // Call this to set exit reason before exit is executed
+        private void SetExitReason(string reason)
+        {
+            lastExitReason = reason;
         }
         #endregion
         
@@ -182,20 +205,68 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (execution.Order != null && execution.Order.OrderState == OrderState.Filled)
             {
                 string orderName = execution.Order.Name ?? "";
+                OrderAction action = execution.Order.OrderAction;
+                
+                // Detect ENTRY fills
+                bool isEntry = (action == OrderAction.Buy || action == OrderAction.SellShort) && 
+                               (orderName == "Long" || orderName == "Short" || orderName.Contains("Entry"));
+                
+                if (isEntry)
+                {
+                    string dir = (action == OrderAction.Buy) ? "LONG" : "SHORT";
+                    SetTradeEntry(dir, price, time);
+                    PrintAndLog($">>> ENTRY FILLED: {dir} @ {price:F2} | {time:yyyy-MM-dd HH:mm:ss}");
+                }
+                
+                // Detect EXIT fills
                 bool isExit = Position.MarketPosition == MarketPosition.Flat && 
                     (orderName.Contains("Stop") || orderName.Contains("Profit") || orderName.Contains("Exit") || 
-                     execution.Order.OrderAction == OrderAction.Sell || execution.Order.OrderAction == OrderAction.BuyToCover);
+                     action == OrderAction.Sell || action == OrderAction.BuyToCover);
                 
                 if (isExit && SystemPerformance.AllTrades.Count > 0)
                 {
                     var lastTrade = SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1];
                     double tradePnL = lastTrade.ProfitCurrency;
+                    double exitPrice = price;
+                    
+                    // Determine exit reason from order name
+                    string exitReason = "UNKNOWN";
+                    if (!string.IsNullOrEmpty(lastExitReason))
+                        exitReason = lastExitReason;
+                    else if (orderName.Contains("Stop"))
+                        exitReason = simpleTrailActive ? "TRAIL" : "SL";
+                    else if (orderName.Contains("Profit"))
+                        exitReason = "TP";
+                    else if (orderName.Contains("Exit"))
+                        exitReason = orderName.Replace(" ", "_");
+                    else if (orderName.Contains("MaxProfit"))
+                        exitReason = "MAX_PROFIT";
+                    
+                    // Calculate ticks P&L
+                    double ticksPnL = 0;
+                    if (tradeEntryPrice > 0 && TickSize > 0)
+                    {
+                        if (tradeEntryDirection == "LONG")
+                            ticksPnL = (exitPrice - tradeEntryPrice) / TickSize;
+                        else if (tradeEntryDirection == "SHORT")
+                            ticksPnL = (tradeEntryPrice - exitPrice) / TickSize;
+                    }
                     
                     dailyPnL += tradePnL;
                     dailyTradeCount++;
                     
                     string pnlIcon = tradePnL >= 0 ? "✅" : "❌";
-                    PrintAndLog($"{pnlIcon} TRADE CLOSED: P&L ${tradePnL:F2} | Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades)");
+                    string ticksStr = ticksPnL >= 0 ? $"+{ticksPnL:F0}t" : $"{ticksPnL:F0}t";
+                    
+                    // Comprehensive trade closed log line for analysis script
+                    PrintAndLog($"{pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason}");
+                    PrintAndLog($"   Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades) | Entry Time: {tradeEntryTime:yyyy-MM-dd HH:mm:ss}");
+                    
+                    // Reset entry tracking
+                    tradeEntryDirection = "";
+                    tradeEntryPrice = 0;
+                    tradeEntryTime = DateTime.MinValue;
+                    lastExitReason = "";
                     
                     if (EnableSoundAlert)
                         try { System.Media.SystemSounds.Asterisk.Play(); } catch { }
