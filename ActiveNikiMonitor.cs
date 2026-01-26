@@ -259,12 +259,12 @@ namespace NinjaTrader.NinjaScript.Indicators
                 IsSuspendedWhileInactive = false;
                 
                 // Signal filters - match ActiveNikiTrader defaults
-                MinConfluenceRequired = 5;
+                MinConfluenceRequired = 6;
                 MaxBarsAfterYellowSquare = 3;
                 MinSolarWaveCount = 1;
                 CooldownBars = 10;
-                UseTimeBasedCooldown = false;
-                CooldownSeconds = 120;
+                UseTimeBasedCooldown = true;
+                CooldownSeconds = 90;
                 
                 // Indicator selection - all 8 enabled by default
                 UseRubyRiver = true;
