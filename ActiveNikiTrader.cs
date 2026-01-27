@@ -154,12 +154,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         public int MinSolarWaveCount { get; set; }
         
         [NinjaScriptProperty]
-        [Range(10, 1000)]
+        [Range(10, 3000)]
         [Display(Name="Stop Loss USD", Description="Stop loss amount in dollars", Order=4, GroupName="1. Signal Filters")]
         public double StopLossUSD { get; set; }
         
         [NinjaScriptProperty]
-        [Range(10, 1000)]
+        [Range(10, 3000)]
         [Display(Name="Take Profit USD", Description="Take profit amount in dollars", Order=5, GroupName="1. Signal Filters")]
         public double TakeProfitUSD { get; set; }
         
