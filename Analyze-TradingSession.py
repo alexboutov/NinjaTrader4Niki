@@ -790,7 +790,7 @@ def parse_monitor_signals(filepath, date_str):
 
 def parse_trader_signals(filepath, date_str):
     """
-    Parse ActiveNikiTrader log file.
+    Parse ActiveNikiTrader or ActiveNikiMonitor log file (both use same box format).
     Format (NEW with date): ║  *** LONG SIGNAL @ 2025-12-07 09:32:34 ***
     Format (OLD time only): ║  *** LONG SIGNAL @ 09:32:34 ***
             ║  Trigger: YellowSquare+RR
@@ -800,6 +800,10 @@ def parse_trader_signals(filepath, date_str):
     signals = []
     if not os.path.exists(filepath):
         return signals
+    
+    # Detect source from filename
+    filename = os.path.basename(filepath)
+    source = 'Monitor' if 'Monitor' in filename else 'Trader'
     
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -842,8 +846,8 @@ def parse_trader_signals(filepath, date_str):
                 if i + j < len(lines):
                     next_line = lines[i + j].strip()
                     
-                    # End of signal box
-                    if '╚' in next_line:
+                    # End of signal box (handle both proper UTF-8 and corrupted encoding)
+                    if '╚' in next_line or 'â•š' in next_line:
                         # Check lines after box for order status
                         for k in range(j + 1, j + 5):
                             if i + k < len(lines):
@@ -867,13 +871,18 @@ def parse_trader_signals(filepath, date_str):
                     if trigger_match:
                         trigger = trigger_match.group(1).strip()
                     
-                    # Ask/Bid prices
+                    # Ask/Bid prices (Trader format)
                     ask_match = re.search(r'Ask: (\d+\.?\d*)', next_line)
                     if ask_match:
                         ask_price = float(ask_match.group(1))
                     bid_match = re.search(r'Bid: (\d+\.?\d*)', next_line)
                     if bid_match:
                         bid_price = float(bid_match.group(1))
+                    
+                    # Simple Price: line (Monitor format) - may have timestamp prefix
+                    price_match = re.search(r'Price: (\d+\.?\d*)', next_line)
+                    if price_match and price == 0:  # Only if not already set
+                        price = float(price_match.group(1))
                     
                     # Confluence line
                     conf_match = re.search(r'Confluence: (\d+)/(\d+)', next_line)
@@ -885,11 +894,13 @@ def parse_trader_signals(filepath, date_str):
                     if 'RR=' in next_line and 'DT=' in next_line and 'AIQ1=' not in next_line:
                         indicator_states = parse_indicator_state(next_line)
             
-            # Use ask for LONG, bid for SHORT as entry price estimate
-            price = ask_price if direction == 'LONG' else bid_price
+            # Use ask for LONG, bid for SHORT if available (Trader format)
+            # Otherwise keep existing price (Monitor format)
+            if ask_price > 0 or bid_price > 0:
+                price = ask_price if direction == 'LONG' else bid_price
             
             signals.append({
-                'source': 'Trader',
+                'source': source,
                 'time_str': time_str,
                 'timestamp': datetime.strptime(f"{signal_date} {time_str}", "%Y-%m-%d %H:%M:%S"),
                 'direction': direction,
@@ -1093,13 +1104,14 @@ def parse_trader_closed_trades(filepath, date_str):
 
 def find_signal_files(folder_path, date_str):
     """Find all signal log files in the folder."""
-    monitor_files = glob.glob(os.path.join(folder_path, 'ActiveNikiMonitor_*.txt'))
-    trader_files = glob.glob(os.path.join(folder_path, 'ActiveNikiTrader_*.txt'))
+    # ActiveNikiMonitor now uses the same box format as ActiveNikiTrader,
+    # so route all files through the trader parser
+    monitor_files = []  # No longer used - Monitor uses Trader format
+    trader_files = glob.glob(os.path.join(folder_path, 'ActiveNikiMonitor_*.txt'))
+    trader_files.extend(glob.glob(os.path.join(folder_path, 'ActiveNikiTrader_*.txt')))
     
-    # Also check for signals.txt (legacy)
-    legacy_file = os.path.join(folder_path, 'signals.txt')
-    if os.path.exists(legacy_file):
-        monitor_files.append(legacy_file)
+    # Note: signals.txt is just a summary file without detail lines (price, confluence, trigger)
+    # so we don't parse it - the full data is in the ActiveNikiMonitor/Trader files
     
     return monitor_files, trader_files
 
