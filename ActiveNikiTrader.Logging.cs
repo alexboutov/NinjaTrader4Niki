@@ -235,16 +235,21 @@ namespace NinjaTrader.NinjaScript.Strategies
                     PrintAndLog($">>> ENTRY FILLED: {dir} @ {price:F2} | Signal={signalPriceAtEntry:F2} | Slippage: {slipStr} ({slipDollarStr}) | {time:yyyy-MM-dd HH:mm:ss}");
                 }
                 
-                // Detect EXIT fills
-                bool isExit = Position.MarketPosition == MarketPosition.Flat && 
-                    (orderName.Contains("Stop") || orderName.Contains("Profit") || orderName.Contains("Exit") || 
-                     action == OrderAction.Sell || action == OrderAction.BuyToCover);
+                // Detect EXIT fills - check order action and if we have an active entry tracked
+                // Don't rely on Position.MarketPosition as it may not be updated yet
+                bool isExitAction = (action == OrderAction.Sell || action == OrderAction.BuyToCover);
+                bool hasActiveEntry = !string.IsNullOrEmpty(tradeEntryDirection);
+                string orderNameLower = orderName.ToLower();
+                bool isStopOrTarget = orderNameLower.Contains("stop") || orderNameLower.Contains("profit") || orderNameLower.Contains("exit") || orderNameLower.Contains("target");
                 
-                if (isExit && SystemPerformance.AllTrades.Count > 0)
+                if (isExitAction && hasActiveEntry && isStopOrTarget)
                 {
-                    var lastTrade = SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1];
-                    double tradePnL = lastTrade.ProfitCurrency;
-                    double exitPrice = price;
+                    try
+                    {
+                        if (SystemPerformance.AllTrades.Count == 0) return;
+                        var lastTrade = SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1];
+                        double tradePnL = lastTrade.ProfitCurrency;
+                        double exitPrice = price;
                     
                     // Determine exit reason from order name
                     string exitReason = "UNKNOWN";
@@ -325,6 +330,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                         PrintAndLog($"🎯 DAILY PROFIT TARGET HIT: ${dailyPnL:F2} reached ${DailyProfitTargetUSD:F2} target. Trading stopped for today.");
                         if (EnableSoundAlert)
                             try { System.Media.SystemSounds.Asterisk.Play(); } catch { }
+                    }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Collection was modified during enumeration - skip this update
                     }
                 }
             }
