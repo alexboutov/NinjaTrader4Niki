@@ -135,6 +135,11 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool simpleTrailActive = false;
         private double simpleTrailStopLevel = 0;
         
+        // Slippage tracking - capture intended prices at signal time
+        private double signalPriceAtEntry = 0;      // Ask/Bid when order placed
+        private double expectedStopPrice = 0;       // Initial SL level (updated by trail)
+        private double expectedTargetPrice = 0;     // TP level
+        
         #endregion
         
         #region Parameters
@@ -832,6 +837,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                         ? currentPrice - trailDistancePoints 
                         : currentPrice + trailDistancePoints;
                     
+                    // Update expected stop for slippage tracking
+                    expectedStopPrice = simpleTrailStopLevel;
+                    
                     // Update stop loss to trailing level
                     if (isLong)
                         SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
@@ -849,6 +857,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         if (newTrailStop > simpleTrailStopLevel)
                         {
                             simpleTrailStopLevel = newTrailStop;
+                            expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
                             SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
                             PrintAndLog($"📈 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t");
                         }
@@ -859,6 +868,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         if (newTrailStop < simpleTrailStopLevel)
                         {
                             simpleTrailStopLevel = newTrailStop;
+                            expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
                             SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                             PrintAndLog($"📉 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t");
                         }
@@ -873,6 +883,10 @@ namespace NinjaTrader.NinjaScript.Strategies
                 trailStopPrice = 0;
                 simpleTrailActive = false;
                 simpleTrailStopLevel = 0;
+                // Reset slippage tracking
+                signalPriceAtEntry = 0;
+                expectedStopPrice = 0;
+                expectedTargetPrice = 0;
             }
             
             if (barsSinceLastSignal >= 0)
@@ -971,6 +985,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     
                                     double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
                                     
+                                    // Capture signal price and expected levels for slippage tracking
+                                    signalPriceAtEntry = GetCurrentAsk();
+                                    expectedStopPrice = signalPriceAtEntry - (slTicks * TickSize);
+                                    expectedTargetPrice = signalPriceAtEntry + tpPoints;
+                                    
                                     if (EnableDynamicExit)
                                     {
                                         SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
@@ -994,7 +1013,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     }
                                     EnterLong("Long");
                                     string exitMode = EnableDynamicExit ? " [DYNAMIC]" : (EnableTrailingStop ? " [TRAIL]" : "");
-                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
+                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
                                 }
                                 else
                                 {
@@ -1042,6 +1061,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     
                                     double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
                                     
+                                    // Capture signal price and expected levels for slippage tracking
+                                    signalPriceAtEntry = GetCurrentBid();
+                                    expectedStopPrice = signalPriceAtEntry + (slTicks * TickSize);
+                                    expectedTargetPrice = signalPriceAtEntry - tpPoints;
+                                    
                                     if (EnableDynamicExit)
                                     {
                                         SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
@@ -1065,7 +1089,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     }
                                     EnterShort("Short");
                                     string exitMode = EnableDynamicExit ? " [DYNAMIC]" : (EnableTrailingStop ? " [TRAIL]" : "");
-                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
+                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
                                 }
                                 else
                                 {

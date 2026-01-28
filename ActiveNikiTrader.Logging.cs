@@ -214,8 +214,25 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (isEntry)
                 {
                     string dir = (action == OrderAction.Buy) ? "LONG" : "SHORT";
+                    
+                    // Calculate entry slippage (positive = unfavorable)
+                    double entrySlippageTicks = 0;
+                    double entrySlippageDollars = 0;
+                    if (signalPriceAtEntry > 0 && TickSize > 0)
+                    {
+                        if (dir == "LONG")
+                            entrySlippageTicks = (price - signalPriceAtEntry) / TickSize;
+                        else
+                            entrySlippageTicks = (signalPriceAtEntry - price) / TickSize;
+                        
+                        entrySlippageDollars = entrySlippageTicks * TickSize * Instrument.MasterInstrument.PointValue;
+                    }
+                    
                     SetTradeEntry(dir, price, time);
-                    PrintAndLog($">>> ENTRY FILLED: {dir} @ {price:F2} | {time:yyyy-MM-dd HH:mm:ss}");
+                    
+                    string slipStr = entrySlippageTicks >= 0 ? $"+{entrySlippageTicks:F0}t" : $"{entrySlippageTicks:F0}t";
+                    string slipDollarStr = entrySlippageDollars >= 0 ? $"${entrySlippageDollars:F2}" : $"-${Math.Abs(entrySlippageDollars):F2}";
+                    PrintAndLog($">>> ENTRY FILLED: {dir} @ {price:F2} | Signal={signalPriceAtEntry:F2} | Slippage: {slipStr} ({slipDollarStr}) | {time:yyyy-MM-dd HH:mm:ss}");
                 }
                 
                 // Detect EXIT fills
@@ -252,14 +269,37 @@ namespace NinjaTrader.NinjaScript.Strategies
                             ticksPnL = (tradeEntryPrice - exitPrice) / TickSize;
                     }
                     
+                    // Calculate exit slippage (positive = unfavorable)
+                    double exitSlippageTicks = 0;
+                    if (TickSize > 0)
+                    {
+                        if (exitReason == "TP" && expectedTargetPrice > 0)
+                        {
+                            // TP is a limit order - should have 0 or favorable slippage
+                            if (tradeEntryDirection == "LONG")
+                                exitSlippageTicks = (expectedTargetPrice - exitPrice) / TickSize;
+                            else
+                                exitSlippageTicks = (exitPrice - expectedTargetPrice) / TickSize;
+                        }
+                        else if ((exitReason == "SL" || exitReason == "TRAIL") && expectedStopPrice > 0)
+                        {
+                            // Stop orders can have slippage
+                            if (tradeEntryDirection == "LONG")
+                                exitSlippageTicks = (expectedStopPrice - exitPrice) / TickSize;
+                            else
+                                exitSlippageTicks = (exitPrice - expectedStopPrice) / TickSize;
+                        }
+                    }
+                    
                     dailyPnL += tradePnL;
                     dailyTradeCount++;
                     
                     string pnlIcon = tradePnL >= 0 ? "✅" : "❌";
                     string ticksStr = ticksPnL >= 0 ? $"+{ticksPnL:F0}t" : $"{ticksPnL:F0}t";
+                    string exitSlipStr = exitSlippageTicks >= 0 ? $"+{exitSlippageTicks:F0}t" : $"{exitSlippageTicks:F0}t";
                     
-                    // Comprehensive trade closed log line for analysis script
-                    PrintAndLog($"{pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason}");
+                    // Comprehensive trade closed log line for analysis script - includes exit slippage
+                    PrintAndLog($"{pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason} | Exit Slip: {exitSlipStr}");
                     PrintAndLog($"   Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades) | Entry Time: {tradeEntryTime:yyyy-MM-dd HH:mm:ss}");
                     
                     // Reset entry tracking
