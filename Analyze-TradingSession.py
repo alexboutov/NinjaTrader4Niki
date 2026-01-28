@@ -135,47 +135,60 @@ def parse_trades(filepath):
     if not os.path.exists(filepath):
         return trades
     
-    with open(filepath, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            if not line or "New state='Filled'" not in line:
-                continue
-            
-            # Parse timestamp: 2025-12-19 08:07:46:809
-            ts_match = re.match(r'(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})', line)
-            if not ts_match:
-                continue
-            
-            date_str = ts_match.group(1)
-            time_str = ts_match.group(2)
-            timestamp = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
-            
-            # Parse action: Buy, Sell, Buy to cover
-            action_match = re.search(r"Action='([^']+)'", line)
-            action = action_match.group(1) if action_match else ""
-            
-            # Parse fill price
-            price_match = re.search(r"Fill price=(\d+\.?\d*)", line)
-            fill_price = float(price_match.group(1)) if price_match else 0
-            
-            # Parse if it's a close order
-            is_close = "Name='Close'" in line
-            
-            # Determine direction
-            if action in ['Buy', 'Buy to cover']:
-                direction = 'LONG' if not is_close else 'COVER'
-            else:  # Sell
-                direction = 'SHORT' if not is_close else 'CLOSE'
-            
-            trades.append({
-                'timestamp': timestamp,
-                'time_str': time_str,
-                'action': action,
-                'direction': direction,
-                'price': fill_price,
-                'is_close': is_close,
-                'raw': line
-            })
+    # Try different encodings (NinjaTrader sometimes uses UTF-16)
+    content = None
+    for encoding in ['utf-8', 'utf-16', 'utf-16-le', 'utf-8-sig', 'latin-1']:
+        try:
+            with open(filepath, 'r', encoding=encoding) as f:
+                content = f.read()
+            break
+        except (UnicodeDecodeError, UnicodeError):
+            continue
+    
+    if content is None:
+        print(f"  Warning: Could not decode {filepath}")
+        return trades
+    
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or "New state='Filled'" not in line:
+            continue
+        
+        # Parse timestamp: 2025-12-19 08:07:46:809
+        ts_match = re.match(r'(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})', line)
+        if not ts_match:
+            continue
+        
+        date_str = ts_match.group(1)
+        time_str = ts_match.group(2)
+        timestamp = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
+        
+        # Parse action: Buy, Sell, Buy to cover
+        action_match = re.search(r"Action='([^']+)'", line)
+        action = action_match.group(1) if action_match else ""
+        
+        # Parse fill price
+        price_match = re.search(r"Fill price=(\d+\.?\d*)", line)
+        fill_price = float(price_match.group(1)) if price_match else 0
+        
+        # Parse if it's a close order
+        is_close = "Name='Close'" in line
+        
+        # Determine direction
+        if action in ['Buy', 'Buy to cover']:
+            direction = 'LONG' if not is_close else 'COVER'
+        else:  # Sell
+            direction = 'SHORT' if not is_close else 'CLOSE'
+        
+        trades.append({
+            'timestamp': timestamp,
+            'time_str': time_str,
+            'action': action,
+            'direction': direction,
+            'price': fill_price,
+            'is_close': is_close,
+            'raw': line
+        })
     
     return trades
 
@@ -996,9 +1009,35 @@ def parse_trader_orders_and_closes(filepath, date_str):
                     'is_close': False
                 })
         
-        # Parse TRADE CLOSED - NEW FORMAT with direction, entry, exit, reason
-        # Format: ✅ TRADE CLOSED: SHORT | Entry=25187.00 Exit=25165.00 | +88t $434.84 | Reason: TRAIL
-        closed_match = re.search(r'TRADE CLOSED:\s*(LONG|SHORT)\s*\|\s*Entry=(\d+\.?\d*)\s*Exit=(\d+\.?\d*)\s*\|\s*([+-]?\d+)t\s*\$([+-]?\d+\.?\d*)\s*\|\s*Reason:\s*(\w+)', line_stripped)
+        # Parse ENTRY FILLED with slippage
+        # Format: >>> ENTRY FILLED: LONG @ 25914.50 | Signal=25914.00 | Slippage: +2t ($10.00) | 2025-12-09 10:41:48
+        entry_fill_match = re.search(r'>>> ENTRY FILLED:\s*(LONG|SHORT)\s*@\s*(\d+\.?\d*)\s*\|\s*Signal=(\d+\.?\d*)\s*\|\s*Slippage:\s*([+-]?\d+)t\s*\(\$?([+-]?\d+\.?\d*)\)', line_stripped)
+        if entry_fill_match:
+            direction = entry_fill_match.group(1)
+            fill_price = float(entry_fill_match.group(2))
+            signal_price = float(entry_fill_match.group(3))
+            entry_slippage_ticks = int(entry_fill_match.group(4))
+            entry_slippage_dollars = float(entry_fill_match.group(5))
+            
+            # Extract trade timestamp from the line (format: 2025-12-09 10:41:48)
+            trade_time_match = re.search(r'(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})', line_stripped)
+            if trade_time_match:
+                trade_date = trade_time_match.group(1)
+                trade_time = trade_time_match.group(2)
+            else:
+                trade_date = current_signal_date if current_signal_date else date_str
+                trade_time = current_signal_time if current_signal_time else '00:00:00'
+            
+            # Update the last order with actual fill info
+            if orders and orders[-1]['direction'] == direction:
+                orders[-1]['fill_price'] = fill_price
+                orders[-1]['signal_price'] = signal_price
+                orders[-1]['entry_slippage_ticks'] = entry_slippage_ticks
+                orders[-1]['entry_slippage_dollars'] = entry_slippage_dollars
+        
+        # Parse TRADE CLOSED - NEW FORMAT with direction, entry, exit, reason, and optional exit slippage
+        # Format: ✅ TRADE CLOSED: SHORT | Entry=25187.00 Exit=25165.00 | +88t $434.84 | Reason: TRAIL | Exit Slip: +4t
+        closed_match = re.search(r'TRADE CLOSED:\s*(LONG|SHORT)\s*\|\s*Entry=(\d+\.?\d*)\s*Exit=(\d+\.?\d*)\s*\|\s*([+-]?\d+)t\s*\$([+-]?\d+\.?\d*)\s*\|\s*Reason:\s*(\w+)(?:\s*\|\s*Exit Slip:\s*([+-]?\d+)t)?', line_stripped)
         if closed_match:
             direction = closed_match.group(1)
             entry_price = float(closed_match.group(2))
@@ -1006,6 +1045,7 @@ def parse_trader_orders_and_closes(filepath, date_str):
             pnl_ticks = int(closed_match.group(4))
             pnl_dollars = float(closed_match.group(5))
             exit_reason = closed_match.group(6)
+            exit_slippage_ticks = int(closed_match.group(7)) if closed_match.group(7) else 0
             
             # Extract log timestamp
             time_match = re.search(r'(\d{2}:\d{2}:\d{2})', line)
@@ -1023,6 +1063,7 @@ def parse_trader_orders_and_closes(filepath, date_str):
                 'pnl_ticks': pnl_ticks,
                 'pnl_dollars': pnl_dollars,
                 'exit_reason': exit_reason,
+                'exit_slippage_ticks': exit_slippage_ticks,
                 'is_win': pnl_dollars > 0
             })
         else:
@@ -1204,7 +1245,7 @@ def build_roundtrips_from_trader_log(orders, closes):
     """
     Build round-trips by matching ORDER PLACED entries with TRADE CLOSED exits.
     Uses P&L directly from TRADE CLOSED lines.
-    NEW FORMAT includes: direction, entry_price, exit_price, pnl_ticks, exit_reason
+    NEW FORMAT includes: direction, entry_price, exit_price, pnl_ticks, exit_reason, slippage
     """
     roundtrips = []
     
@@ -1226,6 +1267,8 @@ def build_roundtrips_from_trader_log(orders, closes):
                 'pnl_ticks': 0,
                 'pnl_dollars': 0,
                 'exit_reason': 'INCOMPLETE',
+                'entry_slippage_ticks': order.get('entry_slippage_ticks', 0),
+                'exit_slippage_ticks': 0,
                 'complete': False
             })
             continue
@@ -1238,6 +1281,10 @@ def build_roundtrips_from_trader_log(orders, closes):
         exit_price = close.get('exit_price', 0)
         exit_reason = close.get('exit_reason', 'UNKNOWN')
         
+        # Get slippage data
+        entry_slippage_ticks = order.get('entry_slippage_ticks', 0)
+        exit_slippage_ticks = close.get('exit_slippage_ticks', 0)
+        
         # Create exit trade dict for compatibility
         exit_trade = {
             'timestamp': close['timestamp'],
@@ -1246,7 +1293,8 @@ def build_roundtrips_from_trader_log(orders, closes):
             'pnl_dollars': close['pnl_dollars'],
             'pnl_ticks': close['pnl_ticks'],
             'exit_price': exit_price,
-            'exit_reason': exit_reason
+            'exit_reason': exit_reason,
+            'exit_slippage_ticks': exit_slippage_ticks
         }
         
         roundtrips.append({
@@ -1258,6 +1306,8 @@ def build_roundtrips_from_trader_log(orders, closes):
             'pnl_ticks': close['pnl_ticks'],
             'pnl_dollars': close['pnl_dollars'],
             'exit_reason': exit_reason,
+            'entry_slippage_ticks': entry_slippage_ticks,
+            'exit_slippage_ticks': exit_slippage_ticks,
             'complete': True
         })
     
@@ -2437,6 +2487,113 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             best_trigger = max(profitable_triggers, key=lambda x: x[1]['pnl'])
             lines.append(f"   - Best trigger: {best_trigger[0]} with {best_trigger[1]['pnl']:+.0f}t")
     lines.append("")
+    
+    # === SLIPPAGE ANALYSIS ===
+    # Collect slippage data from complete roundtrips
+    entry_slippages = [rt.get('entry_slippage_ticks', 0) for rt in complete_rts if rt.get('entry_slippage_ticks') is not None]
+    exit_slippages = [rt.get('exit_slippage_ticks', 0) for rt in complete_rts if rt.get('exit_slippage_ticks') is not None]
+    
+    # Group exit slippage by reason
+    exit_slip_by_reason = defaultdict(list)
+    for rt in complete_rts:
+        reason = rt.get('exit_reason', 'UNKNOWN')
+        slip = rt.get('exit_slippage_ticks', 0)
+        if slip is not None:
+            exit_slip_by_reason[reason].append(slip)
+    
+    # Only show slippage section if we have data
+    if entry_slippages or exit_slippages:
+        lines.append("=" * 80)
+        lines.append("SLIPPAGE ANALYSIS")
+        lines.append("=" * 80)
+        lines.append("")
+        
+        # Helper for statistics
+        def calc_stats(data):
+            if not data:
+                return {'count': 0, 'mean': 0, 'median': 0, 'std': 0, 'min': 0, 'max': 0, 'total': 0}
+            n = len(data)
+            total = sum(data)
+            mean = total / n
+            sorted_data = sorted(data)
+            median = sorted_data[n // 2] if n % 2 == 1 else (sorted_data[n // 2 - 1] + sorted_data[n // 2]) / 2
+            variance = sum((x - mean) ** 2 for x in data) / n if n > 0 else 0
+            std = variance ** 0.5
+            return {
+                'count': n,
+                'mean': mean,
+                'median': median,
+                'std': std,
+                'min': min(data),
+                'max': max(data),
+                'total': total
+            }
+        
+        # Entry slippage stats
+        if entry_slippages:
+            entry_stats = calc_stats(entry_slippages)
+            lines.append("ENTRY SLIPPAGE:")
+            lines.append(f"   Trades with data: {entry_stats['count']}")
+            lines.append(f"   Mean:   {entry_stats['mean']:+.1f}t (${entry_stats['mean'] * TICK_VALUE:+.2f})")
+            lines.append(f"   Median: {entry_stats['median']:+.1f}t")
+            lines.append(f"   Std Dev: {entry_stats['std']:.1f}t")
+            lines.append(f"   Range:  {entry_stats['min']:+.0f}t to {entry_stats['max']:+.0f}t")
+            lines.append(f"   TOTAL:  {entry_stats['total']:+.0f}t (${entry_stats['total'] * TICK_VALUE:+.2f})")
+            lines.append("")
+        
+        # Exit slippage stats
+        if exit_slippages:
+            exit_stats = calc_stats(exit_slippages)
+            lines.append("EXIT SLIPPAGE (all exits):")
+            lines.append(f"   Trades with data: {exit_stats['count']}")
+            lines.append(f"   Mean:   {exit_stats['mean']:+.1f}t (${exit_stats['mean'] * TICK_VALUE:+.2f})")
+            lines.append(f"   Median: {exit_stats['median']:+.1f}t")
+            lines.append(f"   Std Dev: {exit_stats['std']:.1f}t")
+            lines.append(f"   Range:  {exit_stats['min']:+.0f}t to {exit_stats['max']:+.0f}t")
+            lines.append(f"   TOTAL:  {exit_stats['total']:+.0f}t (${exit_stats['total'] * TICK_VALUE:+.2f})")
+            lines.append("")
+        
+        # Exit slippage by reason
+        if exit_slip_by_reason:
+            lines.append("EXIT SLIPPAGE BY REASON:")
+            for reason in ['SL', 'TRAIL', 'TP', 'UNKNOWN']:
+                if reason in exit_slip_by_reason:
+                    reason_data = exit_slip_by_reason[reason]
+                    reason_stats = calc_stats(reason_data)
+                    lines.append(f"   {reason:8} ({reason_stats['count']:3} trades): Mean {reason_stats['mean']:+5.1f}t | Total {reason_stats['total']:+6.0f}t (${reason_stats['total'] * TICK_VALUE:+.2f})")
+            lines.append("")
+        
+        # Total slippage cost summary
+        total_entry_slip = sum(entry_slippages) if entry_slippages else 0
+        total_exit_slip = sum(exit_slippages) if exit_slippages else 0
+        total_slippage = total_entry_slip + total_exit_slip
+        total_slippage_dollars = total_slippage * TICK_VALUE
+        
+        # Broker fee estimation ($4.50 per round-trip for NQ)
+        broker_fee_per_trade = 4.50
+        total_broker_fees = total_trades * broker_fee_per_trade
+        
+        # Adjusted P&L
+        gross_pnl_dollars = total_pnl * TICK_VALUE
+        net_pnl_dollars = gross_pnl_dollars - total_slippage_dollars - total_broker_fees
+        
+        lines.append("COST SUMMARY:")
+        lines.append(f"   Gross P&L:        {total_pnl:+.0f}t (${gross_pnl_dollars:+.2f})")
+        lines.append(f"   Entry Slippage:   {total_entry_slip:+.0f}t (${total_entry_slip * TICK_VALUE:+.2f})")
+        lines.append(f"   Exit Slippage:    {total_exit_slip:+.0f}t (${total_exit_slip * TICK_VALUE:+.2f})")
+        lines.append(f"   Total Slippage:   {total_slippage:+.0f}t (${total_slippage_dollars:+.2f})")
+        lines.append(f"   Broker Fees:      {total_trades} × ${broker_fee_per_trade:.2f} = ${total_broker_fees:.2f}")
+        lines.append(f"   ─────────────────────────────────────")
+        lines.append(f"   NET P&L:          ${net_pnl_dollars:+.2f}")
+        lines.append("")
+        
+        # Slippage as percentage of gross
+        if gross_pnl_dollars != 0:
+            slip_pct = (total_slippage_dollars / abs(gross_pnl_dollars)) * 100
+            total_costs_pct = ((total_slippage_dollars + total_broker_fees) / abs(gross_pnl_dollars)) * 100
+            lines.append(f"   Slippage as % of |Gross|: {slip_pct:.1f}%")
+            lines.append(f"   Total costs as % of |Gross|: {total_costs_pct:.1f}%")
+            lines.append("")
     
     # Multi-day comparison
     if folder_path:
