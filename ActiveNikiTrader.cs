@@ -973,8 +973,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     {
                         LogSignal("LONG", "YellowSquare+" + confirmingIndicator, barTime, bull, total);
                         UpdateSignalDisplay("YellowSquare+" + confirmingIndicator, bull, total, barTime, true);
-                        
-                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
+
+						if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR")
                         {
                             if (bull >= MinConfluenceForAutoTrade)
                             {
