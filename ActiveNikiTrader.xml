@@ -777,7 +777,7 @@
       <Calculate>OnEachTick</Calculate>
       <Displacement>0</Displacement>
       <DisplayInDataBox>true</DisplayInDataBox>
-      <From>2026-01-25T00:00:00</From>
+      <From>2026-01-28T00:00:00</From>
       <IsAutoScale>true</IsAutoScale>
       <Lines />
       <MaximumBarsLookBack>TwoHundredFiftySix</MaximumBarsLookBack>
@@ -786,7 +786,7 @@
       <Plots />
       <ScaleJustification>Right</ScaleJustification>
       <ShowTransparentPlotsInDataBox>false</ShowTransparentPlotsInDataBox>
-      <To>2026-01-28T00:00:00</To>
+      <To>2026-01-31T00:00:00</To>
       <IsDataSeriesRequired>true</IsDataSeriesRequired>
       <IsOverlay>true</IsOverlay>
       <SelectedValueSeries>0</SelectedValueSeries>
@@ -827,7 +827,7 @@
       <OrderFillResolutionValue>1</OrderFillResolutionValue>
       <RestartsWithinMinutes>5</RestartsWithinMinutes>
       <SetOrderQuantity>Strategy</SetOrderQuantity>
-      <Slippage>4</Slippage>
+      <Slippage>0</Slippage>
       <StartBehavior>WaitUntilFlat</StartBehavior>
       <StopTargetHandling>PerEntryExecution</StopTargetHandling>
       <SupportsOptimizationGraph>true</SupportsOptimizationGraph>
@@ -838,21 +838,21 @@
       <MinConfluenceRequired>5</MinConfluenceRequired>
       <MaxBarsAfterYellowSquare>3</MaxBarsAfterYellowSquare>
       <MinSolarWaveCount>1</MinSolarWaveCount>
-      <StopLossUSD>200</StopLossUSD>
+      <StopLossUSD>300</StopLossUSD>
       <TakeProfitUSD>600</TakeProfitUSD>
       <CooldownBars>10</CooldownBars>
       <EnableAutoTrading>true</EnableAutoTrading>
       <MinConfluenceForAutoTrade>5</MinConfluenceForAutoTrade>
       <UseTradingHoursFilter>true</UseTradingHoursFilter>
-      <Session1StartHour>7</Session1StartHour>
+      <Session1StartHour>10</Session1StartHour>
       <Session1StartMinute>0</Session1StartMinute>
-      <Session1EndHour>8</Session1EndHour>
-      <Session1EndMinute>25</Session1EndMinute>
-      <Session2StartHour>9</Session2StartHour>
-      <Session2StartMinute>15</Session2StartMinute>
-      <Session2EndHour>22</Session2EndHour>
+      <Session1EndHour>10</Session1EndHour>
+      <Session1EndMinute>59</Session1EndMinute>
+      <Session2StartHour>10</Session2StartHour>
+      <Session2StartMinute>0</Session2StartMinute>
+      <Session2EndHour>10</Session2EndHour>
       <Session2EndMinute>59</Session2EndMinute>
-      <CloseBeforeNews>true</CloseBeforeNews>
+      <CloseBeforeNews>false</CloseBeforeNews>
       <NewsCloseHour>8</NewsCloseHour>
       <NewsCloseMinute>28</NewsCloseMinute>
       <CloseAtEndOfDay>true</CloseAtEndOfDay>
@@ -865,7 +865,7 @@
       <UseEasyTrend>true</UseEasyTrend>
       <UseT3Pro>false</UseT3Pro>
       <UseAAATrendSync>true</UseAAATrendSync>
-      <UseAIQSuperBands>false</UseAIQSuperBands>
+      <UseAIQSuperBands>true</UseAIQSuperBands>
       <T3ProPeriod>14</T3ProPeriod>
       <T3ProTCount>3</T3ProTCount>
       <T3ProVFactor>0.7</T3ProVFactor>
@@ -913,7 +913,7 @@
       <MaxProfitUSD>1000</MaxProfitUSD>
       <EnableTrailingStop>true</EnableTrailingStop>
       <TrailActivationTicks>80</TrailActivationTicks>
-      <TrailDistanceTicks>40</TrailDistanceTicks>
+      <TrailDistanceTicks>30</TrailDistanceTicks>
       <EnableIndicatorCSVLog>true</EnableIndicatorCSVLog>
     </ActiveNikiTrader>
   </Strategy>
