@@ -1050,7 +1050,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("SHORT", "OrangeSquare+" + confirmingIndicator, barTime, bear, total);
                         UpdateSignalDisplay("OrangeSquare+" + confirmingIndicator, bear, total, barTime, false);
                         
-                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
+	                    // if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
+						// Only take SHORT if RR is UP (contrarian filter)
+						if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
                         {
                             if (bear >= MinConfluenceForAutoTrade)
                             {
