@@ -210,6 +210,19 @@ try {
                     $afSize = [math]::Round($af.Length / 1KB, 1)
                     Write-Log "  Report: $($af.Name) (${afSize} KB)" "OK"
                 }
+
+                # Clean up copied source files (report is self-contained)
+                $patterns = @("ActiveNikiMonitor_*.txt", "ActiveNikiTrader_*.txt", "IndicatorValues_*.csv")
+                $removed = 0
+                foreach ($pattern in $patterns) {
+                    Get-ChildItem -Path $analysisFolder -Filter $pattern -ErrorAction SilentlyContinue | ForEach-Object {
+                        Remove-Item $_.FullName -Force
+                        $removed++
+                    }
+                }
+                if ($removed -gt 0) {
+                    Write-Log "  Cleaned up $removed copied source file(s)" "OK"
+                }
             } else {
                 Write-Log "  Python analysis exited with code $LASTEXITCODE" "ERROR"
             }
