@@ -39,6 +39,7 @@ $NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log"
 $AnalysisBasePath = Join-Path $NT8LogPath "ActiveNikiAnalysis"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonScript = Join-Path $ScriptDir "main.py"
+$PythonExe = "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe"
 $RunLog = Join-Path $AnalysisBasePath "run.log"
 
 # === FUNCTIONS ===
@@ -196,11 +197,11 @@ try {
     # ==================== STEP 6: RUN PYTHON ANALYSIS ====================
     Write-Log "Step 6: Running Python analysis..."
 
-    if (Test-Path $PythonScript) {
+    if ((Test-Path $PythonScript) -and (Test-Path $PythonExe)) {
         $hasData = ($allTrades.Count -gt 0) -or ($traderCopied -gt 0)
         if ($hasData) {
-            Write-Log "  python $PythonScript $analysisFolder --date $Date"
-            $pythonOutput = python $PythonScript $analysisFolder --date $Date 2>&1
+            Write-Log "  $PythonExe $PythonScript $analysisFolder --date $Date"
+            $pythonOutput = & $PythonExe $PythonScript $analysisFolder --date $Date 2>&1
             $pythonOutput | ForEach-Object { Write-Log "  [PY] $_" }
 
             if ($LASTEXITCODE -eq 0) {
@@ -231,7 +232,7 @@ try {
         }
     } else {
         Write-Log "  main.py not found at: $PythonScript" "ERROR"
-        Write-Log "  Expected location: $ScriptDir" "ERROR"
+        Write-Log "  Or python not found at: $PythonExe" "ERROR"
     }
 
     # ==================== SUMMARY ====================
