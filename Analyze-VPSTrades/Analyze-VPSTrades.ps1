@@ -247,8 +247,37 @@ try {
         Write-Log "  - $($_.Name) ($size)"
     }
 
+    # ==================== STEP 7: PUSH REPORT TO GITHUB ====================
+    Write-Log "Step 7: Pushing report to GitHub..."
+    $gitExe = "C:\Program Files\Git\bin\git.exe"
+    $repoRoot = "C:\Users\Administrator\Documents\NinjaTrader4Niki"
+    $reportsDir = Join-Path $repoRoot "reports"
+
+    $reportFile = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($reportFile) {
+        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis.txt") -Force
+        $tradesFile = Join-Path $analysisFolder "trades_final.txt"
+        $signalsFile = Join-Path $analysisFolder "signals.txt"
+        if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
+        if (Test-Path $signalsFile) { Copy-Item $signalsFile (Join-Path $reportsDir "signals.txt") -Force }
+
+        Push-Location $repoRoot
+        try {
+            & $gitExe add reports/ 2>&1 | Out-Null
+            & $gitExe commit -m $Date 2>&1 | Out-Null
+            & $gitExe push 2>&1 | Out-Null
+            Write-Log "  Git push completed for $Date" "OK"
+        } catch {
+            Write-Log "  Git push failed: $_" "ERROR"
+        } finally {
+            Pop-Location
+        }
+    } else {
+        Write-Log "  No analysis report found to push" "WARN"
+    }
 } catch {
     Write-Log "FATAL: $($_.Exception.Message)" "ERROR"
     Write-Log "Stack: $($_.ScriptStackTrace)" "ERROR"
     exit 1
 }
+
