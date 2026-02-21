@@ -1,9 +1,10 @@
-# Deploy indicators and strategies to NinjaTrader
+# Deploy indicators, strategies, and templates to NinjaTrader
 
 # Define paths
 $repoPath = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
 $ntIndicatorsPath = "C:\Users\Administrator\Documents\NinjaTrader 8\bin\Custom\Indicators"
 $ntStrategiesPath = "C:\Users\Administrator\Documents\NinjaTrader 8\bin\Custom\Strategies"
+$ntStrategyTemplatePath = "C:\Users\Administrator\Documents\NinjaTrader 8\templates\Strategy\ActiveNikiTrader"
 
 # Indicators to deploy
 $indicators = @(
@@ -27,6 +28,18 @@ $strategies = @(
     "ActiveNikiTrader.Panel.cs",
     "ActiveNikiTrader.Signals.cs"
 )
+
+Write-Host ""
+Write-Host "===== CLEANING OLD FILES =====" -ForegroundColor Cyan
+
+# Clean old indicator files to force fresh compilation
+foreach ($file in $indicators) {
+    $path = Join-Path $ntIndicatorsPath $file
+    if (Test-Path $path) {
+        Remove-Item $path -Force
+        Write-Host "[DELETED] $file" -ForegroundColor Yellow
+    }
+}
 
 Write-Host ""
 Write-Host "===== DEPLOYING INDICATORS =====" -ForegroundColor Cyan
@@ -67,12 +80,38 @@ foreach ($file in $strategies) {
 }
 
 Write-Host ""
+Write-Host "===== DEPLOYING STRATEGY TEMPLATE =====" -ForegroundColor Cyan
+$templateSuccess = 0
+$templateFail = 0
+
+# Create template directory if it doesn't exist
+if (-not (Test-Path $ntStrategyTemplatePath)) {
+    New-Item -ItemType Directory -Path $ntStrategyTemplatePath -Force | Out-Null
+    Write-Host "[CREATED] Template directory" -ForegroundColor Cyan
+}
+
+$templateFile = "ActiveNikiTrader.xml"
+$sourceTemplate = Join-Path $repoPath $templateFile
+$destTemplate = Join-Path $ntStrategyTemplatePath $templateFile
+
+if (Test-Path $sourceTemplate) {
+    Copy-Item $sourceTemplate $destTemplate -Force
+    Write-Host "[OK] Copied $templateFile" -ForegroundColor Green
+    $templateSuccess++
+} else {
+    Write-Host "[FAIL] Not found: $templateFile" -ForegroundColor Red
+    $templateFail++
+}
+
+Write-Host ""
 Write-Host "===== SUMMARY =====" -ForegroundColor Cyan
 Write-Host "Indicators: $indicatorSuccess copied, $indicatorFail failed" -ForegroundColor White
 Write-Host "Strategies: $strategySuccess copied, $strategyFail failed" -ForegroundColor White
+Write-Host "Templates:  $templateSuccess copied, $templateFail failed" -ForegroundColor White
 Write-Host ""
 Write-Host "Destinations:" -ForegroundColor Gray
 Write-Host "  Indicators: $ntIndicatorsPath" -ForegroundColor Gray
 Write-Host "  Strategies: $ntStrategiesPath" -ForegroundColor Gray
+Write-Host "  Template:   $ntStrategyTemplatePath" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Next: Open NinjaTrader and compile (Tools > Edit NinjaScript > Strategy or press F5)" -ForegroundColor Yellow

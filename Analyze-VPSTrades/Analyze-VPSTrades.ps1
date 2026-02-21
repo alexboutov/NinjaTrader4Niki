@@ -39,7 +39,7 @@ $NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log"
 $AnalysisBasePath = Join-Path $NT8LogPath "ActiveNikiAnalysis"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonScript = Join-Path $ScriptDir "main.py"
-$PythonExe = "C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe"
+$PythonExe = "C:\Program Files\Python313\python.exe"
 $RunLog = Join-Path $AnalysisBasePath "run.log"
 
 # === FUNCTIONS ===
@@ -249,13 +249,19 @@ try {
 
     # ==================== STEP 7: PUSH REPORT TO GITHUB ====================
     Write-Log "Step 7: Pushing report to GitHub..."
-    $gitExe = "C:\Program Files\Git\bin\git.exe"
-    $repoRoot = "C:\Users\Administrator\Documents\NinjaTrader4Niki"
+    $gitExe = "C:\Program Files\Git\cmd\git.exe"
+    $repoRoot = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
     $reportsDir = Join-Path $repoRoot "reports"
 
     $reportFile = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($reportFile) {
-        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis.txt") -Force
+        # Ensure reports directory exists
+        if (!(Test-Path $reportsDir)) {
+            New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
+            Write-Log "  Created reports directory: $reportsDir" "OK"
+        }
+        $vpsName = $env:COMPUTERNAME
+        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis_${vpsName}.txt") -Force
         $tradesFile = Join-Path $analysisFolder "trades_final.txt"
         $signalsFile = Join-Path $analysisFolder "signals.txt"
         if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
@@ -266,7 +272,7 @@ try {
             & $gitExe add reports/ 2>&1 | Out-Null
             & $gitExe commit -m $Date 2>&1 | Out-Null
             & $gitExe push 2>&1 | Out-Null
-            Write-Log "  Git push completed for $Date" "OK"
+            Write-Log "  Git push completed for $Date ($vpsName)" "OK"
         } catch {
             Write-Log "  Git push failed: $_" "ERROR"
         } finally {
@@ -275,9 +281,30 @@ try {
     } else {
         Write-Log "  No analysis report found to push" "WARN"
     }
+    # ==================== STEP 8: CLEAN UP OLD LOG FILES ====================
+    Write-Log "Step 8: Cleaning up NT8 log files older than 3 weeks..."
+    $cutoffDate = (Get-Date).AddDays(-21)
+    $cleanupPatterns = @("ActiveNikiMonitor_*.txt", "ActiveNikiTrader_*.txt", "IndicatorValues_*.csv")
+    $totalRemoved = 0
+
+    foreach ($pattern in $cleanupPatterns) {
+        $oldFiles = Get-ChildItem -Path $NT8LogPath -Filter $pattern -ErrorAction SilentlyContinue |
+            Where-Object { $_.LastWriteTime -lt $cutoffDate }
+        foreach ($file in $oldFiles) {
+            Remove-Item $file.FullName -Force -ErrorAction SilentlyContinue
+            Write-Log "  Deleted: $($file.Name) (last modified $($file.LastWriteTime.ToString('yyyy-MM-dd')))"
+            $totalRemoved++
+        }
+    }
+
+    if ($totalRemoved -gt 0) {
+        Write-Log "  Removed $totalRemoved old file(s)" "OK"
+    } else {
+        Write-Log "  No files older than 3 weeks found" "INFO"
+    }
+
 } catch {
     Write-Log "FATAL: $($_.Exception.Message)" "ERROR"
     Write-Log "Stack: $($_.ScriptStackTrace)" "ERROR"
     exit 1
 }
-

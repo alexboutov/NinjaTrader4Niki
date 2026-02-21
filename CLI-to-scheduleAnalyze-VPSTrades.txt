@@ -1,0 +1,17 @@
+$action = New-ScheduledTaskAction `
+    -Execute "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" `
+    -Argument "-NonInteractive -ExecutionPolicy Bypass -File `"C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki\Analyze-VPSTrades\Analyze-VPSTrades.ps1`""
+
+$trigger = New-ScheduledTaskTrigger -Daily -At "11:30AM"
+
+$settings = New-ScheduledTaskSettingsSet `
+    -ExecutionTimeLimit (New-TimeSpan -Hours 1) `
+    -StartWhenAvailable
+
+Register-ScheduledTask `
+    -TaskName "Analyze-VPSTrades" `
+    -Action $action `
+    -Trigger $trigger `
+    -Settings $settings `
+    -RunLevel Highest `
+    -Force

@@ -5,3 +5,7 @@ trades_final.txt
 .vs/ 
 py/ 
 VPS/ 
+
+# Python bytecode
+__pycache__/
+*.pyc
