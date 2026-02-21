@@ -1,0 +1,480 @@
+================================================================================
+FEB 21, 2026 TRADING SESSION ANALYSIS
+================================================================================
+
+SIGNAL SOURCES
+--------------
+ActiveNikiMonitor signals: 425
+ActiveNikiTrader signals:  1
+  - Orders placed:         0
+  - Outside hours:         0
+  - Blocked by cooldown:   0
+
+SESSION SUMMARY
+---------------
+Total Round-trips: 0
+Win/Loss: 0W / 0L (0.0% win rate)
+Total P&L: +0 ticks ($+0.00)
+  LONG:  0 trades, +0t
+  SHORT: 0 trades, +0t
+
+ALL SIGNALS FIRED: 420
+----------------------------------------
+Time      Dir   Source   Trigger              Conf   Price
+13:27:42  SHORT Trader   [OrangeSquare+DT   ] 6/6   24840.00
+00:15:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24600.75
+00:15:21  LONG  Monitor  [YellowSquare+RR   ] 5/6   24836.25
+00:45:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24798.25
+00:50:04  LONG  Monitor  [YellowSquare+RR   ] 5/6   24940.25
+01:12:53  LONG  Monitor  [YellowSquare+RR   ] 5/6   25001.00
+01:42:57  LONG  Monitor  [YellowSquare+RR   ] 5/6   25011.00
+01:54:25  LONG  Monitor  [YellowSquare+RR   ] 5/6   25011.00
+02:00:04  LONG  Monitor  [YellowSquare+RR   ] 5/6   24945.25
+02:10:29  LONG  Monitor  [YellowSquare+RR   ] 5/6   25021.00
+02:30:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24591.50
+03:00:18  LONG  Monitor  [YellowSquare+RR   ] 5/6   24838.75
+03:08:02  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24917.75
+03:09:25  LONG  Monitor  [YellowSquare+RR   ] 5/6   25033.50
+03:15:02  LONG  Monitor  [YellowSquare+RR   ] 5/6   24868.75
+03:15:19  LONG  Monitor  [YellowSquare+RR   ] 5/6   25036.00
+03:15:43  LONG  Monitor  [YellowSquare+DT   ] 5/6   24727.25
+03:21:46  LONG  Monitor  [YellowSquare+RR   ] 5/6   24704.75
+03:22:07  LONG  Monitor  [YellowSquare+RR   ] 5/6   24898.75
+03:30:13  LONG  Monitor  [YellowSquare+RR   ] 5/6   25046.00
+03:33:40  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24910.25
+03:36:39  LONG  Monitor  [YellowSquare+RR   ] 5/6   24906.25
+03:41:36  LONG  Monitor  [YellowSquare+RR   ] 5/6   24913.75
+03:45:27  LONG  Monitor  [YellowSquare+RR   ] 5/6   24762.25
+03:46:08  LONG  Monitor  [YellowSquare+RR   ] 5/6   24908.75
+03:56:27  LONG  Monitor  [YellowSquare+RR   ] 5/6   24908.75
+03:57:41  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24958.50
+04:04:07  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24958.50
+04:06:23  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24943.50
+04:09:42  LONG  Monitor  [YellowSquare+RR   ] 5/6   24913.75
+04:14:59  LONG  Monitor  [YellowSquare+RR   ] 5/6   24960.25
+04:16:11  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24951.00
+04:25:17  LONG  Monitor  [YellowSquare+RR   ] 5/6   24918.75
+04:26:23  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24951.00
+04:32:42  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24933.50
+04:36:02  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24928.50
+04:41:42  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24903.50
+05:04:39  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24868.50
+05:06:12  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24863.50
+05:09:14  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24863.50
+05:12:51  LONG  Monitor  [YellowSquare+RR   ] 5/6   24933.75
+05:13:04  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24846.00
+05:20:38  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24853.50
+05:21:39  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24932.75
+05:24:01  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24846.00
+05:29:05  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24843.50
+05:35:37  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24838.50
+05:37:50  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24831.00
+05:41:31  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24922.75
+05:49:04  LONG  Monitor  [YellowSquare+RR   ] 5/6   24931.25
+05:50:12  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24922.75
+06:01:13  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24843.50
+06:06:05  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24852.75
+06:20:25  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24860.25
+06:20:39  LONG  Monitor  [YellowSquare+RR   ] 5/6   24871.00
+06:42:25  LONG  Monitor  [YellowSquare+RR   ] 5/6   24876.00
+06:45:50  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24855.25
+06:53:36  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24891.25
+06:55:04  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24832.75
+07:00:50  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24820.25
+07:02:01  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24828.50
+07:06:10  LONG  Monitor  [YellowSquare+SW   ] 5/6   24938.75
+07:08:47  LONG  Monitor  [YellowSquare+RR   ] 5/6   24943.75
+07:11:01  LONG  Monitor  [YellowSquare+RR   ] 5/6   24943.75
+07:14:56  LONG  Monitor  [YellowSquare+RR   ] 5/6   24958.75
+07:24:04  LONG  Monitor  [YellowSquare+ET   ] 5/6   24868.50
+07:29:30  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24810.25
+07:30:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24877.75
+07:35:28  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24800.25
+07:37:49  LONG  Monitor  [YellowSquare+RR   ] 5/6   24719.75
+07:39:39  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24802.75
+07:39:55  LONG  Monitor  [YellowSquare+RR   ] 5/6   24883.50
+07:43:55  LONG  Monitor  [YellowSquare+RR   ] 5/6   24893.50
+07:45:56  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24797.75
+07:56:45  LONG  Monitor  [YellowSquare+RR   ] 5/6   24729.75
+08:00:00  SHORT Monitor  [OrangeSquare+SW   ] 6/6   24584.50
+08:07:19  LONG  Monitor  [YellowSquare+RR   ] 5/6   24699.75
+08:09:23  LONG  Monitor  [YellowSquare+RR   ] 5/6   24649.75
+08:15:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24850.00
+08:16:40  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24846.00
+08:21:34  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24831.00
+08:24:00  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24873.75
+08:28:01  LONG  Monitor  [YellowSquare+RR   ] 5/6   24842.75
+08:30:01  LONG  Monitor  [YellowSquare+ET   ] 5/6   24906.25
+08:30:22  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24826.00
+08:31:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24805.25
+08:33:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24770.25
+08:39:14  LONG  Monitor  [YellowSquare+RR   ] 5/6   24878.50
+08:39:22  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24772.75
+08:39:45  SHORT Monitor  [OrangeSquare+VY   ] 5/6   24873.75
+08:45:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24744.75
+08:45:55  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24841.25
+08:46:08  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24745.25
+08:49:12  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24725.25
+08:54:34  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24826.25
+08:55:06  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24802.25
+09:01:27  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24821.25
+09:19:42  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24715.25
+09:26:19  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24826.25
+09:28:00  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24712.75
+09:30:00  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24729.75
+09:30:01  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24710.25
+09:30:05  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24808.75
+09:30:07  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24821.00
+09:31:43  LONG  Monitor  [YellowSquare+RR   ] 5/6   24740.25
+09:31:47  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24744.75
+09:32:05  LONG  Monitor  [YellowSquare+RR   ] 5/6   24863.50
+09:32:09  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24778.75
+09:33:13  LONG  Monitor  [YellowSquare+RR   ] 5/6   24790.25
+09:34:19  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24841.00
+09:34:42  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24793.75
+09:35:13  LONG  Monitor  [YellowSquare+RR   ] 5/6   24807.75
+09:36:03  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24796.00
+09:36:23  LONG  Monitor  [YellowSquare+RR   ] 5/6   24793.75
+09:37:03  LONG  Monitor  [YellowSquare+RR   ] 5/6   24865.25
+09:39:27  LONG  Monitor  [YellowSquare+RR   ] 5/6   24831.00
+09:40:03  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24788.75
+09:41:13  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24793.50
+09:41:18  LONG  Monitor  [YellowSquare+RR   ] 5/6   24875.25
+09:42:44  LONG  Monitor  [YellowSquare+RR   ] 5/6   24831.25
+09:43:12  LONG  Monitor  [YellowSquare+RR   ] 5/6   24813.50
+09:45:22  LONG  Monitor  [YellowSquare+DT   ] 5/6   24932.75
+09:46:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24866.25
+09:48:23  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24826.25
+09:48:42  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24910.25
+09:50:04  LONG  Monitor  [YellowSquare+RR   ] 5/6   24833.50
+09:51:06  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24803.75
+09:51:15  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24872.75
+09:52:10  LONG  Monitor  [YellowSquare+RR   ] 5/6   24848.50
+09:52:47  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24862.75
+09:53:43  LONG  Monitor  [YellowSquare+RR   ] 5/6   24848.75
+09:53:53  LONG  Monitor  [YellowSquare+RR   ] 5/6   24881.00
+09:54:22  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24865.25
+09:56:16  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24867.75
+09:56:51  LONG  Monitor  [YellowSquare+RR   ] 5/6   24906.00
+09:57:31  LONG  Monitor  [YellowSquare+RR   ] 5/6   24916.25
+09:59:54  SHORT Monitor  [OrangeSquare+ET   ] 6/6   24857.75
+10:00:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24485.75
+10:00:00  LONG  Monitor  [YellowSquare+RR   ] 5/6   24946.25
+10:00:28  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24856.00
+10:01:33  LONG  Monitor  [YellowSquare+RR   ] 5/6   25035.25
+10:02:02  LONG  Monitor  [YellowSquare+RR   ] 5/6   24901.00
+10:03:05  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24990.25
+10:05:04  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24965.25
+10:06:46  SHORT Monitor  [OrangeSquare+VY   ] 6/6   24901.00
+10:06:58  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24865.25
+10:08:56  LONG  Monitor  [YellowSquare+RR   ] 5/6   24972.75
+10:09:09  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24896.00
+10:10:49  LONG  Monitor  [YellowSquare+RR   ] 5/6   25012.75
+10:11:15  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24896.00
+10:12:27  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24977.75
+10:13:04  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24873.50
+10:14:18  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24937.75
+10:15:04  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24883.50
+10:15:50  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24912.75
+10:17:06  LONG  Monitor  [YellowSquare+RR   ] 5/6   24921.00
+10:18:15  LONG  Monitor  [YellowSquare+RR   ] 5/6   24957.75
+10:19:37  LONG  Monitor  [YellowSquare+RR   ] 5/6   24621.25
+10:21:25  LONG  Monitor  [YellowSquare+RR   ] 5/6   24995.25
+10:21:26  SHORT Monitor  [OrangeSquare+ET   ] 5/6   24591.25
+10:23:20  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24553.75
+10:25:15  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24543.75
+10:25:32  LONG  Monitor  [YellowSquare+RR   ] 5/6   24913.50
+10:26:11  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24995.25
+10:27:19  LONG  Monitor  [YellowSquare+RR   ] 5/6   25066.25
+10:27:56  SHORT Monitor  [OrangeSquare+ET   ] 6/6   24881.00
+10:28:54  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24528.75
+10:29:00  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24977.75
+10:30:43  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24506.25
+10:31:18  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24960.25
+10:32:12  LONG  Monitor  [YellowSquare+RR   ] 5/6   24906.00
+10:32:48  SHORT Monitor  [OrangeSquare+SW   ] 5/6   25026.25
+10:32:50  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24483.75
+10:33:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24927.75
+10:34:53  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24456.25
+10:36:49  LONG  Monitor  [YellowSquare+RR   ] 5/6   24493.75
+10:36:55  LONG  Monitor  [YellowSquare+RR   ] 5/6   24975.25
+10:37:13  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25033.75
+10:38:57  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24473.75
+10:39:04  LONG  Monitor  [YellowSquare+RR   ] 5/6   24992.75
+10:40:57  SHORT Monitor  [OrangeSquare+ET   ] 5/6   24965.25
+10:40:59  LONG  Monitor  [YellowSquare+RR   ] 5/6   24496.25
+10:41:24  LONG  Monitor  [YellowSquare+RR   ] 5/6   24928.50
+10:42:24  LONG  Monitor  [YellowSquare+RR   ] 5/6   25076.25
+10:42:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   25007.75
+10:44:30  LONG  Monitor  [YellowSquare+RR   ] 5/6   24496.25
+10:44:52  LONG  Monitor  [YellowSquare+RR   ] 5/6   25050.25
+10:46:22  LONG  Monitor  [YellowSquare+RR   ] 5/6   25068.75
+10:46:43  LONG  Monitor  [YellowSquare+RR   ] 5/6   24523.75
+10:47:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   25062.75
+10:49:07  LONG  Monitor  [YellowSquare+RR   ] 5/6   24571.25
+10:53:32  LONG  Monitor  [YellowSquare+RR   ] 5/6   25073.75
+10:53:35  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24878.50
+10:53:37  LONG  Monitor  [YellowSquare+RR   ] 5/6   25105.25
+10:55:09  LONG  Monitor  [YellowSquare+RR   ] 5/6   25122.75
+10:55:17  LONG  Monitor  [YellowSquare+RR   ] 5/6   25086.25
+10:56:47  LONG  Monitor  [YellowSquare+RR   ] 5/6   25117.75
+10:57:37  LONG  Monitor  [YellowSquare+VY   ] 5/6   24588.75
+10:58:03  LONG  Monitor  [YellowSquare+RR   ] 5/6   24916.00
+10:59:03  LONG  Monitor  [YellowSquare+RR   ] 5/6   25117.75
+10:59:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   24596.25
+10:59:58  LONG  Monitor  [YellowSquare+RR   ] 5/6   24926.00
+11:01:14  LONG  Monitor  [YellowSquare+RR   ] 5/6   25093.75
+11:01:53  LONG  Monitor  [YellowSquare+RR   ] 5/6   25120.25
+11:02:27  LONG  Monitor  [YellowSquare+RR   ] 5/6   24661.25
+11:04:05  LONG  Monitor  [YellowSquare+RR   ] 5/6   25127.75
+11:04:26  LONG  Monitor  [YellowSquare+RR   ] 5/6   24653.75
+11:06:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   24693.75
+11:08:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24703.75
+11:13:21  LONG  Monitor  [YellowSquare+RR   ] 5/6   24763.75
+11:13:34  SHORT Monitor  [OrangeSquare+RR   ] 5/6   25100.25
+11:15:00  LONG  Monitor  [YellowSquare+RR   ] 5/6   24776.25
+11:15:03  LONG  Monitor  [YellowSquare+RR   ] 5/6   24908.50
+11:15:13  LONG  Monitor  [YellowSquare+RR   ] 5/6   25101.25
+11:15:28  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25072.75
+11:17:05  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25042.75
+11:18:01  LONG  Monitor  [YellowSquare+RR   ] 5/6   24936.00
+11:19:09  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25027.75
+11:20:13  LONG  Monitor  [YellowSquare+RR   ] 5/6   24951.00
+11:20:37  LONG  Monitor  [YellowSquare+RR   ] 5/6   24781.25
+11:21:13  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25012.75
+11:21:44  LONG  Monitor  [YellowSquare+RR   ] 5/6   24956.00
+11:22:45  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25015.25
+11:24:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24788.75
+11:24:46  SHORT Monitor  [OrangeSquare+RR   ] 5/6   25007.75
+11:26:23  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24990.25
+11:28:42  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24751.25
+11:29:39  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24873.50
+11:31:20  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24701.25
+11:31:24  LONG  Monitor  [YellowSquare+DT   ] 5/6   25103.75
+11:33:18  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24706.25
+11:34:11  LONG  Monitor  [YellowSquare+RR   ] 5/6   25035.25
+11:36:54  LONG  Monitor  [YellowSquare+DT   ] 5/6   25037.75
+11:37:40  LONG  Monitor  [YellowSquare+RR   ] 5/6   24773.75
+11:39:40  LONG  Monitor  [YellowSquare+RR   ] 5/6   25111.25
+11:40:25  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24888.50
+11:40:44  LONG  Monitor  [YellowSquare+RR   ] 5/6   25072.75
+11:41:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   25111.25
+11:43:13  LONG  Monitor  [YellowSquare+VY   ] 5/6   24768.75
+11:45:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24701.50
+11:45:26  LONG  Monitor  [YellowSquare+RR   ] 5/6   25102.75
+11:45:45  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24848.50
+11:45:50  SHORT Monitor  [OrangeSquare+SW   ] 5/6   24731.25
+11:47:33  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24741.25
+11:47:38  LONG  Monitor  [YellowSquare+RR   ] 5/6   25112.75
+11:48:17  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24833.50
+11:49:20  LONG  Monitor  [YellowSquare+RR   ] 5/6   25125.25
+11:49:22  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24738.75
+11:50:03  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24818.50
+11:51:37  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24813.50
+11:52:39  LONG  Monitor  [YellowSquare+RR   ] 5/6   25117.75
+11:53:34  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24733.75
+11:57:14  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25068.75
+11:57:33  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24741.25
+12:02:06  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24718.75
+12:02:49  SHORT Monitor  [OrangeSquare+SW   ] 5/6   25082.75
+12:06:13  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24731.25
+12:12:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24997.75
+12:14:07  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24698.75
+12:14:13  SHORT Monitor  [OrangeSquare+RR   ] 5/6   25000.25
+12:15:00  SHORT Monitor  [OrangeSquare+DT   ] 6/6   24845.50
+12:15:18  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24831.00
+12:15:55  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24698.75
+12:17:26  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24952.75
+12:19:09  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24927.75
+12:21:44  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24915.25
+12:21:50  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24701.25
+12:24:07  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24673.75
+12:24:08  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24910.25
+12:26:28  LONG  Monitor  [YellowSquare+ET   ] 5/6   24723.75
+12:26:35  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24892.75
+12:28:16  LONG  Monitor  [YellowSquare+RR   ] 5/6   24718.75
+12:30:06  SHORT Monitor  [OrangeSquare+ET   ] 6/6   24853.50
+12:32:24  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24696.25
+12:33:01  LONG  Monitor  [YellowSquare+RR   ] 5/6   24940.25
+12:33:34  SHORT Monitor  [OrangeSquare+DT   ] 5/6   25083.75
+12:33:57  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24856.00
+12:34:19  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24698.75
+12:35:01  LONG  Monitor  [YellowSquare+RR   ] 5/6   24960.25
+12:36:54  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24851.00
+12:38:12  LONG  Monitor  [YellowSquare+SW   ] 5/6   24736.25
+12:40:45  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24843.50
+12:41:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25076.25
+12:41:38  LONG  Monitor  [YellowSquare+RR   ] 5/6   24960.25
+12:41:53  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24688.75
+12:43:24  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24937.75
+12:44:04  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24666.25
+12:44:56  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24843.50
+12:47:17  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24646.25
+12:49:56  LONG  Monitor  [YellowSquare+RR   ] 5/6   25007.75
+12:50:18  LONG  Monitor  [YellowSquare+RR   ] 5/6   24673.75
+12:51:39  LONG  Monitor  [YellowSquare+RR   ] 5/6   25007.75
+12:53:49  LONG  Monitor  [YellowSquare+RR   ] 5/6   25020.25
+12:55:03  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24616.25
+12:55:30  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24786.00
+12:58:01  LONG  Monitor  [YellowSquare+RR   ] 5/6   25027.75
+12:58:47  LONG  Monitor  [YellowSquare+RR   ] 5/6   24681.25
+13:00:24  LONG  Monitor  [YellowSquare+RR   ] 5/6   25040.25
+13:02:02  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24781.00
+13:02:32  LONG  Monitor  [YellowSquare+RR   ] 5/6   25035.25
+13:04:17  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24776.00
+13:07:45  SHORT Monitor  [OrangeSquare+ET   ] 5/6   24663.75
+13:09:33  SHORT Monitor  [OrangeSquare+SW   ] 6/6   24656.25
+13:11:12  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24651.25
+13:12:51  LONG  Monitor  [YellowSquare+RR   ] 5/6   24811.00
+13:13:17  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25002.75
+13:15:06  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24995.25
+13:17:12  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24980.25
+13:17:16  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24658.75
+13:19:12  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24666.25
+13:19:16  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24781.00
+13:21:34  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24952.75
+13:21:59  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24758.50
+13:24:07  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24940.25
+13:24:47  LONG  Monitor  [YellowSquare+RR   ] 5/6   24768.75
+13:26:00  LONG  Monitor  [YellowSquare+RR   ] 5/6   24980.25
+13:27:15  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25061.25
+13:27:42  LONG  Monitor  [YellowSquare+ET   ] 5/6   24960.25
+13:28:54  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25051.25
+13:30:40  LONG  Monitor  [YellowSquare+RR   ] 5/6   24798.50
+13:30:45  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25058.75
+13:34:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   24798.75
+13:38:38  LONG  Monitor  [YellowSquare+RR   ] 5/6   24803.75
+13:40:09  SHORT Monitor  [OrangeSquare+RR   ] 5/6   25058.75
+13:43:32  LONG  Monitor  [YellowSquare+RR   ] 5/6   24838.75
+13:47:58  LONG  Monitor  [YellowSquare+RR   ] 5/6   24818.50
+13:49:43  SHORT Monitor  [OrangeSquare+RR   ] 6/6   25026.25
+13:52:46  LONG  Monitor  [YellowSquare+RR   ] 5/6   24813.50
+13:53:47  LONG  Monitor  [YellowSquare+RR   ] 5/6   24841.25
+13:56:31  LONG  Monitor  [YellowSquare+RR   ] 5/6   24821.00
+14:01:31  LONG  Monitor  [YellowSquare+ET   ] 5/6   25033.75
+14:04:53  LONG  Monitor  [YellowSquare+RR   ] 5/6   25028.75
+14:05:33  LONG  Monitor  [YellowSquare+DT   ] 5/6   24861.25
+14:07:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24838.50
+14:17:51  LONG  Monitor  [YellowSquare+DT   ] 5/6   24853.75
+14:19:30  SHORT Monitor  [OrangeSquare+ET   ] 5/6   24996.25
+14:21:21  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24996.25
+14:21:42  LONG  Monitor  [YellowSquare+RR   ] 5/6   24853.75
+14:22:44  LONG  Monitor  [YellowSquare+RR   ] 5/6   24841.00
+14:23:42  LONG  Monitor  [YellowSquare+RR   ] 5/6   24858.75
+14:28:34  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24988.75
+14:32:38  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24808.50
+14:34:01  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24961.25
+14:35:36  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24956.25
+14:36:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24806.00
+14:37:40  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24936.25
+14:40:35  LONG  Monitor  [YellowSquare+RR   ] 5/6   24873.75
+14:42:20  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24773.50
+14:42:46  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24926.25
+14:45:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24773.50
+14:46:41  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24768.50
+14:54:34  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24833.75
+14:58:02  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24826.25
+15:03:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24821.25
+15:07:29  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24813.75
+15:12:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24806.00
+15:12:57  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24868.75
+15:15:17  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24871.25
+15:15:30  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24801.25
+15:18:24  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24803.75
+15:20:11  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24868.75
+15:22:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24783.75
+15:22:38  LONG  Monitor  [YellowSquare+RR   ] 5/6   24803.50
+15:24:10  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24778.75
+15:25:51  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24776.25
+15:29:56  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24773.75
+15:30:00  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24871.25
+15:33:08  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24751.25
+15:37:09  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24753.75
+15:37:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24921.25
+15:44:34  LONG  Monitor  [YellowSquare+RR   ] 5/6   24808.50
+15:45:41  LONG  Monitor  [YellowSquare+RR   ] 5/6   24948.75
+15:49:23  LONG  Monitor  [YellowSquare+RR   ] 5/6   24833.50
+15:50:48  LONG  Monitor  [YellowSquare+RR   ] 5/6   24971.25
+15:51:58  SHORT Monitor  [OrangeSquare+SW   ] 5/6   24746.25
+15:52:50  LONG  Monitor  [YellowSquare+RR   ] 5/6   24831.00
+15:53:55  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24756.25
+15:56:02  LONG  Monitor  [YellowSquare+RR   ] 5/6   24991.25
+15:56:10  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24743.75
+15:57:43  LONG  Monitor  [YellowSquare+RR   ] 5/6   24846.00
+15:59:13  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24751.25
+16:00:17  SHORT Monitor  [OrangeSquare+ET   ] 5/6   24951.25
+16:00:59  LONG  Monitor  [YellowSquare+RR   ] 5/6   24783.75
+16:02:55  LONG  Monitor  [YellowSquare+RR   ] 5/6   24868.50
+16:03:53  LONG  Monitor  [YellowSquare+RR   ] 5/6   24778.75
+16:15:06  LONG  Monitor  [YellowSquare+RR   ] 5/6   24786.25
+16:15:41  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24933.75
+16:50:29  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24936.25
+16:53:45  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24758.75
+18:00:14  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24830.25
+18:00:18  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24766.25
+18:02:31  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24751.25
+18:05:29  LONG  Monitor  [YellowSquare+DT   ] 5/6   24817.25
+18:09:00  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24753.75
+18:11:38  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24733.75
+18:11:59  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24835.25
+18:15:57  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24728.75
+18:30:02  LONG  Monitor  [YellowSquare+RR   ] 5/6   24983.50
+18:32:59  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24738.75
+18:45:14  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24721.25
+18:58:49  SHORT Monitor  [OrangeSquare+DT   ] 5/6   24716.25
+19:02:13  LONG  Monitor  [YellowSquare+RR   ] 5/6   24875.25
+19:16:58  SHORT Monitor  [OrangeSquare+ET   ] 6/6   24948.50
+19:45:17  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24933.50
+19:46:21  LONG  Monitor  [YellowSquare+RR   ] 5/6   24902.75
+20:21:38  LONG  Monitor  [YellowSquare+RR   ] 5/6   24922.75
+20:32:05  LONG  Monitor  [YellowSquare+RR   ] 5/6   24925.25
+20:51:21  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24943.50
+21:03:16  LONG  Monitor  [YellowSquare+DT   ] 5/6   24922.75
+21:22:59  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24887.75
+21:29:40  LONG  Monitor  [YellowSquare+RR   ] 5/6   24751.25
+21:44:19  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24892.75
+21:46:06  LONG  Monitor  [YellowSquare+SW   ] 5/6   24986.00
+22:01:59  LONG  Monitor  [YellowSquare+RR   ] 5/6   24983.50
+22:05:21  LONG  Monitor  [YellowSquare+RR   ] 5/6   24768.75
+22:31:46  LONG  Monitor  [YellowSquare+RR   ] 5/6   24758.75
+22:44:48  SHORT Monitor  [OrangeSquare+RR   ] 5/6   24890.25
+23:00:31  LONG  Monitor  [YellowSquare+RR   ] 5/6   24988.50
+23:05:54  LONG  Monitor  [YellowSquare+RR   ] 5/6   24796.25
+23:26:07  LONG  Monitor  [YellowSquare+RR   ] 5/6   24811.25
+  (► = order placed by ActiveNikiTrader)
+
+SIGNAL ALIGNMENT ANALYSIS
+-------------------------
+
+ALIGNED with signals: 0 trades, +0t
+
+COUNTER to signals: 0 trades, +0t
+
+NO SIGNAL nearby: 0 trades, +0t
+
+BEST & WORST TRADES
+-------------------
+
+TOP 5 WINNERS:
+
+BOTTOM 5 LOSERS:
+
+TIME-BASED ANALYSIS
+-------------------
+
+================================================================================
+KEY INSIGHTS
+================================================================================
+
+1. SIGNAL ALIGNMENT:
+
+2. P&L BY ALIGNMENT:
+   - ALIGNED trades: +0t ($+0.00)
+   - COUNTER trades: +0t ($+0.00)
+   - NO SIGNAL trades: +0t ($+0.00)
+
+3. CONFLUENCE INSIGHTS:
+
+5. RECOMMENDATIONS:
+
+================================================================================
