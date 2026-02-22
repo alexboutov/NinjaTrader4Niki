@@ -4,33 +4,31 @@ FEB 22, 2026 TRADING SESSION ANALYSIS
 
 SIGNAL SOURCES
 --------------
-ActiveNikiMonitor signals: 34
-ActiveNikiTrader signals:  78
+ActiveNikiMonitor signals: 0
+ActiveNikiTrader signals:  98
   - Orders placed:         2
-  - Outside hours:         5
+  - Outside hours:         6
   - Blocked by cooldown:   1
 
 SESSION SUMMARY
 ---------------
 Total Round-trips: 2
-Win/Loss: 0W / 2L (0.0% win rate)
-Total P&L: -111 ticks ($-555.00)
+Win/Loss: 2W / 0L (100.0% win rate)
+Total P&L: +92 ticks ($+460.00)
   LONG:  0 trades, +0t
-  SHORT: 2 trades, -111t
+  SHORT: 2 trades, +92t
 
 CONFLUENCE LEVEL ANALYSIS
 -------------------------
-  5/6: 2 trades, 0W (0%), -111t
+  5/6: 2 trades, 2W (100%), +92t
 
 TRIGGER TYPE ANALYSIS
 ---------------------
-  OrangeSquare+DT: 2 trades, 0W (0%), -111t
+  OrangeSquare+DT: 2 trades, 2W (100%), +92t
 
-ALL SIGNALS FIRED: 112
+ALL SIGNALS FIRED: 98
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
-06:45:50  SHORT Trader   [OrangeSquare+DT   ] 6/6   24854.75
-06:55:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24833.50
 07:00:50  SHORT Trader   [OrangeSquare+DT   ] 6/6   24819.50
 07:29:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24809.75
 07:35:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24798.75
@@ -91,7 +89,7 @@ Time      Dir   Source   Trigger              Conf   Price
 12:19:09  SHORT Trader   [OrangeSquare+DT   ] 6/6   24926.75
 12:21:44  SHORT Trader   [OrangeSquare+DT   ] 6/6   24916.25
 12:24:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24911.00
-12:26:35  SHORT Trader   [OrangeSquare+RR   ] 6/6   24888.00
+12:26:35  SHORT Trader   [OrangeSquare+DT   ] 5/6   24888.00
 12:35:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24963.25
 12:41:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24958.00
 12:43:24  SHORT Trader   [OrangeSquare+DT   ] 5/6   24938.75
@@ -107,53 +105,41 @@ Time      Dir   Source   Trigger              Conf   Price
 13:21:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24949.75
 13:24:07  SHORT Trader   [OrangeSquare+DT   ] 6/6   24945.75
 13:26:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24980.25
-07:08:14  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24658.50
-07:10:12  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24666.00
-07:33:47  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24613.50
-07:40:27  SHORT Monitor  [OrangeSquare+SW   ] 6/6   24598.50
-08:07:01  SHORT Monitor  [OrangeSquare+SW   ] 6/6   24546.00
-08:13:23  SHORT Monitor  [OrangeSquare+DT   ] 6/6   24541.00
-08:21:28  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24581.00
-08:23:01  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24606.00
-09:30:20  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24656.00
-09:33:05  SHORT Monitor  [OrangeSquare+DT   ] 6/6   24688.50
-09:34:45  SHORT Monitor  [OrangeSquare+SW   ] 6/6   24746.00
-09:40:47  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24781.00
-09:42:25  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24778.50
-09:45:10  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24676.00
-09:47:20  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24658.50
-09:51:48  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24556.00
-09:53:21  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24553.50
-09:56:51  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24503.50
-09:58:49  SHORT Monitor  [OrangeSquare+DT   ] 6/6   24498.50
-10:01:32  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24511.00
-10:05:05  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24571.00
-10:25:00  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24548.50
-10:27:50  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24536.00
-10:51:41  SHORT Monitor  [OrangeSquare+VY   ] 6/6   24576.00
-11:04:26  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24653.50
-12:42:05  SHORT Monitor  [OrangeSquare+VY   ] 6/6   24688.50
-12:46:02  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24646.00
-12:48:28  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24666.00
-12:50:22  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24668.50
-12:52:42  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24641.00
-12:57:56  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24671.00
-13:20:22  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24683.50
-19:30:01  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24741.00
-20:05:28  SHORT Monitor  [OrangeSquare+RR   ] 6/6   24713.50
+13:33:07  LONG  Trader   [YellowSquare+RR   ] 5/6   25020.25
+13:34:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   25018.75
+13:37:19  LONG  Trader   [YellowSquare+RR   ] 5/6   25045.25
+13:41:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25065.75
+13:46:49  LONG  Trader   [YellowSquare+RR   ] 5/6   25107.50
+13:50:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   25048.50
+13:56:01  LONG  Trader   [YellowSquare+RR   ] 5/6   25101.50
+14:00:20  LONG  Trader   [YellowSquare+RR   ] 5/6   25104.75
+14:12:08  SHORT Trader   [OrangeSquare+DT   ] 5/6   25075.00
+14:14:14  SHORT Trader   [OrangeSquare+DT   ] 5/6   25067.25
+14:19:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   25055.00
+14:20:47  SHORT Trader   [OrangeSquare+DT   ] 6/6   25053.00
+14:26:48  SHORT Trader   [OrangeSquare+RR   ] 6/6   25057.50
+14:37:47  SHORT Trader   [OrangeSquare+RR   ] 6/6   25050.00
+14:42:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   25045.00
+14:57:09  SHORT Trader   [OrangeSquare+DT   ] 6/6   25032.50
+15:25:17  SHORT Trader   [OrangeSquare+DT   ] 5/6   25027.00
+15:32:56  SHORT Trader   [OrangeSquare+DT   ] 6/6   25023.50
+15:50:00  LONG  Trader   [YellowSquare+RR   ] 5/6   25056.75
+15:55:24  LONG  Trader   [YellowSquare+RR   ] 5/6   25059.00
+16:01:10  LONG  Trader   [YellowSquare+RR   ] 5/6   25077.75
+16:55:10  LONG  Trader   [YellowSquare+RR   ] 5/6   25080.25
   (► = order placed by ActiveNikiTrader)
 
 STRATEGY TRADES
 ---------------
-  10:26:11 SHORT    -60t ($-300.00) ✗ [OrangeSquare+DT] 5/6
-  10:29:00 SHORT    -51t ($-255.00) ✗ [OrangeSquare+DT] 5/6
+  10:26:11 SHORT    +72t ($+360.00) ✓ [OrangeSquare+DT] 5/6
+  10:29:00 SHORT    +20t ($+100.00) ✓ [OrangeSquare+DT] 5/6
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
 
-ALIGNED with signals: 2 trades, -111t
-  10:26:11 SHORT   -60t <- Trader @ 10:26:11 [OrangeSquare+DT] 5/6 
-  10:29:00 SHORT   -51t <- Trader @ 10:29:00 [OrangeSquare+DT] 5/6 
+ALIGNED with signals: 2 trades, +92t
+  10:26:11 SHORT   +72t <- Trader @ 10:26:11 [OrangeSquare+DT] 5/6 ✓
+  10:29:00 SHORT   +20t <- Trader @ 10:29:00 [OrangeSquare+DT] 5/6 ✓
 
 COUNTER to signals: 0 trades, +0t
 
@@ -162,29 +148,29 @@ NO SIGNAL nearby: 0 trades, +0t
 INDICATOR STATE CORRELATION
 ---------------------------
 Indicator   UP(W/L)     DN(W/L)     Notes
-  AAA       0/0 (   0%)  0/2 (   0%)  
-  DT        0/0 (   0%)  0/2 (   0%)  
-  ET        0/0 (   0%)  0/2 (   0%)  
-  RR        0/2 (   0%)  0/0 (   0%)  
-  SB        0/0 (   0%)  0/2 (   0%)  
-  SW        0/0 (   0%)  0/2 (   0%)  
-  T3P       0/2 (   0%)  0/0 (   0%)  
-  VY        0/0 (   0%)  0/2 (   0%)  
+  AAA       0/0 (   0%)  2/0 ( 100%)  Better when DN
+  DT        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  ET        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  RR        2/0 ( 100%)  0/0 (   0%)  Better when UP
+  SB        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  SW        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  T3P       2/0 ( 100%)  0/0 (   0%)  Better when UP
+  VY        0/0 (   0%)  2/0 ( 100%)  Better when DN
 
 BEST & WORST TRADES
 -------------------
 
 TOP 5 WINNERS:
-  10:29:00 SHORT   -51t [Trader:OrangeSquare+DT] 5/6
-  10:26:11 SHORT   -60t [Trader:OrangeSquare+DT] 5/6
+  10:26:11 SHORT   +72t [Trader:OrangeSquare+DT] 5/6
+  10:29:00 SHORT   +20t [Trader:OrangeSquare+DT] 5/6
 
 BOTTOM 5 LOSERS:
-  10:29:00 SHORT   -51t [Trader:OrangeSquare+DT] 5/6
-  10:26:11 SHORT   -60t [Trader:OrangeSquare+DT] 5/6
+  10:26:11 SHORT   +72t [Trader:OrangeSquare+DT] 5/6
+  10:29:00 SHORT   +20t [Trader:OrangeSquare+DT] 5/6
 
 TIME-BASED ANALYSIS
 -------------------
-10:00-11:00 : 2 trades, 0W, -111t
+10:00-11:00 : 2 trades, 2W, +92t
 
 ================================================================================
 KEY INSIGHTS
@@ -194,15 +180,16 @@ KEY INSIGHTS
    - 2 of 2 trades (100%) aligned with signals
 
 2. P&L BY ALIGNMENT:
-   - ALIGNED trades: -111t ($-555.00)
+   - ALIGNED trades: +92t ($+460.00)
    - COUNTER trades: +0t ($+0.00)
    - NO SIGNAL trades: +0t ($+0.00)
 
 3. CONFLUENCE INSIGHTS:
-   - Best performing: 5/6 with -111t
-   - High confluence (N-1 or higher): -111t
+   - Best performing: 5/6 with +92t
+   - High confluence (N-1 or higher): +92t
 
 5. RECOMMENDATIONS:
+   - Best trigger: OrangeSquare+DT with +92t
 
 ================================================================================
 SLIPPAGE ANALYSIS
@@ -218,26 +205,26 @@ ENTRY SLIPPAGE:
 
 EXIT SLIPPAGE (all exits):
    Trades with data: 2
-   Mean:   -2.5t ($-12.50)
-   Median: -2.5t
-   Std Dev: 4.5t
-   Range:  -7t to +2t
-   TOTAL:  -5t ($-25.00)
+   Mean:   +6.0t ($+30.00)
+   Median: +6.0t
+   Std Dev: 2.0t
+   Range:  +4t to +8t
+   TOTAL:  +12t ($+60.00)
 
 EXIT SLIPPAGE BY REASON:
-   SL       (  2 trades): Mean  -2.5t | Total     -5t ($-25.00)
+   TRAIL    (  2 trades): Mean  +6.0t | Total    +12t ($+60.00)
 
 COST SUMMARY:
-   Gross P&L:        -111t ($-555.00)
+   Gross P&L:        +92t ($+460.00)
    Entry Slippage:   +0t ($+0.00)
-   Exit Slippage:    -5t ($-25.00)
-   Total Slippage:   -5t ($-25.00)
+   Exit Slippage:    +12t ($+60.00)
+   Total Slippage:   +12t ($+60.00)
    Broker Fees:      2 × $4.50 = $9.00
    ─────────────────────────────────────
-   NET P&L:          $-539.00
+   NET P&L:          $+391.00
 
-   Slippage as % of |Gross|: -4.5%
-   Total costs as % of |Gross|: -2.9%
+   Slippage as % of |Gross|: 13.0%
+   Total costs as % of |Gross|: 15.0%
 
 ================================================================================
 MULTI-DAY COMPARISON - VPS (Previous Days)
@@ -247,6 +234,6 @@ Date        Trades  Win%    P&L      Signal Alignment
 ----------------------------------------------------------------------
 Feb 21        0     0%      +0t    N/A
 ----------------------------------------------------------------------
-TODAY         2     0%    -111t    2 aligned (-111t), 0 no signal (+0t)
+TODAY         2     100%     +92t    2 aligned (+92t), 0 no signal (+0t)
 
 ================================================================================
