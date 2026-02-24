@@ -260,8 +260,16 @@ try {
             New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
             Write-Log "  Created reports directory: $reportsDir" "OK"
         }
-        $vpsName = $env:COMPUTERNAME
-        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis_${vpsName}.txt") -Force
+        # Resolve VPS name from public IP address
+        $publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+        $vpsName = switch ($publicIP) {
+            "104.237.203.83" { "VPS1" }
+            "205.234.153.21" { "VPS2" }
+            "64.44.56.21"    { "VPS3" }
+            default          { "VPS_$publicIP" }
+        }
+        Write-Log "  VPS identity: $vpsName (IP: $publicIP)"
+        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt") -Force
         $tradesFile = Join-Path $analysisFolder "trades_final.txt"
         $signalsFile = Join-Path $analysisFolder "signals.txt"
         if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
@@ -272,7 +280,7 @@ try {
             & $gitExe add reports/ 2>&1 | Out-Null
             & $gitExe commit -m $Date 2>&1 | Out-Null
             & $gitExe push 2>&1 | Out-Null
-            Write-Log "  Git push completed for $Date ($vpsName)" "OK"
+            Write-Log "  Git push completed for $Date - Trading_Analysis-${vpsName}.txt" "OK"
         } catch {
             Write-Log "  Git push failed: $_" "ERROR"
         } finally {
@@ -284,7 +292,7 @@ try {
     # ==================== STEP 8: CLEAN UP OLD LOG FILES ====================
     Write-Log "Step 8: Cleaning up NT8 log files older than 3 weeks..."
     $cutoffDate = (Get-Date).AddDays(-21)
-    $cleanupPatterns = @("ActiveNikiMonitor_*.txt", "ActiveNikiTrader_*.txt", "IndicatorValues_*.csv")
+    $cleanupPatterns = @("ActiveNikiTrader_*.txt", "IndicatorValues_*.csv")
     $totalRemoved = 0
 
     foreach ($pattern in $cleanupPatterns) {
