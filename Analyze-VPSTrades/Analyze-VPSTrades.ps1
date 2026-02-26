@@ -277,6 +277,7 @@ try {
 
         Push-Location $repoRoot
         try {
+            & $gitExe pull --rebase 2>&1 | Out-Null
             & $gitExe add reports/ 2>&1 | Out-Null
             & $gitExe commit -m $Date 2>&1 | Out-Null
             & $gitExe push 2>&1 | Out-Null
