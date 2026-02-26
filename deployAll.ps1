@@ -115,3 +115,4 @@ Write-Host "  Strategies: $ntStrategiesPath" -ForegroundColor Gray
 Write-Host "  Template:   $ntStrategyTemplatePath" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Next: Open NinjaTrader and compile (Tools > Edit NinjaScript > Strategy or press F5)" -ForegroundColor Yellow
+
