@@ -39,7 +39,7 @@ $NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log"
 $AnalysisBasePath = Join-Path $NT8LogPath "ActiveNikiAnalysis"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonScript = Join-Path $ScriptDir "main.py"
-$PythonExe = "python"
+$PythonExe = "C:\Program Files\Python313\python.exe"
 $RunLog = Join-Path $AnalysisBasePath "run.log"
 
 # === FUNCTIONS ===
