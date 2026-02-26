@@ -5,10 +5,11 @@ FEB 26, 2026 TRADING SESSION ANALYSIS
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  0
-  - Orders placed:         0
+ActiveNikiTrader signals:  28
+  - Orders placed:         3
   - Outside hours:         0
   - Blocked by cooldown:   0
+BAR data loaded:           262841 bars from CSV
 
 SESSION SUMMARY
 ---------------
@@ -18,10 +19,72 @@ Total P&L: +0 ticks ($+0.00)
   LONG:  0 trades, +0t
   SHORT: 0 trades, +0t
 
-ALL SIGNALS FIRED: 0
+ALL SIGNALS FIRED: 28
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
+08:36:32  LONG  Trader   [YellowSquare+RR   ] 5/6   25401.00
+08:46:07  LONG  Trader   [YellowSquare+RR   ] 5/6   25398.25
+09:29:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   25341.25
+09:34:46  SHORT Trader   [OrangeSquare+DT   ] 5/6   25270.50 ►
+09:37:15  SHORT Trader   [OrangeSquare+DT   ] 6/6   25238.00
+09:44:25  SHORT Trader   [OrangeSquare+DT   ] 6/6   25240.25
+09:48:44  SHORT Trader   [OrangeSquare+DT   ] 5/6   25228.75
+09:54:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   25202.00
+09:59:48  SHORT Trader   [OrangeSquare+DT   ] 5/6   25200.75 ►
+10:09:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   25154.50
+10:13:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   25089.50
+10:16:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   25028.00
+10:19:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24971.50
+10:20:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24947.00
+10:23:06  SHORT Trader   [OrangeSquare+DT   ] 5/6   24920.00 ►
+10:26:43  LONG  Trader   [YellowSquare+RR   ] 5/6   24959.50
+10:28:20  SHORT Trader   [OrangeSquare+DT   ] 6/6   24916.50
+10:30:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24931.50
+10:34:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24897.75
+10:37:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24922.00
+10:39:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24967.25
+10:41:22  LONG  Trader   [YellowSquare+RR   ] 5/6   24982.75
+10:43:42  LONG  Trader   [YellowSquare+RR   ] 5/6   24996.00
+10:48:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25016.00
+11:03:37  LONG  Trader   [YellowSquare+RR   ] 5/6   25020.50
+11:08:42  LONG  Trader   [YellowSquare+RR   ] 5/6   25026.50
+11:16:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25067.50
+11:25:15  LONG  Trader   [YellowSquare+DT   ] 5/6   25054.25
   (► = order placed by ActiveNikiTrader)
+
+==========================================================================================
+EXIT STRATEGY COMPARISON: SL/TP vs Confluence Drop vs Single Indicator Flip
+==========================================================================================
+
+(Exit times estimated by scanning BAR data for SL/TP price levels)
+
+STRATEGY COMPARISON SUMMARY
+----------------------------------------------------------------------
+Strategy                         Trades   Better    Worse          NET
+----------------------------------------------------------------------
+1. Current SL/TP (baseline)           0      ---      ---          +0t
+2. Confluence drop below 6            0      ---      ---          +0t
+3. Single indicator flip              0      ---      ---          +0t
+----------------------------------------------------------------------
+
+==========================================================================================
+TRAILING STOP SIMULATION ANALYSIS
+==========================================================================================
+
+Simulates trailing stops that activate after reaching profit threshold,
+then trail behind price by specified distance. Fixed SL/TP still honored.
+
+TRAILING STOP COMPARISON SUMMARY
+------------------------------------------------------------------------------------------
+Strategy                   Trades  Better   Worse   Same     Actual      Trail        NET
+------------------------------------------------------------------------------------------
+Fixed SL/TP (baseline)          0     ---     ---    ---         +0t        ---        +0t
+------------------------------------------------------------------------------------------
+
+TRAILING STOP RECOMMENDATION
+------------------------------
+  No trailing stop configuration improved results.
+  Current fixed SL/TP strategy performs best.
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
@@ -54,6 +117,12 @@ KEY INSIGHTS
    - NO SIGNAL trades: +0t ($+0.00)
 
 3. CONFLUENCE INSIGHTS:
+
+4. EXIT STRATEGY COMPARISON:
+   - Confluence drop: no trades affected
+   - Indicator flip:  no trades affected
+   - Trailing stop:   no improvement found
+   → Current SL/TP performs best
 
 5. RECOMMENDATIONS:
 
