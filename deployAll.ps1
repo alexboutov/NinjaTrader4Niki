@@ -90,17 +90,18 @@ if (-not (Test-Path $ntStrategyTemplatePath)) {
     Write-Host "[CREATED] Template directory" -ForegroundColor Cyan
 }
 
-$templateFile = "ActiveNikiTrader.xml"
-$sourceTemplate = Join-Path $repoPath $templateFile
-$destTemplate = Join-Path $ntStrategyTemplatePath $templateFile
-
-if (Test-Path $sourceTemplate) {
-    Copy-Item $sourceTemplate $destTemplate -Force
-    Write-Host "[OK] Copied $templateFile" -ForegroundColor Green
-    $templateSuccess++
-} else {
-    Write-Host "[FAIL] Not found: $templateFile" -ForegroundColor Red
-    $templateFail++
+$templates = @("ActiveNikiTrader.xml", "ActiveNikiTrader 7-11.xml")
+foreach ($templateFile in $templates) {
+	$sourceTemplate = Join-Path $repoPath $templateFile
+	$destTemplate = Join-Path $ntStrategyTemplatePath $templateFile
+	if (Test-Path $sourceTemplate) {
+    		Copy-Item $sourceTemplate $destTemplate -Force
+    		Write-Host "[OK] Copied $templateFile" -ForegroundColor Green
+    		$templateSuccess++
+	} else {
+    		Write-Host "[FAIL] Not found: $templateFile" -ForegroundColor Red
+    		$templateFail++
+	}
 }
 
 Write-Host ""
