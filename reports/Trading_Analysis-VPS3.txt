@@ -5,11 +5,11 @@ FEB 26, 2026 TRADING SESSION ANALYSIS
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  28
+ActiveNikiTrader signals:  17
   - Orders placed:         3
   - Outside hours:         0
   - Blocked by cooldown:   0
-BAR data loaded:           262841 bars from CSV
+BAR data loaded:           179936 bars from CSV
 
 SESSION SUMMARY
 ---------------
@@ -19,7 +19,7 @@ Total P&L: +0 ticks ($+0.00)
   LONG:  0 trades, +0t
   SHORT: 0 trades, +0t
 
-ALL SIGNALS FIRED: 28
+ALL SIGNALS FIRED: 17
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
 08:36:32  LONG  Trader   [YellowSquare+RR   ] 5/6   25401.00
@@ -39,17 +39,6 @@ Time      Dir   Source   Trigger              Conf   Price
 10:23:06  SHORT Trader   [OrangeSquare+DT   ] 5/6   24920.00 ►
 10:26:43  LONG  Trader   [YellowSquare+RR   ] 5/6   24959.50
 10:28:20  SHORT Trader   [OrangeSquare+DT   ] 6/6   24916.50
-10:30:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24931.50
-10:34:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24897.75
-10:37:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24922.00
-10:39:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24967.25
-10:41:22  LONG  Trader   [YellowSquare+RR   ] 5/6   24982.75
-10:43:42  LONG  Trader   [YellowSquare+RR   ] 5/6   24996.00
-10:48:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25016.00
-11:03:37  LONG  Trader   [YellowSquare+RR   ] 5/6   25020.50
-11:08:42  LONG  Trader   [YellowSquare+RR   ] 5/6   25026.50
-11:16:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25067.50
-11:25:15  LONG  Trader   [YellowSquare+DT   ] 5/6   25054.25
   (► = order placed by ActiveNikiTrader)
 
 ==========================================================================================
