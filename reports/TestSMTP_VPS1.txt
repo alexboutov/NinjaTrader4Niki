@@ -1,0 +1,15 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 52AF-4086
+
+ Directory of C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki\reports
+
+02/28/2026  12:39 PM    <DIR>          .
+02/25/2026  10:33 PM    <DIR>          ..
+02/27/2026  11:56 AM                 5 signals.txt
+02/28/2026  12:39 PM                 0 TestSMTP.txt
+02/27/2026  11:56 AM             1,269 trades_final.txt
+02/27/2026  11:56 AM            22,560 Trading_Analysis-VPS1.txt
+02/27/2026  12:23 PM            22,499 Trading_Analysis-VPS2.txt
+02/27/2026  12:11 PM            22,689 Trading_Analysis-VPS3.txt
+               6 File(s)         69,022 bytes
+               2 Dir(s)  179,806,040,064 bytes free
