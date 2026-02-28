@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Analyze-VPSTrades.ps1
     Analyzes NinjaTrader 8 trading logs directly on the VPS.
@@ -13,10 +13,10 @@
     - Designed to run unattended via scheduled task (SYSTEM account)
 
     Processing order (smallest files first for performance):
-      1. log.*.txt           → extract today's filled trades
-      2. ActiveNikiMonitor_* → copy for signal parsing
-      3. ActiveNikiTrader_*  → copy for order/close parsing
-      4. IndicatorValues_*   → copy for BAR analysis (largest)
+      1. log.*.txt           â†’ extract today's filled trades
+      2. ActiveNikiMonitor_* â†’ copy for signal parsing
+      3. ActiveNikiTrader_*  â†’ copy for order/close parsing
+      4. IndicatorValues_*   â†’ copy for BAR analysis (largest)
 
 .PARAMETER Date
     The trading date to analyze. Defaults to today. Format: yyyy-MM-dd
@@ -310,6 +310,54 @@ try {
         Write-Log "  Removed $totalRemoved old file(s)" "OK"
     } else {
         Write-Log "  No files older than 3 weeks found" "INFO"
+    }
+
+    # ==================== STEP 9: SEND EMAIL REPORT ====================
+    Write-Log "Step 9: Sending email report..."
+
+    $EmailTo      = "alex.boutov@gmail.com"
+    $EmailFrom    = "alex.boutov@gmail.com"
+    $EmailAppPass = "oqmy bqia arud hfmf"
+
+    if (-not $vpsName) {
+        $publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+        $vpsName = switch ($publicIP) {
+            "104.237.203.83" { "VPS1" }
+            "205.234.153.21" { "VPS2" }
+            "64.44.56.21"    { "VPS3" }
+            default          { "VPS_$publicIP" }
+        }
+    }
+
+    $emailAttachment = Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt"
+
+    if (Test-Path $emailAttachment) {
+        try {
+            $smtpCred = New-Object System.Management.Automation.PSCredential(
+                $EmailFrom,
+                (ConvertTo-SecureString $EmailAppPass -AsPlainText -Force)
+            )
+            $tradeCount  = if ($allTrades.Count -gt 0) { $allTrades.Count } else { 0 }
+            $signalCount = if ($allSignalLines.Count -gt 0) { $allSignalLines.Count } else { 0 }
+            $emailBody = "Trading Analysis Report - ${vpsName} - ${Date}`nTrades filled : ${tradeCount}`nSignal lines  : ${signalCount}`nFull report is attached.`n---`nGenerated automatically by Analyze-VPSTrades.ps1 on ${vpsName}"
+            $mailParams = @{
+                From        = $EmailFrom
+                To          = $EmailTo
+                Subject     = "[${vpsName}] Trading Analysis - ${Date}"
+                Body        = $emailBody
+                Attachments = $emailAttachment
+                SmtpServer  = "smtp.gmail.com"
+                Port        = 587
+                UseSsl      = $true
+                Credential  = $smtpCred
+            }
+            Send-MailMessage @mailParams
+            Write-Log "  Email sent to $EmailTo - Trading_Analysis-${vpsName}.txt" "OK"
+        } catch {
+            Write-Log "  Email send failed: $_" "ERROR"
+        }
+    } else {
+        Write-Log "  Email attachment not found, skipping: $emailAttachment" "WARN"
     }
 
 } catch {
