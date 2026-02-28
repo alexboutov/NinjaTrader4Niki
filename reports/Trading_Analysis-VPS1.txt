@@ -5,11 +5,11 @@ FEB 27, 2026 TRADING SESSION ANALYSIS
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  43
+ActiveNikiTrader signals:  41
   - Orders placed:         2
   - Outside hours:         1
   - Blocked by cooldown:   0
-BAR data loaded:           246080 bars from CSV
+BAR data loaded:           233487 bars from CSV
 
 SESSION SUMMARY
 ---------------
@@ -27,7 +27,7 @@ TRIGGER TYPE ANALYSIS
 ---------------------
   OrangeSquare+DT: 2 trades, 2W (100%), +106t
 
-ALL SIGNALS FIRED: 43
+ALL SIGNALS FIRED: 41
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
 07:05:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24928.00
@@ -71,8 +71,6 @@ Time      Dir   Source   Trigger              Conf   Price
 11:17:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24992.75
 11:23:20  SHORT Trader   [OrangeSquare+DT   ] 6/6   24960.75
 11:33:52  LONG  Trader   [YellowSquare+RR   ] 5/6   25000.25
-11:47:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24940.00
-11:54:05  LONG  Trader   [YellowSquare+RR   ] 5/6   24978.25
   (► = order placed by ActiveNikiTrader)
 
 STRATEGY TRADES
@@ -609,11 +607,10 @@ MULTI-DAY COMPARISON - VPS (Previous Days)
 
 Date        Trades  Win%    P&L      Signal Alignment
 ----------------------------------------------------------------------
-Feb 21        0     0%      +0t    N/A
-Feb 22        1     100%    +146t    1 aligned (+146t), 0 no signal (+0t)
-Feb 24        2     100%    +175t    2 aligned (+175t), 0 no signal (+0t)
+Feb 08       13     46%    +280t    13 aligned (+280t), 0 no signal (+0t)
+Feb 09       14     50%    +400t    14 aligned (+400t), 0 no signal (+0t)
 Feb 25        3     100%    +242t    3 aligned (+242t), 0 no signal (+0t)
-Feb 26        0     0%      +0t    N/A
+Feb 26        3     100%    +337t    3 aligned (+337t), 0 no signal (+0t)
 ----------------------------------------------------------------------
 TODAY         2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
 
