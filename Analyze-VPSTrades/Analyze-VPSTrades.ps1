@@ -42,6 +42,17 @@ $PythonScript = Join-Path $ScriptDir "main.py"
 $PythonExe = "C:\Program Files\Python313\python.exe"
 $RunLog = Join-Path $AnalysisBasePath "run.log"
 
+# === EMAIL CONFIGURATION ===
+$EmailTo       = "alex.boutov@gmail.com"
+$EmailFrom     = "alex.boutov@gmail.com"   # <-- Gmail address sending FROM
+$EmailAppPass  = "oqmy bqia arud hfmf"             # <-- Gmail App Password (NOT your login password)
+#
+# HOW TO GET A GMAIL APP PASSWORD:
+#   1. Go to https://myaccount.google.com/security
+#   2. Enable 2-Step Verification (required)
+#   3. Search for "App passwords" → create one named e.g. "VPS Trading Script"
+#   4. Paste the 16-character password above (spaces are fine)
+
 # === FUNCTIONS ===
 
 function Write-Log {
@@ -277,6 +288,7 @@ try {
 
         Push-Location $repoRoot
         try {
+            & $gitExe pull --rebase 2>&1 | Out-Null
             & $gitExe add reports/ 2>&1 | Out-Null
             & $gitExe commit -m $Date 2>&1 | Out-Null
             & $gitExe push 2>&1 | Out-Null
@@ -289,6 +301,7 @@ try {
     } else {
         Write-Log "  No analysis report found to push" "WARN"
     }
+
     # ==================== STEP 8: CLEAN UP OLD LOG FILES ====================
     Write-Log "Step 8: Cleaning up NT8 log files older than 3 weeks..."
     $cutoffDate = (Get-Date).AddDays(-21)
@@ -309,6 +322,65 @@ try {
         Write-Log "  Removed $totalRemoved old file(s)" "OK"
     } else {
         Write-Log "  No files older than 3 weeks found" "INFO"
+    }
+
+    # ==================== STEP 9: SEND EMAIL REPORT ====================
+    Write-Log "Step 9: Sending email report..."
+
+    # $vpsName may be unset if Step 7 was skipped (no report file found); define a fallback
+    if (-not $vpsName) {
+        $publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+        $vpsName = switch ($publicIP) {
+            "104.237.203.83" { "VPS1" }
+            "205.234.153.21" { "VPS2" }
+            "64.44.56.21"    { "VPS3" }
+            default          { "VPS_$publicIP" }
+        }
+    }
+
+    $emailAttachment = Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt"
+
+    if (Test-Path $emailAttachment) {
+        try {
+            $smtpCred = New-Object System.Management.Automation.PSCredential(
+                $EmailFrom,
+                (ConvertTo-SecureString $EmailAppPass -AsPlainText -Force)
+            )
+
+            # Build a short summary for the email body
+            $tradeCount  = if ($allTrades.Count -gt 0) { $allTrades.Count } else { 0 }
+            $signalCount = if ($allSignalLines.Count -gt 0) { $allSignalLines.Count } else { 0 }
+            $emailBody   = @"
+Trading Analysis Report - $vpsName - $Date
+
+Trades filled : $tradeCount
+Signal lines  : $signalCount
+
+Full report is attached.
+
+---
+Generated automatically by Analyze-VPSTrades.ps1 on $vpsName
+"@
+
+            $mailParams = @{
+                From        = $EmailFrom
+                To          = $EmailTo
+                Subject     = "[$vpsName] Trading Analysis - $Date"
+                Body        = $emailBody
+                Attachments = $emailAttachment
+                SmtpServer  = "smtp.gmail.com"
+                Port        = 587
+                UseSsl      = $true
+                Credential  = $smtpCred
+            }
+
+            Send-MailMessage @mailParams
+            Write-Log "  Email sent to $EmailTo — attachment: Trading_Analysis-${vpsName}.txt" "OK"
+        } catch {
+            Write-Log "  Email send failed: $_" "ERROR"
+        }
+    } else {
+        Write-Log "  Email attachment not found, skipping: $emailAttachment" "WARN"
     }
 
 } catch {
