@@ -247,11 +247,11 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     
     lines.append(f"ALL SIGNALS FIRED: {len(unique_signals)}")
     lines.append("-" * 40)
-    lines.append("Time      Dir   Source   Trigger              Conf   Price")
+    lines.append("Timestamp              Dir   Source   Trigger              Conf   Price")
     for sig in unique_signals:
         conf_str = f"{sig['confluence_count']}/{sig['confluence_total']}"
         order_marker = " ►" if sig.get('order_placed') else ""
-        lines.append(f"{sig['time_str']}  {sig['direction']:5} {sig['source']:8} [{sig['trigger']:18}] {conf_str:5} {sig['price']:.2f}{order_marker}")
+        lines.append(f"{sig['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}  {sig['direction']:5} {sig['source']:8} [{sig['trigger']:18}] {conf_str:5} {sig['price']:.2f}{order_marker}")
     lines.append("  (► = order placed by ActiveNikiTrader)")
     lines.append("")
     
@@ -288,7 +288,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
                 elif diff and diff < 0:
                     exit_info = f" [{first_flip['indicator']} flip: cost {abs(diff):.0f}t]"
             
-            lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+6.0f}t (${rt['pnl_ticks'] * TICK_VALUE:+7.2f}) {pnl_marker} {sig_info}{exit_info}")
+            lines.append(f"  {rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} {rt['direction']:5} {rt['pnl_ticks']:+6.0f}t (${rt['pnl_ticks'] * TICK_VALUE:+7.2f}) {pnl_marker} {sig_info}{exit_info}")
         lines.append("")
     
     # === EARLY EXIT ANALYSIS - THREE STRATEGIES COMPARED ===
@@ -344,7 +344,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             lines.append(f"  Winners with drop: {conf_ea['winner_count']} → cost: {conf_ea['winner_cost_ticks']:+.0f}t")
             lines.append(f"  NET: {conf_ea['total_difference_ticks']:+.0f}t")
             lines.append("")
-            lines.append("  Entry     Dir   Exit  Actual  @Time     Conf   Hypo    Diff   Result")
+            lines.append("  Entry                  Dir   Exit  Actual  @Time                    Conf   Hypo    Diff   Result")
             for t in conf_ea['trade_details']:
                 result = "SAVE" if t['early_exit_better'] else "COST"
                 outcome = "W" if t['was_winner'] else "L"
@@ -365,7 +365,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             lines.append(f"  Winners with flip: {flip_ea['winner_count']} → cost: {flip_ea['winner_cost_ticks']:+.0f}t")
             lines.append(f"  NET: {flip_ea['total_difference_ticks']:+.0f}t")
             lines.append("")
-            lines.append("  Entry     Dir   Exit  Actual  @Time     Ind   Hypo    Diff   Result")
+            lines.append("  Entry                  Dir   Exit  Actual  @Time                    Ind   Hypo    Diff   Result")
             for t in flip_ea['trade_details']:
                 result = "SAVE" if t['early_exit_better'] else "COST"
                 outcome = "W" if t['was_winner'] else "L"
@@ -465,7 +465,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             
             # Trade details (first 30)
             lines.append("  Trade Details (showing impact per trade):")
-            lines.append("  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?")
+            lines.append("  Entry                  Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?")
             for t in ts['trade_details'][:30]:  # Limit to 30 for readability
                 result = "+" if t['is_better'] else ("-" if t['difference'] < 0 else "=")
                 trail_flag = "Yes" if t['trail_activated'] else "No"
@@ -506,14 +506,14 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
         sig = rt['signal']
         pnl_marker = "✓" if rt['pnl_ticks'] > 0 else ""
         conf_str = f"{sig['confluence_count']}/{sig['confluence_total']}"
-        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t <- {sig['source']} @ {sig['time_str']} [{sig['trigger']}] {conf_str} {pnl_marker}")
+        lines.append(f"  {rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t <- {sig['source']} @ {sig['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} [{sig['trigger']}] {conf_str} {pnl_marker}")
     lines.append("")
     
     lines.append(f"COUNTER to signals: {len(counter)} trades, {counter_pnl:+.0f}t")
     for rt in counter:
         sig = rt['signal']
         conf_str = f"{sig['confluence_count']}/{sig['confluence_total']}"
-        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t <- Against {sig['direction']} @ {sig['time_str']} [{sig['trigger']}]")
+        lines.append(f"  {rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t <- Against {sig['direction']} @ {sig['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} [{sig['trigger']}]")
     lines.append("")
     
     lines.append(f"NO SIGNAL nearby: {len(no_signal)} trades, {no_signal_pnl:+.0f}t")
@@ -576,7 +576,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
         else:
             sig_info = "[NO SIGNAL]"
-        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
+        lines.append(f"  {rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
     lines.append("")
     
     lines.append("BOTTOM 5 LOSERS:")
@@ -586,7 +586,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             sig_info = f"[{sig['source']}:{sig['trigger']}] {sig['confluence_count']}/{sig['confluence_total']}"
         else:
             sig_info = "[NO SIGNAL]"
-        lines.append(f"  {rt['entry']['time_str']} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
+        lines.append(f"  {rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} {rt['direction']:5} {rt['pnl_ticks']:+5.0f}t {sig_info}")
     lines.append("")
     
     # Time-based analysis

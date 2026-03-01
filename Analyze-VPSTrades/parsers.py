@@ -162,7 +162,7 @@ def parse_indicator_csv(filepath, date_str):
                 
                 bars.append({
                     'timestamp': timestamp,
-                    'time_str': timestamp.strftime('%H:%M:%S'),
+                    'time_str': timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                     'close': close,
                     'indicators': indicators,
                     'bull_conf': bull_conf,

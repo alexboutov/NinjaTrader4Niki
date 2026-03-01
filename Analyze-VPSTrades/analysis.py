@@ -157,14 +157,14 @@ def analyze_early_exit_impact(roundtrips):
             difference = hypo_pnl - actual_pnl
             
             confluence_trades.append({
-                'entry_time': rt['entry']['time_str'],
+                'entry_time': rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
                 'direction': rt['direction'],
                 'actual_pnl': actual_pnl,
                 'hypo_pnl': hypo_pnl,
                 'difference': difference,
                 'entry_confluence': confluence_drop['entry_confluence'],
                 'exit_confluence': confluence_drop['exit_confluence'],
-                'trigger_time': confluence_drop['time'],
+                'trigger_time': confluence_drop['time'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(confluence_drop['time'], 'strftime') else confluence_drop['time'],
                 'trigger_price': confluence_drop['price'],
                 'was_winner': was_winner,
                 'early_exit_better': difference > 0,
@@ -181,13 +181,13 @@ def analyze_early_exit_impact(roundtrips):
             difference = hypo_pnl - actual_pnl
             
             flip_trades.append({
-                'entry_time': rt['entry']['time_str'],
+                'entry_time': rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
                 'direction': rt['direction'],
                 'actual_pnl': actual_pnl,
                 'hypo_pnl': hypo_pnl,
                 'difference': difference,
                 'indicator': first_flip['indicator'],
-                'trigger_time': first_flip['time'],
+                'trigger_time': first_flip['time'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(first_flip['time'], 'strftime') else first_flip['time'],
                 'trigger_price': first_flip['price'],
                 'was_winner': was_winner,
                 'early_exit_better': difference > 0,
@@ -327,7 +327,7 @@ def analyze_trailing_stop_impact(roundtrips):
             
             # Store detail
             r['trade_details'].append({
-                'entry_time': rt['entry']['time_str'],
+                'entry_time': rt['entry']['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
                 'direction': rt['direction'],
                 'actual_pnl': actual_pnl,
                 'trail_pnl': trail_pnl,

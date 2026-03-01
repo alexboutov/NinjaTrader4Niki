@@ -54,14 +54,29 @@ def main():
             print("Error: Could not determine date. Use --date YYYY-MM-DD")
             sys.exit(1)
     
-    # Paths
-    trades_path = os.path.join(folder_path, 'trades_final.txt')
-    
+    # Resolve paths:
+    # - If folder_path is the raw log root, source files live there and output
+    #   goes into <log_root>/ActiveNikiAnalysis/<date>/
+    # - If folder_path is already a dated analysis subfolder, keep existing behaviour
+    analysis_subfolder = os.path.join('ActiveNikiAnalysis', date_str)
+    if os.path.basename(os.path.normpath(folder_path)) == date_str or        'ActiveNikiAnalysis' in folder_path:
+        # Already a dated/analysis folder — use as-is
+        source_path = folder_path
+        output_path = folder_path
+    else:
+        # Log root passed — search files here, write output to analysis subfolder
+        source_path = folder_path
+        output_path = os.path.join(folder_path, 'ActiveNikiAnalysis', date_str)
+        os.makedirs(output_path, exist_ok=True)
+        print(f"Output folder: {output_path}")
+
+    trades_path = os.path.join(source_path, 'trades_final.txt')
+
     # Find signal files
-    monitor_files, trader_files = find_signal_files(folder_path, date_str)
-    
+    monitor_files, trader_files = find_signal_files(source_path, date_str)
+
     # Find indicator CSV files
-    csv_files = find_indicator_csv_files(folder_path)
+    csv_files = find_indicator_csv_files(source_path)
     
     print(f"Date: {date_str}")
     print(f"Folder: {folder_path}")
@@ -147,19 +162,19 @@ def main():
             print(f"  - {config['name']}: {config['description']}")
     
     # Generate report
-    report = generate_report(roundtrips, all_signals, date_str, folder_path, all_bars)
+    report = generate_report(roundtrips, all_signals, date_str, output_path, all_bars)
     
     # Output file
     dt = datetime.strptime(date_str, "%Y-%m-%d")
     month_abbr = dt.strftime("%b")
     output_filename = f"{month_abbr}{dt.day:02d}_Trading_Analysis.txt"
-    output_path = os.path.join(folder_path, output_filename)
+    report_file = os.path.join(output_path, output_filename)
     
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(report_file, 'w', encoding='utf-8') as f:
         f.write(report)
     
-    print(f"\nAnalysis saved to: {output_path}")
-    print(f"  File size: {os.path.getsize(output_path)} bytes")
+    print(f"\nAnalysis saved to: {report_file}")
+    print(f"  File size: {os.path.getsize(report_file)} bytes")
 
 
 if __name__ == '__main__':
