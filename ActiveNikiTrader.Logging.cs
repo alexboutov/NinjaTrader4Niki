@@ -145,21 +145,21 @@ namespace NinjaTrader.NinjaScript.Strategies
             string instrumentName = Instrument.FullName;
             string squareType = dir == "LONG" ? "Yellow🟨" : "Orange🟧";
             
-            PrintAndLog($"");
-            PrintAndLog($"╔══════════════════════════════════════════════════════════════════════════╗");
+            PrintAndLog($"", t);
+            PrintAndLog($"╔══════════════════════════════════════════════════════════════════════════╗", t);
             // FIXED: Include full date in signal timestamp for Market Replay analysis
-            PrintAndLog($"║  *** {dir} SIGNAL @ {t:yyyy-MM-dd HH:mm:ss} ***");
-            PrintAndLog($"╠══════════════════════════════════════════════════════════════════════════╣");
-            PrintAndLog($"║  Instrument: {instrumentName}");
-            PrintAndLog($"║  Ask: {askPrice:F2}    Bid: {bidPrice:F2}");
-            PrintAndLog($"║  STOP: {stopPrice:F2}  (${StopLossUSD:F0} = {stopPoints:F2} pts)");
-            PrintAndLog($"║  TP:   {tpPrice:F2}  (${TakeProfitUSD:F0} = {tpPoints:F2} pts)");
-            PrintAndLog($"╠══════════════════════════════════════════════════════════════════════════╣");
-            PrintAndLog($"║  Trigger: {trigger}");
-            PrintAndLog($"║  Confluence: {confluenceCount}/{total}");
-            PrintAndLog($"║  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)} SB={Ts(SB_IsUp)}");
-            PrintAndLog($"║  AIQ1={Ts(AIQ1_IsUp)} | Bars after {squareType}: {barsAfterSquare}");
-            PrintAndLog($"╚══════════════════════════════════════════════════════════════════════════╝");
+            PrintAndLog($"║  *** {dir} SIGNAL @ {t:yyyy-MM-dd HH:mm:ss} ***", t);
+            PrintAndLog($"╠══════════════════════════════════════════════════════════════════════════╣", t);
+            PrintAndLog($"║  Instrument: {instrumentName}", t);
+            PrintAndLog($"║  Ask: {askPrice:F2}    Bid: {bidPrice:F2}", t);
+            PrintAndLog($"║  STOP: {stopPrice:F2}  (${StopLossUSD:F0} = {stopPoints:F2} pts)", t);
+            PrintAndLog($"║  TP:   {tpPrice:F2}  (${TakeProfitUSD:F0} = {tpPoints:F2} pts)", t);
+            PrintAndLog($"╠══════════════════════════════════════════════════════════════════════════╣", t);
+            PrintAndLog($"║  Trigger: {trigger}", t);
+            PrintAndLog($"║  Confluence: {confluenceCount}/{total}", t);
+            PrintAndLog($"║  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)} SB={Ts(SB_IsUp)}", t);
+            PrintAndLog($"║  AIQ1={Ts(AIQ1_IsUp)} | Bars after {squareType}: {barsAfterSquare}", t);
+            PrintAndLog($"╚══════════════════════════════════════════════════════════════════════════╝", t);
         }
         
         private string Ts(bool up) => up ? "UP" : "DN";
@@ -232,7 +232,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     
                     string slipStr = entrySlippageTicks >= 0 ? $"+{entrySlippageTicks:F0}t" : $"{entrySlippageTicks:F0}t";
                     string slipDollarStr = entrySlippageDollars >= 0 ? $"${entrySlippageDollars:F2}" : $"-${Math.Abs(entrySlippageDollars):F2}";
-                    PrintAndLog($">>> ENTRY FILLED: {dir} @ {price:F2} | Signal={signalPriceAtEntry:F2} | Slippage: {slipStr} ({slipDollarStr}) | {time:yyyy-MM-dd HH:mm:ss}");
+                    PrintAndLog($">>> ENTRY FILLED: {dir} @ {price:F2} | Signal={signalPriceAtEntry:F2} | Slippage: {slipStr} ({slipDollarStr}) | {time:yyyy-MM-dd HH:mm:ss}", time);
                 }
                 
                 // Detect EXIT fills - check order action and if we have an active entry tracked
@@ -304,8 +304,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     string exitSlipStr = exitSlippageTicks >= 0 ? $"+{exitSlippageTicks:F0}t" : $"{exitSlippageTicks:F0}t";
                     
                     // Comprehensive trade closed log line for analysis script - includes exit slippage
-                    PrintAndLog($"{pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason} | Exit Slip: {exitSlipStr}");
-                    PrintAndLog($"   Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades) | Entry Time: {tradeEntryTime:yyyy-MM-dd HH:mm:ss}");
+                    PrintAndLog($"{pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason} | Exit Slip: {exitSlipStr}", time);
+                    PrintAndLog($"   Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades) | Entry Time: {tradeEntryTime:yyyy-MM-dd HH:mm:ss}", time);
                     
                     // Reset entry tracking
                     tradeEntryDirection = "";
@@ -319,7 +319,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (EnableDailyLossLimit && dailyPnL <= -DailyLossLimitUSD)
                     {
                         dailyLossLimitHit = true;
-                        PrintAndLog($"🛑 DAILY LOSS LIMIT HIT: ${dailyPnL:F2} exceeds -${DailyLossLimitUSD:F2} limit. Trading stopped for today.");
+                        PrintAndLog($"🛑 DAILY LOSS LIMIT HIT: ${dailyPnL:F2} exceeds -${DailyLossLimitUSD:F2} limit. Trading stopped for today.", time);
                         if (EnableSoundAlert)
                             try { System.Media.SystemSounds.Hand.Play(); } catch { }
                     }
@@ -327,7 +327,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (EnableDailyProfitTarget && dailyPnL >= DailyProfitTargetUSD)
                     {
                         dailyProfitTargetHit = true;
-                        PrintAndLog($"🎯 DAILY PROFIT TARGET HIT: ${dailyPnL:F2} reached ${DailyProfitTargetUSD:F2} target. Trading stopped for today.");
+                        PrintAndLog($"🎯 DAILY PROFIT TARGET HIT: ${dailyPnL:F2} reached ${DailyProfitTargetUSD:F2} target. Trading stopped for today.", time);
                         if (EnableSoundAlert)
                             try { System.Media.SystemSounds.Asterisk.Play(); } catch { }
                     }
@@ -350,11 +350,14 @@ namespace NinjaTrader.NinjaScript.Strategies
             catch { }
         }
         
-        private void PrintAndLog(string msg)
+        private void PrintAndLog(string msg, DateTime? barTime = null)
         {
             Print(msg);
             if (logWriter != null)
-                try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
+            {
+                DateTime ts = barTime ?? DateTime.Now;
+                try { logWriter.WriteLine($"{ts:yyyy-MM-dd HH:mm:ss} | {msg}"); } catch { }
+            }
         }
         #endregion
     }

@@ -169,14 +169,32 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
             LogAlways($"--------------------------------");
         }
-        
+        private void LogAlways(string msg)
+        {
+            Print(msg);
+            if (logWriter != null)
+            {
+                try 
+                { 
+                    // Use Time[0] for Market Replay time. 
+                    // If the strategy is initializing and Time[0] isn't ready, fall back to system time.
+                    string marketTimestamp = (CurrentBar >= 0) 
+                        ? Time[0].ToString("yyyy-MM-dd HH:mm:ss") 
+                        : DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                    logWriter.WriteLine($"{marketTimestamp} | {msg}"); 
+                } 
+                catch { }
+            }
+        }
+/*        
         private void LogAlways(string msg)
         {
             Print(msg);
             if (logWriter != null)
                 try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
         }
-        
+*/        
         // Helper methods for reflection-based indicator reading
         private bool GetBool(object o, FieldInfo f) { try { return o != null && f != null && (bool)f.GetValue(o); } catch { return false; } }
         private double GetDbl(object o, FieldInfo f) { try { return o != null && f != null ? (double)f.GetValue(o) : 0; } catch { return 0; } }

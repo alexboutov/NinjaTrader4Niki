@@ -673,7 +673,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (ResetDailyPnLAtSessionStart && barTime.Date != lastTradeDate.Date)
             {
                 if (dailyPnL != 0 || dailyTradeCount > 0)
-                    PrintAndLog($"📊 NEW DAY: Resetting Daily P&L (was ${dailyPnL:F2}, {dailyTradeCount} trades)");
+                    PrintAndLog($"📊 NEW DAY: Resetting Daily P&L (was ${dailyPnL:F2}, {dailyTradeCount} trades)", barTime);
                 dailyPnL = 0;
                 dailyTradeCount = 0;
                 dailyLossLimitHit = false;
@@ -691,7 +691,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (LogBarDetails && UniRenkoMode)
             {
                 var (bull, bear, total) = GetConfluence();
-                PrintAndLog($"[BAR {CurrentBar}] {barTime:HH:mm:ss} | O={Open[0]:F2} H={High[0]:F2} L={Low[0]:F2} C={Close[0]:F2} | AIQ1={Ts(AIQ1_IsUp)} RR={Ts(RR_IsUp)} Bull={bull} Bear={bear}");
+                PrintAndLog($"[BAR {CurrentBar}] {barTime:HH:mm:ss} | O={Open[0]:F2} H={High[0]:F2} L={Low[0]:F2} C={Close[0]:F2} | AIQ1={Ts(AIQ1_IsUp)} RR={Ts(RR_IsUp)} Bull={bull} Bear={bear}", barTime);
             }
             
             if (CloseBeforeNews && Position.MarketPosition != MarketPosition.Flat)
@@ -704,12 +704,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (Position.MarketPosition == MarketPosition.Long)
                     {
                         ExitLong("Long", "PreNews Exit");
-                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - Before news window");
+                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - Before news window", barTime);
                     }
                     else if (Position.MarketPosition == MarketPosition.Short)
                     {
                         ExitShort("Short", "PreNews Exit");
-                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - Before news window");
+                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - Before news window", barTime);
                     }
                 }
             }
@@ -724,12 +724,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (Position.MarketPosition == MarketPosition.Long)
                     {
                         ExitLong("Long", "EOD Exit");
-                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - End of day");
+                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - End of day", barTime);
                     }
                     else if (Position.MarketPosition == MarketPosition.Short)
                     {
                         ExitShort("Short", "EOD Exit");
-                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - End of day");
+                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - End of day", barTime);
                     }
                 }
             }
@@ -756,12 +756,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (isLong)
                     {
                         ExitLong("Long", "MaxProfit Exit");
-                        PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}");
+                        PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}", barTime);
                     }
                     else
                     {
                         ExitShort("Short", "MaxProfit Exit");
-                        PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}");
+                        PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}", barTime);
                     }
                     entryPrice = 0;
                     dynamicExitActive = false;
@@ -784,19 +784,19 @@ namespace NinjaTrader.NinjaScript.Strategies
                             else
                                 SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
                                 
-                            PrintAndLog($"🚀 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}");
+                            PrintAndLog($"🚀 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}", barTime);
                         }
                         else
                         {
                             if (isLong)
                             {
                                 ExitLong("Long", "DynamicTP Exit");
-                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}");
+                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             else
                             {
                                 ExitShort("Short", "DynamicTP Exit");
-                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}");
+                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             entryPrice = 0;
                         }
@@ -812,7 +812,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                             {
                                 trailStopPrice = newTrailStop;
                                 SetStopLoss("Long", CalculationMode.Price, trailStopPrice, true);
-                                PrintAndLog($"📈 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
+                                PrintAndLog($"📈 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             
                             if (currentPrice <= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
@@ -820,7 +820,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                 ExitLong("Long", "DynamicTrail Exit");
                                 string reason = currentPrice <= trailStopPrice ? "Trail Stop Hit" : 
                                                 !trendStillValid ? "RR Flipped" : $"Conf={bull}<{MinConfluenceToStay}";
-                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}");
+                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}", barTime);
                                 entryPrice = 0;
                                 dynamicExitActive = false;
                             }
@@ -832,7 +832,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                             {
                                 trailStopPrice = newTrailStop;
                                 SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
-                                PrintAndLog($"📉 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
+                                PrintAndLog($"📉 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             
                             if (currentPrice >= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
@@ -840,7 +840,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                 ExitShort("Short", "DynamicTrail Exit");
                                 string reason = currentPrice >= trailStopPrice ? "Trail Stop Hit" : 
                                                 !trendStillValid ? "RR Flipped" : $"Conf={bear}<{MinConfluenceToStay}";
-                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}");
+                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}", barTime);
                                 entryPrice = 0;
                                 dynamicExitActive = false;
                             }
@@ -898,9 +898,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                         SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                     
                     if (UseATRBasedTrail)
-                        PrintAndLog($"📈 TRAIL ACTIVATED (ATR) @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | ATR={atrValue:F2} | Thresh={activationThresholdTicks:F0}t | Dist={trailDistancePoints:F2} | Stop={simpleTrailStopLevel:F2}");
+                        PrintAndLog($"📈 TRAIL ACTIVATED (ATR) @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | ATR={atrValue:F2} | Thresh={activationThresholdTicks:F0}t | Dist={trailDistancePoints:F2} | Stop={simpleTrailStopLevel:F2}", barTime);
                     else
-                        PrintAndLog($"📈 TRAIL ACTIVATED @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | Trail Stop={simpleTrailStopLevel:F2}");
+                        PrintAndLog($"📈 TRAIL ACTIVATED @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | Trail Stop={simpleTrailStopLevel:F2}", barTime);
                 }
                 // Update trailing stop if already active (only move in favorable direction)
                 else if (simpleTrailActive)
@@ -921,9 +921,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                             expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
                             SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
                             if (UseATRBasedTrail)
-                                PrintAndLog($"📈 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t");
+                                PrintAndLog($"📈 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t", barTime);
                             else
-                                PrintAndLog($"📈 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t");
+                                PrintAndLog($"📈 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t", barTime);
                         }
                     }
                     else
@@ -935,9 +935,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                             expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
                             SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                             if (UseATRBasedTrail)
-                                PrintAndLog($"📉 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t");
+                                PrintAndLog($"📉 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t", barTime);
                             else
-                                PrintAndLog($"📉 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t");
+                                PrintAndLog($"📉 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t", barTime);
                         }
                     }
                 }
@@ -987,25 +987,25 @@ namespace NinjaTrader.NinjaScript.Strategies
                 barsSinceYellowSquare = 0;
                 barsSinceOrangeSquare = -1;
                 if (inCooldown)
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
+                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})", barTime);
                 else
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})");
+                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})", barTime);
             }
             else if (orangeSquareAppeared)
             {
                 barsSinceOrangeSquare = 0;
                 barsSinceYellowSquare = -1;
                 if (inCooldown)
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
+                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})", barTime);
                 else
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})");
+                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})", barTime);
             }
             else if (barsSinceYellowSquare >= 0)
             {
                 barsSinceYellowSquare++;
                 if (barsSinceYellowSquare > MaxBarsAfterYellowSquare)
                 {
-                    PrintAndLog($"LONG window expired @ {barTime:HH:mm:ss} | No confirmation within {MaxBarsAfterYellowSquare} bars");
+                    PrintAndLog($"LONG window expired @ {barTime:HH:mm:ss} | No confirmation within {MaxBarsAfterYellowSquare} bars", barTime);
                     barsSinceYellowSquare = -1;
                 }
             }
@@ -1014,7 +1014,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 barsSinceOrangeSquare++;
                 if (barsSinceOrangeSquare > MaxBarsAfterYellowSquare)
                 {
-                    PrintAndLog($"SHORT window expired @ {barTime:HH:mm:ss} | No confirmation within {MaxBarsAfterYellowSquare} bars");
+                    PrintAndLog($"SHORT window expired @ {barTime:HH:mm:ss} | No confirmation within {MaxBarsAfterYellowSquare} bars", barTime);
                     barsSinceOrangeSquare = -1;
                 }
             }
@@ -1081,16 +1081,16 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     }
                                     EnterLong("Long");
                                     string exitMode = EnableDynamicExit ? " [DYNAMIC]" : (EnableTrailingStop ? (UseATRBasedTrail ? " [TRAIL-ATR]" : " [TRAIL]") : "");
-                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
+                                    PrintAndLog($">>> ORDER PLACED: LONG @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}", barTime);
                                 }
                                 else
                                 {
-                                    PrintAndLog($">>> OUTSIDE TRADING HOURS: LONG signal not traded @ {barTime:HH:mm:ss}");
+                                    PrintAndLog($">>> OUTSIDE TRADING HOURS: LONG signal not traded @ {barTime:HH:mm:ss}", barTime);
                                 }
                             }
                             else
                             {
-                                PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bull}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}");
+                                PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bull}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}", barTime);
                             }
                         }
                         
@@ -1100,7 +1100,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else
                     {
-                        PrintAndLog($"{confirmingIndicator} confirmed but confluence {bull}/{total} < {MinConfluenceRequired} @ {barTime:HH:mm:ss}");
+                        PrintAndLog($"{confirmingIndicator} confirmed but confluence {bull}/{total} < {MinConfluenceRequired} @ {barTime:HH:mm:ss}", barTime);
                     }
                 }
             }
@@ -1159,16 +1159,16 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     }
                                     EnterShort("Short");
                                     string exitMode = EnableDynamicExit ? " [DYNAMIC]" : (EnableTrailingStop ? (UseATRBasedTrail ? " [TRAIL-ATR]" : " [TRAIL]") : "");
-                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
+                                    PrintAndLog($">>> ORDER PLACED: SHORT @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}", barTime);
                                 }
                                 else
                                 {
-                                    PrintAndLog($">>> OUTSIDE TRADING HOURS: SHORT signal not traded @ {barTime:HH:mm:ss}");
+                                    PrintAndLog($">>> OUTSIDE TRADING HOURS: SHORT signal not traded @ {barTime:HH:mm:ss}", barTime);
                                 }
                             }
                             else
                             {
-                                PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bear}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}");
+                                PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bear}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}", barTime);
                             }
                         }
                         
@@ -1178,7 +1178,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else
                     {
-                        PrintAndLog($"{confirmingIndicator} confirmed but bear confluence {bear}/{total} < {MinConfluenceRequired} @ {barTime:HH:mm:ss}");
+                        PrintAndLog($"{confirmingIndicator} confirmed but bear confluence {bear}/{total} < {MinConfluenceRequired} @ {barTime:HH:mm:ss}", barTime);
                     }
                 }
             }
