@@ -5,73 +5,84 @@ MAR 01, 2026 TRADING SESSION ANALYSIS
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  28
-  - Orders placed:         3
-  - Outside hours:         0
+ActiveNikiTrader signals:  41
+  - Orders placed:         2
+  - Outside hours:         3
   - Blocked by cooldown:   0
 
 SESSION SUMMARY
 ---------------
-Total Round-trips: 3
-Win/Loss: 3W / 0L (100.0% win rate)
-Total P&L: +337 ticks ($+1685.00)
+Total Round-trips: 2
+Win/Loss: 2W / 0L (100.0% win rate)
+Total P&L: +106 ticks ($+530.00)
   LONG:  0 trades, +0t
-  SHORT: 3 trades, +337t
+  SHORT: 2 trades, +106t
 
 CONFLUENCE LEVEL ANALYSIS
 -------------------------
-  5/6: 3 trades, 3W (100%), +337t
+  5/6: 2 trades, 2W (100%), +106t
 
 TRIGGER TYPE ANALYSIS
 ---------------------
-  OrangeSquare+DT: 3 trades, 3W (100%), +337t
+  OrangeSquare+DT: 2 trades, 2W (100%), +106t
 
-ALL SIGNALS FIRED: 28
+ALL SIGNALS FIRED: 41
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
-08:36:32  LONG  Trader   [YellowSquare+RR   ] 5/6   25401.00
-08:46:07  LONG  Trader   [YellowSquare+RR   ] 5/6   25398.25
-09:29:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   25341.25
-09:34:46  SHORT Trader   [OrangeSquare+DT   ] 5/6   25270.50 ►
-09:37:15  SHORT Trader   [OrangeSquare+DT   ] 6/6   25238.00
-09:44:25  SHORT Trader   [OrangeSquare+DT   ] 6/6   25240.25
-09:48:44  SHORT Trader   [OrangeSquare+DT   ] 5/6   25228.75
-09:54:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   25202.00
-09:59:48  SHORT Trader   [OrangeSquare+DT   ] 5/6   25200.75 ►
-10:09:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   25154.50
-10:13:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   25089.50
-10:16:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   25028.00
-10:19:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24971.50
-10:20:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24947.00
-10:23:06  SHORT Trader   [OrangeSquare+DT   ] 5/6   24920.00 ►
-10:26:43  LONG  Trader   [YellowSquare+RR   ] 5/6   24959.50
-10:28:20  SHORT Trader   [OrangeSquare+DT   ] 6/6   24916.50
-10:30:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24931.50
-10:34:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24897.75
-10:37:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24922.00
-10:39:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24967.25
-10:41:22  LONG  Trader   [YellowSquare+RR   ] 5/6   24982.75
-10:43:42  LONG  Trader   [YellowSquare+RR   ] 5/6   24996.00
-10:48:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25016.00
-11:03:37  LONG  Trader   [YellowSquare+RR   ] 5/6   25020.50
-11:08:42  LONG  Trader   [YellowSquare+RR   ] 5/6   25026.50
-11:16:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25067.50
-11:25:15  LONG  Trader   [YellowSquare+DT   ] 5/6   25054.25
+06:49:23  SHORT Trader   [OrangeSquare+DT   ] 5/6   24943.75
+06:52:25  SHORT Trader   [OrangeSquare+DT   ] 5/6   24944.50
+07:05:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24928.00
+07:31:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24985.75
+07:38:38  SHORT Trader   [OrangeSquare+DT   ] 5/6   24948.50
+07:40:39  SHORT Trader   [OrangeSquare+DT   ] 5/6   24946.25
+07:55:14  SHORT Trader   [OrangeSquare+DT   ] 6/6   24918.50
+07:57:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24905.50
+08:17:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24906.50
+08:29:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   24881.50
+08:33:04  SHORT Trader   [OrangeSquare+DT   ] 5/6   24841.00 ►
+08:35:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   24832.75
+08:37:39  SHORT Trader   [OrangeSquare+DT   ] 6/6   24811.50
+08:40:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24816.00
+08:47:51  LONG  Trader   [YellowSquare+RR   ] 5/6   24847.25
+09:24:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   24823.75
+09:28:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24802.50
+09:30:55  SHORT Trader   [OrangeSquare+DT   ] 5/6   24823.50
+09:32:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24853.75
+09:36:44  SHORT Trader   [OrangeSquare+DT   ] 6/6   24854.25
+09:39:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24894.75
+09:42:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24850.25
+09:45:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24864.75
+09:49:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24929.25
+09:51:29  LONG  Trader   [YellowSquare+DT   ] 5/6   24923.00
+09:53:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   24892.00
+09:55:23  SHORT Trader   [OrangeSquare+DT   ] 5/6   24880.25 ►
+10:02:11  LONG  Trader   [YellowSquare+RR   ] 5/6   24923.75
+10:04:02  SHORT Trader   [OrangeSquare+DT   ] 5/6   24905.50
+10:05:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24942.25
+10:11:21  LONG  Trader   [YellowSquare+RR   ] 5/6   24976.00
+10:17:36  SHORT Trader   [OrangeSquare+DT   ] 5/6   24941.00
+10:32:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   24941.00
+10:38:21  LONG  Trader   [YellowSquare+RR   ] 5/6   24983.75
+10:45:09  LONG  Trader   [YellowSquare+RR   ] 5/6   25005.00
+10:47:20  LONG  Trader   [YellowSquare+RR   ] 5/6   25009.50
+10:52:40  SHORT Trader   [OrangeSquare+DT   ] 6/6   24947.50
+10:55:25  SHORT Trader   [OrangeSquare+DT   ] 6/6   24935.00
+10:59:32  LONG  Trader   [YellowSquare+RR   ] 5/6   24982.00
+11:02:21  LONG  Trader   [YellowSquare+RR   ] 5/6   25001.75
+11:10:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   24961.75
   (► = order placed by ActiveNikiTrader)
 
 STRATEGY TRADES
 ---------------
-  09:34:46 SHORT   +128t ($+640.00) ✓ [OrangeSquare+DT] 5/6
-  09:59:48 SHORT   +203t ($+1015.00) ✓ [OrangeSquare+DT] 5/6
-  10:23:06 SHORT     +6t ($ +30.00) ✓ [OrangeSquare+DT] 5/6
+  08:33:04 SHORT    +69t ($+345.00) ✓ [OrangeSquare+DT] 5/6
+  09:55:23 SHORT    +37t ($+185.00) ✓ [OrangeSquare+DT] 5/6
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
 
-ALIGNED with signals: 3 trades, +337t
-  09:34:46 SHORT  +128t <- Trader @ 09:34:46 [OrangeSquare+DT] 5/6 ✓
-  09:59:48 SHORT  +203t <- Trader @ 09:59:48 [OrangeSquare+DT] 5/6 ✓
-  10:23:06 SHORT    +6t <- Trader @ 10:23:06 [OrangeSquare+DT] 5/6 ✓
+ALIGNED with signals: 2 trades, +106t
+  08:33:04 SHORT   +69t <- Trader @ 08:33:04 [OrangeSquare+DT] 5/6 ✓
+  09:55:23 SHORT   +37t <- Trader @ 09:55:23 [OrangeSquare+DT] 5/6 ✓
 
 COUNTER to signals: 0 trades, +0t
 
@@ -80,86 +91,84 @@ NO SIGNAL nearby: 0 trades, +0t
 INDICATOR STATE CORRELATION
 ---------------------------
 Indicator   UP(W/L)     DN(W/L)     Notes
-  AAA       0/0 (   0%)  3/0 ( 100%)  Better when DN
-  DT        0/0 (   0%)  3/0 ( 100%)  Better when DN
-  ET        0/0 (   0%)  3/0 ( 100%)  Better when DN
-  RR        3/0 ( 100%)  0/0 (   0%)  Better when UP
-  SB        0/0 (   0%)  3/0 ( 100%)  Better when DN
-  SW        0/0 (   0%)  3/0 ( 100%)  Better when DN
-  T3P       3/0 ( 100%)  0/0 (   0%)  Better when UP
-  VY        0/0 (   0%)  3/0 ( 100%)  Better when DN
+  AAA       0/0 (   0%)  2/0 ( 100%)  Better when DN
+  DT        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  ET        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  RR        2/0 ( 100%)  0/0 (   0%)  Better when UP
+  SB        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  SW        0/0 (   0%)  2/0 ( 100%)  Better when DN
+  T3P       2/0 ( 100%)  0/0 (   0%)  Better when UP
+  VY        0/0 (   0%)  2/0 ( 100%)  Better when DN
 
 BEST & WORST TRADES
 -------------------
 
 TOP 5 WINNERS:
-  09:59:48 SHORT  +203t [Trader:OrangeSquare+DT] 5/6
-  09:34:46 SHORT  +128t [Trader:OrangeSquare+DT] 5/6
-  10:23:06 SHORT    +6t [Trader:OrangeSquare+DT] 5/6
+  08:33:04 SHORT   +69t [Trader:OrangeSquare+DT] 5/6
+  09:55:23 SHORT   +37t [Trader:OrangeSquare+DT] 5/6
 
 BOTTOM 5 LOSERS:
-  09:59:48 SHORT  +203t [Trader:OrangeSquare+DT] 5/6
-  09:34:46 SHORT  +128t [Trader:OrangeSquare+DT] 5/6
-  10:23:06 SHORT    +6t [Trader:OrangeSquare+DT] 5/6
+  08:33:04 SHORT   +69t [Trader:OrangeSquare+DT] 5/6
+  09:55:23 SHORT   +37t [Trader:OrangeSquare+DT] 5/6
 
 TIME-BASED ANALYSIS
 -------------------
-9:00-10:00  : 2 trades, 2W, +331t
-10:00-11:00 : 1 trades, 1W, +6t
+8:30-9:00   : 1 trades, 1W, +69t
+9:00-10:00  : 1 trades, 1W, +37t
 
 ================================================================================
 KEY INSIGHTS
 ================================================================================
 
 1. SIGNAL ALIGNMENT:
-   - 3 of 3 trades (100%) aligned with signals
+   - 2 of 2 trades (100%) aligned with signals
 
 2. P&L BY ALIGNMENT:
-   - ALIGNED trades: +337t ($+1685.00)
+   - ALIGNED trades: +106t ($+530.00)
    - COUNTER trades: +0t ($+0.00)
    - NO SIGNAL trades: +0t ($+0.00)
 
 3. CONFLUENCE INSIGHTS:
-   - Best performing: 5/6 with +337t
-   - High confluence (N-1 or higher): +337t
+   - Best performing: 5/6 with +106t
+   - High confluence (N-1 or higher): +106t
 
 5. RECOMMENDATIONS:
-   - Best trigger: OrangeSquare+DT with +337t
+   - Best trigger: OrangeSquare+DT with +106t
 
 ================================================================================
 SLIPPAGE ANALYSIS
 ================================================================================
 
 ENTRY SLIPPAGE:
-   Trades with data: 3
-   Mean:   +0.7t ($+3.33)
-   Median: +0.0t
-   Std Dev: 0.9t
-   Range:  +0t to +2t
-   TOTAL:  +2t ($+10.00)
+   Trades with data: 2
+   Mean:   +2.5t ($+12.50)
+   Median: +2.5t
+   Std Dev: 2.5t
+   Range:  +0t to +5t
+   TOTAL:  +5t ($+25.00)
 
 EXIT SLIPPAGE (all exits):
-   Trades with data: 3
-   Mean:   +6.0t ($+30.00)
-   Median: +3.0t
-   Std Dev: 7.3t
-   Range:  -1t to +16t
-   TOTAL:  +18t ($+90.00)
+   Trades with data: 2
+   Mean:   -4.5t ($-22.50)
+   Median: -4.5t
+   Std Dev: 0.5t
+   Range:  -5t to -4t
+   TOTAL:  -9t ($-45.00)
 
 EXIT SLIPPAGE BY REASON:
-   TRAIL    (  3 trades): Mean  +6.0t | Total    +18t ($+90.00)
+   TRAIL    (  2 trades): Mean  -4.5t | Total     -9t ($-45.00)
 
 COST SUMMARY:
-   Gross P&L:        +337t ($+1685.00)
-   Entry Slippage:   +2t ($+10.00)
-   Exit Slippage:    +18t ($+90.00)
-   Total Slippage:   +20t ($+100.00)
-   Broker Fees:      3 × $4.50 = $13.50
+   Gross P&L:        +106t ($+530.00)
+   Entry Slippage:   +5t ($+25.00)
+   Exit Slippage:    -9t ($-45.00)
+   Total Slippage:   -4t ($-20.00)
+   Broker Fees:      2 × $4.50 = $9.00
    ─────────────────────────────────────
-   NET P&L:          $+1571.50
+   NET P&L:          $+541.00
 
-   Slippage as % of |Gross|: 5.9%
-   Total costs as % of |Gross|: 6.7%
+   Slippage as % of |Gross|: -3.8%
+   Total costs as % of |Gross|: -2.1%
 
 ================================================================================
 MULTI-DAY COMPARISON - VPS (Previous Days)
@@ -173,6 +182,6 @@ Feb 26        2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
 Feb 27        2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
 Feb 28        1     100%     +39t    1 aligned (+39t), 0 no signal (+0t)
 ----------------------------------------------------------------------
-TODAY         3     100%    +337t    3 aligned (+337t), 0 no signal (+0t)
+TODAY         2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
 
 ================================================================================
