@@ -831,7 +831,7 @@ namespace NinjaTrader.NinjaScript.Indicators
                 };
                 
                 var stack = new StackPanel();
-                stack.Children.Add(new TextBlock { Text = "ActiveNiki Monitor", FontWeight = FontWeights.Bold, Foreground = Brushes.Cyan, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
+                stack.Children.Add(new TextBlock { Text = "Signals Only", FontWeight = FontWeights.Bold, Foreground = Brushes.GreenYellow, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
                 lblSubtitle = new TextBlock { Foreground = Brushes.LightGray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) };
                 stack.Children.Add(lblSubtitle);
                 
@@ -1489,11 +1489,33 @@ namespace NinjaTrader.NinjaScript.Indicators
                 try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
         }
         
+/*
         private void LogAlways(string msg)
         {
             Print(msg);
             if (logWriter != null)
                 try { logWriter.WriteLine($"{DateTime.Now:HH:mm:ss} | {msg}"); } catch { }
+        }
+*/
+
+        private void LogAlways(string msg)
+        {
+            Print(msg);
+            if (logWriter != null)
+            {
+                try 
+                { 
+                    // This change updates EVERY call to LogAlways automatically!
+                    // If we are on a bar, use the Market Replay time (Time[0]).
+                    // If we are still initializing (CurrentBar < 0), use System Time as a fallback.
+                    string marketTimestamp = (CurrentBar >= 0) 
+                        ? Time[0].ToString("yyyy-MM-dd HH:mm:ss") 
+                        : DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                    logWriter.WriteLine($"{marketTimestamp} | {msg}"); 
+                } 
+                catch { }
+            }
         }
         #endregion
         
@@ -1548,7 +1570,6 @@ namespace NinjaTrader.NinjaScript.Indicators
         #endregion
     }
 }
-
 
 #region NinjaScript generated code. Neither change nor remove.
 
