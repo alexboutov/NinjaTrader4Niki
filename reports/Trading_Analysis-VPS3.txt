@@ -1,174 +1,639 @@
-================================================================================
-FEB 28, 2026 TRADING SESSION ANALYSIS
-================================================================================
-
-SIGNAL SOURCES
---------------
-ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  33
-  - Orders placed:         1
-  - Outside hours:         0
-  - Blocked by cooldown:   0
+====================================================================================================
+MARKET REPLAY ANALYSIS: MAR 02, 2026 TO MAR 03, 2026
+Report Generated (System Time): 2026-03-03 15:21:20
+====================================================================================================
 
 SESSION SUMMARY
 ---------------
-Total Round-trips: 1
-Win/Loss: 1W / 0L (100.0% win rate)
-Total P&L: +146 ticks ($+730.00)
-  LONG:  0 trades, +0t
-  SHORT: 1 trades, +146t
+Total Round-trips: 10
+Win/Loss:          9W / 1L (90.0% win rate)
+Total P&L:         -109 ticks ($-545.00)
 
-CONFLUENCE LEVEL ANALYSIS
--------------------------
-  5/6: 1 trades, 1W (100%), +146t
+ALL SIGNALS FIRED: 608
+----------------------------------------------------------------------------------------------------
+Market Timestamp       Dir    Source     Trigger                Conf   Price
+2026-03-02 00:20:38    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 00:29:05    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 00:37:39    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 00:47:15    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 01:03:56    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 01:17:06    SHORT  Trader     OrangeSquare+RR        5/8    2026.00   
+2026-03-02 01:22:09    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 01:43:44    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 01:46:36    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 01:51:57    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 02:00:07    LONG   Trader     YellowSquare+ET        5/8    2026.00   
+2026-03-02 02:02:30    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 02:09:00    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 02:57:22    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 02:59:25    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 03:07:54    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 03:09:33    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 03:17:58    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 03:34:20    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 03:45:43    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 04:03:19    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 04:17:06    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 04:21:38    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 04:27:40    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 04:31:29    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 05:44:25    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 06:12:03    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 06:36:25    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 06:49:11    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 06:52:07    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 06:57:56    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 07:05:02    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 07:10:04    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 07:15:17    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 07:26:04    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 07:28:00    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-02 07:39:46    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 07:43:21    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 08:10:11    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 08:12:29    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 08:16:01    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 08:20:33    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 08:24:49    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 08:35:18    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-02 08:42:23    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 08:51:15    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 08:55:31    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 09:04:03    SHORT  Trader     OrangeSquare+RR        5/8    2026.00   
+2026-03-02 09:31:07    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:32:56    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:35:00    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:36:32    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:38:13    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 09:41:43    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 09:44:00    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 09:45:31    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:47:04    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:49:11    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:52:27    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 09:53:58    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-02 09:57:50    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 09:59:50    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:02:38    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:05:28    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:07:44    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:12:19    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:14:48    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:17:25    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:19:24    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 10:21:10    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 10:28:25    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 10:31:49    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 10:33:30    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 10:38:34    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:40:38    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:43:50    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 10:55:23    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-02 11:02:05    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-02 11:05:48    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-02 11:07:26    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 00:21:27    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 00:28:28    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 00:41:47    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 00:47:00    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 00:56:19    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 01:15:36    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 01:33:37    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 02:00:00    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 02:03:35    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 02:15:26    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 02:26:33    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 02:31:25    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 02:41:57    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 02:49:35    SHORT  Trader     OrangeSquare+RR        5/8    2026.00   
+2026-03-03 02:56:08    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 03:00:56    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 03:19:10    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 03:20:54    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 03:24:12    SHORT  Trader     OrangeSquare+RR        6/8    2026.00   
+2026-03-03 03:40:00    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 03:42:00    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 03:56:24    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 03:58:32    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 04:05:23    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 04:11:54    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 04:18:32    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 04:21:24    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 04:31:23    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 04:34:05    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 04:35:54    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 04:42:01    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 04:48:47    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 04:50:25    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 04:53:20    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:00:18    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:02:18    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:22:22    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 05:32:46    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:34:32    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:36:17    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:38:27    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 05:42:33    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 05:46:58    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 05:59:03    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 06:04:46    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 06:08:45    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 06:10:25    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 06:16:22    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 06:20:12    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 06:23:12    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 06:26:34    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 06:33:47    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 06:35:42    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 07:08:54    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 07:19:48    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 07:22:44    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 07:49:39    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 07:51:28    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 08:03:09    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:06:36    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:12:20    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:15:08    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-03 08:30:03    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:36:47    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:39:42    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-03 08:43:09    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:45:10    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 08:48:42    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 08:51:10    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:21:53    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:23:46    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:30:02    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:33:06    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 09:35:24    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:37:01    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:38:42    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:40:13    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:41:51    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:43:44    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:45:32    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:47:33    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 09:49:46    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 09:51:41    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:53:15    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-03 09:56:45    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 09:59:13    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:02:10    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:05:09    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-03 10:09:34    LONG   Trader     YellowSquare+ET        5/8    2026.00    >>>
+2026-03-03 10:12:35    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 10:14:08    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:15:45    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-03 10:17:33    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:20:18    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:24:04    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
+2026-03-03 10:26:18    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:28:16    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:31:14    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 10:34:35    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 10:37:05    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 10:40:41    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 10:43:37    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:49:03    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 10:54:54    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 10:56:30    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 10:58:43    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:01:26    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:04:10    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:05:46    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:08:39    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:17:43    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:22:06    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 11:25:51    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:33:17    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 11:35:02    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:37:33    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:43:22    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 11:45:32    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 11:49:09    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 12:00:47    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 12:08:53    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 12:10:34    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 12:12:56    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 12:19:27    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 12:24:58    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 12:32:59    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 12:36:04    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 12:42:05    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 12:54:21    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
+2026-03-03 12:57:05    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
+2026-03-03 13:41:31    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:41:34    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:41:37    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:41:39    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:41:46    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:41:48    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:41:50    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:41:51    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:41:54    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:42:06    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:42:10    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:42:15    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:42:21    LONG   Monitor    YellowSquare+ET        6/8    13.00     
+2026-03-03 13:42:23    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:42:24    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:42:26    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:42:28    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:42:33    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:42:44    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:42:50    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:42:55    SHORT  Monitor    OrangeSquare+ET        5/8    13.00     
+2026-03-03 13:42:57    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:42:58    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:43:02    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:43:09    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:43:11    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:43:18    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:43:20    SHORT  Monitor    OrangeSquare+ET        5/8    13.00     
+2026-03-03 13:43:34    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:43:43    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:43:46    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:43:51    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:43:55    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:43:57    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:43:58    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:44:08    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:44:12    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:44:16    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:44:18    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:44:21    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:44:35    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:44:42    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:44:57    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:44:59    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:45:01    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:45:07    SHORT  Monitor    OrangeSquare+ET        5/8    13.00     
+2026-03-03 13:45:10    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:45:21    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:45:23    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:45:28    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:45:31    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:45:34    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:45:37    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:45:39    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:45:42    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:45:46    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:45:52    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:45:53    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:45:58    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:46:00    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:46:02    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:46:27    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:46:29    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:46:31    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:46:34    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:46:40    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:46:52    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:46:59    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:47:04    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:47:08    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:47:17    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:47:19    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:47:24    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:47:28    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:47:47    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:48:09    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:48:26    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:48:41    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:48:55    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:49:07    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:49:27    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:49:39    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:49:48    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:49:58    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:50:10    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:50:25    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:50:33    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:50:50    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:50:55    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:51:11    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:51:23    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:51:30    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:51:39    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:51:48    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:51:53    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:52:02    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:52:09    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:52:18    SHORT  Monitor    OrangeSquare+SW        5/8    13.00     
+2026-03-03 13:52:24    SHORT  Monitor    OrangeSquare+DT        5/8    13.00     
+2026-03-03 13:52:41    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:52:46    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:52:52    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:53:04    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:53:11    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:53:20    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:53:27    LONG   Monitor    YellowSquare+ET        5/8    13.00     
+2026-03-03 13:53:33    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:53:45    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:54:07    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:54:21    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:54:36    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:54:44    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:54:49    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:55:03    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:55:22    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:55:29    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:55:34    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:55:48    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 13:56:01    SHORT  Monitor    OrangeSquare+RR        5/8    13.00     
+2026-03-03 13:56:09    LONG   Monitor    YellowSquare+VY        5/8    13.00     
+2026-03-03 13:56:22    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:56:27    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:56:55    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:57:07    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:57:25    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:57:45    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:57:54    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:58:02    LONG   Monitor    YellowSquare+RR        5/8    13.00     
+2026-03-03 13:58:14    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:58:23    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:59:18    LONG   Monitor    YellowSquare+DT        5/8    13.00     
+2026-03-03 13:59:28    LONG   Monitor    YellowSquare+RR        6/8    13.00     
+2026-03-03 13:59:56    SHORT  Monitor    OrangeSquare+RR        6/8    13.00     
+2026-03-03 14:00:05    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:00:12    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:00:29    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:00:41    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:00:55    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:01:00    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:01:26    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:01:43    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:02:02    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:02:16    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:02:38    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:03:19    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:03:34    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:03:50    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:04:01    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:04:16    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:04:27    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:04:40    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:04:48    SHORT  Monitor    OrangeSquare+VY        5/8    14.00     
+2026-03-03 14:04:55    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:05:00    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:05:12    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:05:18    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:05:30    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:05:42    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:05:49    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:05:55    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:06:06    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:06:48    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:05    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:08    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:17    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:07:31    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:07:32    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:35    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:07:40    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:42    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:07:50    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:07:53    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:07:54    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:07:56    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:58    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:07:59    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:02    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:06    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:08:15    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:08:17    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:08:21    SHORT  Monitor    OrangeSquare+ET        5/8    14.00     
+2026-03-03 14:08:23    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:25    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:26    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:27    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:30    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:34    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:36    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:37    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:39    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:41    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:46    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:08:52    LONG   Monitor    YellowSquare+SW        5/8    14.00     
+2026-03-03 14:08:53    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:08:57    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:08:58    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:09:02    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:09:09    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:09:19    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:09:21    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:09:30    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:09:34    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:09:37    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:09:42    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:09:44    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:09:46    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:09:49    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:09:55    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:09:58    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:10:04    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:10:07    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:10:11    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:10:20    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:10:29    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:10:32    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:10:40    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:10:42    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:10:46    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:10:50    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:10:56    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:11:00    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:11:06    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:11:10    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:11:14    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:11:19    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:11:25    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:11:30    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:11:37    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:11:39    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:11:41    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:11:42    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:11:57    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:12:03    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:12:06    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:12:15    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:12:17    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:12:21    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:12:26    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:12:28    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:12:33    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:12:37    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:12:41    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:12:46    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:12:51    SHORT  Monitor    OrangeSquare+ET        5/8    14.00     
+2026-03-03 14:12:53    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:12:55    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:13:04    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:13:06    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:13:09    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:13:13    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:13:15    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:13:24    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:13:26    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:13:28    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:13:35    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:13:38    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:13:42    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:13:48    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:14:03    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:14:05    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:14:15    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:14:19    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:14:22    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:14:25    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:14:33    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:14:36    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:14:40    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:14:44    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:14:52    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:14:59    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:15:02    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:15:06    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:15:07    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:15:10    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:15:13    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:15:18    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:15:24    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:15:31    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:15:33    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:15:38    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:15:41    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:15:48    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:15:49    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:15:52    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:15:58    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:16:01    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:16:11    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:16:18    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:16:22    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:16:27    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:16:32    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:16:34    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:16:41    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:16:45    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:17:00    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:17:08    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:17:11    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:17:22    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:17:25    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:17:32    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:17:35    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:17:48    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:18:01    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:18:14    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:18:19    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:18:21    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:18:29    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:18:31    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:18:39    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:18:42    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:18:51    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:18:55    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:19:10    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:19:31    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:19:36    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:19:40    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:19:49    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:20:23    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:20:47    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:21:06    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:21:31    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:21:57    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:22:27    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:22:41    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:22:57    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:23:15    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:23:39    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:23:52    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:24:13    LONG   Monitor    YellowSquare+SW        5/8    14.00     
+2026-03-03 14:24:32    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:24:55    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:25:06    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:25:34    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:26:05    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:26:31    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:26:48    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:27:05    LONG   Monitor    YellowSquare+SW        5/8    14.00     
+2026-03-03 14:27:28    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:27:39    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:27:48    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:28:12    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:28:32    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:28:57    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:29:20    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:29:34    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:29:50    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:30:55    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:31:14    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:31:35    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:31:47    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:32:01    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:32:13    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:32:25    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:32:38    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:32:58    SHORT  Monitor    OrangeSquare+ET        5/8    14.00     
+2026-03-03 14:33:39    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:33:51    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:34:06    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:34:17    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:34:27    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:34:39    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:34:58    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:35:11    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:35:26    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:35:46    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:35:56    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:36:17    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:36:42    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:36:57    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:37:11    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:37:22    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:37:46    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:37:56    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:38:10    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:38:22    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:38:32    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:38:58    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:39:32    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:39:46    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:39:56    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:40:08    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:40:27    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 14:40:42    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:40:52    LONG   Monitor    YellowSquare+RR        5/8    14.00     
+2026-03-03 14:41:03    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:41:12    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:41:18    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:41:47    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:42:05    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:42:12    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:42:33    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:42:48    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:42:58    SHORT  Monitor    OrangeSquare+RR        5/8    14.00     
+2026-03-03 14:43:08    LONG   Monitor    YellowSquare+RR        6/8    14.00     
+2026-03-03 14:43:28    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:43:35    LONG   Monitor    YellowSquare+DT        5/8    14.00     
+2026-03-03 14:43:45    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
+2026-03-03 14:43:54    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+  (>>> = order placed by ActiveNikiTrader)
 
-TRIGGER TYPE ANALYSIS
----------------------
-  OrangeSquare+DT: 1 trades, 1W (100%), +146t
+STRATEGY TRADES (FILLED)
+----------------------------------------------------------------------------------------------------
+Market Entry Time      Dir    P&L Ticks  P&L $        Result Signal Info
+2026-03-02 07:28:00    SHORT  58         $290.00      [WIN]   [OrangeSquare+DT] 5/8
+2026-03-02 08:35:18    SHORT  25         $125.00      [WIN]   [OrangeSquare+DT] 5/8
+2026-03-02 09:53:58    SHORT  -609       $-3045.00    [LOSS]  [OrangeSquare+DT] 5/8
+2026-03-03 08:15:08    SHORT  57         $285.00      [WIN]   [OrangeSquare+DT] 5/8
+2026-03-03 08:39:42    SHORT  40         $200.00      [WIN]   [OrangeSquare+DT] 5/8
+2026-03-03 09:53:15    SHORT  143        $715.00      [WIN]   [OrangeSquare+DT] 5/8
+2026-03-03 10:05:09    SHORT  11         $55.00       [WIN]   [OrangeSquare+DT] 5/8
+2026-03-03 10:09:34    LONG   21         $105.00      [WIN]   [YellowSquare+ET] 5/8
+2026-03-03 10:15:45    SHORT  97         $485.00      [WIN]   [OrangeSquare+DT] 5/8
+2026-03-03 10:24:04    SHORT  48         $240.00      [WIN]   [OrangeSquare+DT] 5/8
 
-ALL SIGNALS FIRED: 33
-----------------------------------------
-Time      Dir   Source   Trigger              Conf   Price
-07:08:47  LONG  Trader   [YellowSquare+RR   ] 5/6   24941.75
-07:11:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24945.00
-07:14:56  LONG  Trader   [YellowSquare+RR   ] 5/6   24959.25
-08:24:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24873.25
-08:45:55  SHORT Trader   [OrangeSquare+DT   ] 6/6   24841.00
-08:54:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24826.00
-09:01:27  SHORT Trader   [OrangeSquare+DT   ] 6/6   24820.25
-09:30:05  SHORT Trader   [OrangeSquare+DT   ] 5/6   24816.00 ►
-09:32:09  SHORT Trader   [OrangeSquare+DT   ] 5/6   24779.50
-09:35:22  SHORT Trader   [OrangeSquare+DT   ] 6/6   24769.50
-09:41:14  LONG  Trader   [YellowSquare+RR   ] 5/6   24822.50
-09:42:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24832.00
-09:46:34  LONG  Trader   [YellowSquare+RR   ] 5/6   24864.00
-09:48:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24804.00
-09:54:11  LONG  Trader   [YellowSquare+RR   ] 5/6   24854.75
-09:57:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24916.75
-10:00:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24943.00
-10:27:19  LONG  Trader   [YellowSquare+RR   ] 5/6   25065.75
-10:37:13  SHORT Trader   [OrangeSquare+DT   ] 6/6   25032.75
-10:42:24  LONG  Trader   [YellowSquare+RR   ] 5/6   25076.25
-10:54:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25081.50
-11:01:14  LONG  Trader   [YellowSquare+RR   ] 5/6   25093.75
-11:39:40  LONG  Trader   [YellowSquare+RR   ] 5/6   25111.50
-11:41:48  LONG  Trader   [YellowSquare+RR   ] 5/6   25111.25
-11:57:14  SHORT Trader   [OrangeSquare+DT   ] 6/6   25068.75
-12:41:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   25076.00
-13:24:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   25070.50
-13:28:19  SHORT Trader   [OrangeSquare+DT   ] 6/6   25053.75
-13:30:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   25057.75
-14:19:30  SHORT Trader   [OrangeSquare+DT   ] 5/6   24995.50
-14:30:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24986.00
-14:34:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24962.50
-14:35:36  SHORT Trader   [OrangeSquare+DT   ] 6/6   24956.50
-  (► = order placed by ActiveNikiTrader)
-
-STRATEGY TRADES
----------------
-  09:30:05 SHORT   +146t ($+730.00) ✓ [OrangeSquare+DT] 5/6
-
-SIGNAL ALIGNMENT ANALYSIS
--------------------------
-
-ALIGNED with signals: 1 trades, +146t
-  09:30:05 SHORT  +146t <- Trader @ 09:30:05 [OrangeSquare+DT] 5/6 ✓
-
-COUNTER to signals: 0 trades, +0t
-
-NO SIGNAL nearby: 0 trades, +0t
-
-INDICATOR STATE CORRELATION
----------------------------
-Indicator   UP(W/L)     DN(W/L)     Notes
-  AAA       0/0 (   0%)  1/0 ( 100%)  Better when DN
-  DT        0/0 (   0%)  1/0 ( 100%)  Better when DN
-  ET        0/0 (   0%)  1/0 ( 100%)  Better when DN
-  RR        1/0 ( 100%)  0/0 (   0%)  Better when UP
-  SB        0/0 (   0%)  1/0 ( 100%)  Better when DN
-  SW        0/0 (   0%)  1/0 ( 100%)  Better when DN
-  T3P       1/0 ( 100%)  0/0 (   0%)  Better when UP
-  VY        0/0 (   0%)  1/0 ( 100%)  Better when DN
-
-BEST & WORST TRADES
--------------------
-
-TOP 5 WINNERS:
-  09:30:05 SHORT  +146t [Trader:OrangeSquare+DT] 5/6
-
-BOTTOM 5 LOSERS:
-  09:30:05 SHORT  +146t [Trader:OrangeSquare+DT] 5/6
-
-TIME-BASED ANALYSIS
--------------------
-9:00-10:00  : 1 trades, 1W, +146t
-
-================================================================================
-KEY INSIGHTS
-================================================================================
-
-1. SIGNAL ALIGNMENT:
-   - 1 of 1 trades (100%) aligned with signals
-
-2. P&L BY ALIGNMENT:
-   - ALIGNED trades: +146t ($+730.00)
-   - COUNTER trades: +0t ($+0.00)
-   - NO SIGNAL trades: +0t ($+0.00)
-
-3. CONFLUENCE INSIGHTS:
-   - Best performing: 5/6 with +146t
-   - High confluence (N-1 or higher): +146t
-
-5. RECOMMENDATIONS:
-   - Best trigger: OrangeSquare+DT with +146t
-
-================================================================================
-SLIPPAGE ANALYSIS
-================================================================================
-
-ENTRY SLIPPAGE:
-   Trades with data: 1
-   Mean:   +0.0t ($+0.00)
-   Median: +0.0t
-   Std Dev: 0.0t
-   Range:  +0t to +0t
-   TOTAL:  +0t ($+0.00)
-
-EXIT SLIPPAGE (all exits):
-   Trades with data: 1
-   Mean:   +5.0t ($+25.00)
-   Median: +5.0t
-   Std Dev: 0.0t
-   Range:  +5t to +5t
-   TOTAL:  +5t ($+25.00)
-
-EXIT SLIPPAGE BY REASON:
-   TRAIL    (  1 trades): Mean  +5.0t | Total     +5t ($+25.00)
-
-COST SUMMARY:
-   Gross P&L:        +146t ($+730.00)
-   Entry Slippage:   +0t ($+0.00)
-   Exit Slippage:    +5t ($+25.00)
-   Total Slippage:   +5t ($+25.00)
-   Broker Fees:      1 × $4.50 = $4.50
-   ─────────────────────────────────────
-   NET P&L:          $+700.50
-
-   Slippage as % of |Gross|: 3.4%
-   Total costs as % of |Gross|: 4.0%
-
-================================================================================
-MULTI-DAY COMPARISON - VPS (Previous Days)
-================================================================================
-
-Date        Trades  Win%    P&L      Signal Alignment
-----------------------------------------------------------------------
-Feb 22        1     100%    +146t    1 aligned (+146t), 0 no signal (+0t)
-Feb 24        2     100%    +175t    2 aligned (+175t), 0 no signal (+0t)
-Feb 25        3     100%    +242t    3 aligned (+242t), 0 no signal (+0t)
-Feb 26        0     0%      +0t    N/A
-Feb 27        2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
-----------------------------------------------------------------------
-TODAY         1     100%    +146t    1 aligned (+146t), 0 no signal (+0t)
-
-================================================================================
+====================================================================================================
