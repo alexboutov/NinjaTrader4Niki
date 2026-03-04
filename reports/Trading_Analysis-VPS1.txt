@@ -5,11 +5,11 @@ MAR 04, 2026 TRADING SESSION ANALYSIS
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  167
+ActiveNikiTrader signals:  186
   - Orders placed:         7
   - Outside hours:         8
   - Blocked by cooldown:   0
-BAR data loaded:           809634 bars from CSV
+BAR data loaded:           1047024 bars from CSV
 
 SESSION SUMMARY
 ---------------
@@ -27,7 +27,7 @@ TRIGGER TYPE ANALYSIS
 ---------------------
   OrangeSquare+DT: 4 trades, 2W (50%), -1087t
 
-ALL SIGNALS FIRED: 109
+ALL SIGNALS FIRED: 111
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
 21:05:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24646.75
@@ -117,7 +117,9 @@ Time      Dir   Source   Trigger              Conf   Price
 09:30:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24910.00
 09:31:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   24906.75
 09:33:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24948.50
+09:35:29  SHORT Trader   [OrangeSquare+DT   ] 6/6   24924.75
 09:35:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24897.25
+09:37:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24879.25
 09:40:11  SHORT Trader   [OrangeSquare+DT   ] 6/6   24865.50
 09:42:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24845.00
 09:44:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   24849.25
