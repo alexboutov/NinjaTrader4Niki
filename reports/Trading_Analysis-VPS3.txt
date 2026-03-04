@@ -1,6 +1,6 @@
 ====================================================================================================
 MARKET REPLAY ANALYSIS: MAR 02, 2026 TO MAR 03, 2026
-Report Generated (System Time): 2026-03-03 15:21:20
+Report Generated (System Time): 2026-03-04 11:36:33
 ====================================================================================================
 
 SESSION SUMMARY
@@ -9,7 +9,7 @@ Total Round-trips: 10
 Win/Loss:          9W / 1L (90.0% win rate)
 Total P&L:         -109 ticks ($-545.00)
 
-ALL SIGNALS FIRED: 608
+ALL SIGNALS FIRED: 611
 ----------------------------------------------------------------------------------------------------
 Market Timestamp       Dir    Source     Trigger                Conf   Price
 2026-03-02 00:20:38    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
@@ -175,6 +175,7 @@ Market Timestamp       Dir    Source     Trigger                Conf   Price
 2026-03-03 09:47:33    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
 2026-03-03 09:49:46    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
 2026-03-03 09:51:41    LONG   Trader     YellowSquare+RR        5/8    2026.00   
+2026-03-03 09:53:08    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
 2026-03-03 09:53:15    SHORT  Trader     OrangeSquare+DT        5/8    2026.00    >>>
 2026-03-03 09:56:45    SHORT  Trader     OrangeSquare+DT        5/8    2026.00   
 2026-03-03 09:59:13    SHORT  Trader     OrangeSquare+DT        6/8    2026.00   
@@ -620,6 +621,8 @@ Market Timestamp       Dir    Source     Trigger                Conf   Price
 2026-03-03 14:43:35    LONG   Monitor    YellowSquare+DT        5/8    14.00     
 2026-03-03 14:43:45    SHORT  Monitor    OrangeSquare+RR        6/8    14.00     
 2026-03-03 14:43:54    SHORT  Monitor    OrangeSquare+DT        5/8    14.00     
+2026-03-03 15:24:29    SHORT  Monitor    OrangeSquare+RR        5/8    15.00     
+2026-03-03 15:33:10    SHORT  Monitor    OrangeSquare+RR        6/8    15.00     
   (>>> = order placed by ActiveNikiTrader)
 
 STRATEGY TRADES (FILLED)
