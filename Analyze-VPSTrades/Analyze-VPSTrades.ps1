@@ -266,6 +266,7 @@ try {
             "104.237.203.83" { "VPS1" }
             "205.234.153.21" { "VPS2" }
             "64.44.56.21"    { "VPS3" }
+	    "172.245.253.135" { "VPS4" }
             default          { "VPS_$publicIP" }
         }
         Write-Log "  VPS identity: $vpsName (IP: $publicIP)"
@@ -351,6 +352,7 @@ try {
                 UseSsl      = $true
                 Credential  = $smtpCred
             }
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             Send-MailMessage @mailParams
             Write-Log "  Email sent to $EmailTo - Trading_Analysis-${vpsName}.txt" "OK"
         } catch {
