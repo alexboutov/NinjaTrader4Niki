@@ -33,6 +33,7 @@
 param(
     [string]$Date = (Get-Date -Format "yyyy-MM-dd")
 )
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # === CONFIGURATION ===
 $NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log"
