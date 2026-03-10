@@ -25,11 +25,21 @@ namespace NinjaTrader.NinjaScript.Strategies
     /// ActiveNikiTrader - AIQ_1 trigger + any indicator confirmation with 8-indicator confluence filter
     /// 
     /// Split into partial classes:
-    ///   - ActiveNikiTrader.cs           (Main: fields, parameters, OnStateChange, OnBarUpdate)
-    ///   - ActiveNikiTrader.Panel.cs     (Panel UI: create, update, event handlers)
+    ///   - ActiveNikiTrader.cs            (Main: fields, parameters, OnStateChange, OnBarUpdate)
+    ///   - ActiveNikiTrader.Panel.cs      (Panel UI: create, update, event handlers)
     ///   - ActiveNikiTrader.Indicators.cs (Indicator loading, accessors, reflection)
-    ///   - ActiveNikiTrader.Signals.cs   (Confluence, confirmation, trading hours)
-    ///   - ActiveNikiTrader.Logging.cs   (CSV logging, signal logging, file management)
+    ///   - ActiveNikiTrader.Signals.cs    (Confluence, confirmation, trading hours, force-close)
+    ///   - ActiveNikiTrader.Logging.cs    (CSV logging, signal logging, file management)
+    /// 
+    /// Defaults updated 2026-03-09:
+    ///   - Session 1: 07:00-08:27 (pre-news), Session 2: 09:00-10:58
+    ///   - CloseBeforeNews: 08:28, EODClose: 11:00
+    ///   - SL/TP: $3000/$3000 (wide for simulation/replay testing)
+    ///   - UniRenkoMode: true, UseTimeBasedCooldown: true, CooldownSeconds: 90
+    ///   - EnableAutoTrading: true, UseT3Pro: false
+    ///   - DailyLossLimitUSD: $2000, DailyProfitTargetUSD: $3000
+    ///   - LogBarDetails: true, EnableIndicatorCSVLog: true (simulation/replay phase)
+    ///   - OnMarketData sentinel added for tick-level EOD/news force-close
     /// </summary>
     public partial class ActiveNikiTrader : Strategy
     {
@@ -87,8 +97,6 @@ namespace NinjaTrader.NinjaScript.Strategies
         // Previous state tracking for confirmation detection
         private bool prevRR_IsUp, prevDT_IsUp, prevVY_IsUp, prevET_IsUp, prevSW_IsUp, prevT3P_IsUp, prevAAA_IsUp, prevSB_IsUp;
         
-        
-        
         // Panel UI elements
         private Grid controlPanel;
         private bool panelActive;
@@ -131,7 +139,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private double trailStopPrice = 0;
         private ATR atrIndicator;
         
-        // Simple trailing stop tracking (tick-based)
+        // Simple trailing stop tracking (tick-based or ATR-based)
         private bool simpleTrailActive = false;
         private double simpleTrailStopLevel = 0;
         
@@ -148,7 +156,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         #region Parameters
         [NinjaScriptProperty]
         [Range(2, 8)]
-        [Display(Name="Min Confluence Required", Description="Minimum indicators agreeing (2-7)", Order=1, GroupName="1. Signal Filters")]
+        [Display(Name="Min Confluence Required", Description="Minimum indicators agreeing (2-8)", Order=1, GroupName="1. Signal Filters")]
         public int MinConfluenceRequired { get; set; }
         
         [NinjaScriptProperty]
@@ -182,7 +190,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty]
         [Range(2, 8)]
-        [Display(Name="Min Confluence For Auto Trade", Description="Higher confluence required to actually place orders (2-7)", Order=8, GroupName="1. Signal Filters")]
+        [Display(Name="Min Confluence For Auto Trade", Description="Higher confluence required to actually place orders (2-8)", Order=8, GroupName="1. Signal Filters")]
         public int MinConfluenceForAutoTrade { get; set; }
         
         [NinjaScriptProperty]
@@ -191,46 +199,46 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty]
         [Range(0, 23)]
-        [Display(Name="Session 1 Start Hour", Description="First session start hour (0-23)", Order=10, GroupName="1. Signal Filters")]
+        [Display(Name="Session 1 Start Hour", Description="Pre-news session start hour (0-23)", Order=10, GroupName="1. Signal Filters")]
         public int Session1StartHour { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 59)]
-        [Display(Name="Session 1 Start Minute", Description="First session start minute (0-59)", Order=11, GroupName="1. Signal Filters")]
+        [Display(Name="Session 1 Start Minute", Description="Pre-news session start minute (0-59)", Order=11, GroupName="1. Signal Filters")]
         public int Session1StartMinute { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 23)]
-        [Display(Name="Session 1 End Hour", Description="First session end hour (0-23)", Order=12, GroupName="1. Signal Filters")]
+        [Display(Name="Session 1 End Hour", Description="Pre-news session end hour - should be before NewsCloseHour (0-23)", Order=12, GroupName="1. Signal Filters")]
         public int Session1EndHour { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 59)]
-        [Display(Name="Session 1 End Minute", Description="First session end minute (0-59)", Order=13, GroupName="1. Signal Filters")]
+        [Display(Name="Session 1 End Minute", Description="Pre-news session end minute (0-59)", Order=13, GroupName="1. Signal Filters")]
         public int Session1EndMinute { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 23)]
-        [Display(Name="Session 2 Start Hour", Description="Second session start hour (0-23)", Order=14, GroupName="1. Signal Filters")]
+        [Display(Name="Session 2 Start Hour", Description="Post-news session start hour (0-23)", Order=14, GroupName="1. Signal Filters")]
         public int Session2StartHour { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 59)]
-        [Display(Name="Session 2 Start Minute", Description="Second session start minute (0-59)", Order=15, GroupName="1. Signal Filters")]
+        [Display(Name="Session 2 Start Minute", Description="Post-news session start minute (0-59)", Order=15, GroupName="1. Signal Filters")]
         public int Session2StartMinute { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 23)]
-        [Display(Name="Session 2 End Hour", Description="Second session end hour (0-23)", Order=16, GroupName="1. Signal Filters")]
+        [Display(Name="Session 2 End Hour", Description="Post-news session end hour - should be before EODCloseHour (0-23)", Order=16, GroupName="1. Signal Filters")]
         public int Session2EndHour { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 59)]
-        [Display(Name="Session 2 End Minute", Description="Second session end minute (0-59)", Order=17, GroupName="1. Signal Filters")]
+        [Display(Name="Session 2 End Minute", Description="Post-news session end minute (0-59)", Order=17, GroupName="1. Signal Filters")]
         public int Session2EndMinute { get; set; }
         
         [NinjaScriptProperty]
-        [Display(Name="Close Before News", Description="Close positions before 8:30 AM news window", Order=18, GroupName="1. Signal Filters")]
+        [Display(Name="Close Before News", Description="Close open positions before news window", Order=18, GroupName="1. Signal Filters")]
         public bool CloseBeforeNews { get; set; }
         
         [NinjaScriptProperty]
@@ -249,12 +257,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty]
         [Range(0, 23)]
-        [Display(Name="EOD Close Hour", Description="Hour to close at end of day (0-23)", Order=22, GroupName="1. Signal Filters")]
+        [Display(Name="EOD Close Hour", Description="Hour to force-close all positions (0-23)", Order=22, GroupName="1. Signal Filters")]
         public int EODCloseHour { get; set; }
         
         [NinjaScriptProperty]
         [Range(0, 59)]
-        [Display(Name="EOD Close Minute", Description="Minute to close at end of day (0-59)", Order=23, GroupName="1. Signal Filters")]
+        [Display(Name="EOD Close Minute", Description="Minute to force-close all positions (0-59)", Order=23, GroupName="1. Signal Filters")]
         public int EODCloseMinute { get; set; }
         
         [NinjaScriptProperty][Display(Name="Use Ruby River", Order=1, GroupName="2. Indicator Selection")]
@@ -393,7 +401,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty]
         [Range(2, 8)]
-        [Display(Name="Min Confluence To Stay", Description="Minimum confluence to keep position open past TP (2-7)", Order=2, GroupName="12. Dynamic Exit")]
+        [Display(Name="Min Confluence To Stay", Description="Minimum confluence to keep position open past TP (2-8)", Order=2, GroupName="12. Dynamic Exit")]
         public int MinConfluenceToStay { get; set; }
         
         [NinjaScriptProperty]
@@ -421,12 +429,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty]
         [Range(0.5, 5.0)]
-        [Display(Name="ATR Trail Distance Mult", Description="Trail distance = ATR × this multiplier (default 1.5)", Order=4, GroupName="12a. Trailing Stop")]
+        [Display(Name="ATR Trail Distance Mult", Description="Trail distance = ATR × this multiplier", Order=4, GroupName="12a. Trailing Stop")]
         public double ATRTrailDistanceMultiplier { get; set; }
         
         [NinjaScriptProperty]
         [Range(1.0, 10.0)]
-        [Display(Name="ATR Trail Activation Mult", Description="Activate trail when profit >= ATR × this multiplier (default 2.0)", Order=5, GroupName="12a. Trailing Stop")]
+        [Display(Name="ATR Trail Activation Mult", Description="Activate trail when profit >= ATR × this multiplier", Order=5, GroupName="12a. Trailing Stop")]
         public double ATRTrailActivationMultiplier { get; set; }
         
         [NinjaScriptProperty]
@@ -448,135 +456,134 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             if (State == State.SetDefaults)
             {
-                Name = "ActiveNikiTrader";
+                Name        = "ActiveNikiTrader";
                 Description = "AIQ_1 trigger + any indicator confirmation with 8-indicator confluence filter (LONG + SHORT)";
-                Calculate = Calculate.OnBarClose;
-                EntriesPerDirection = 1;
-                EntryHandling = EntryHandling.AllEntries;
+                Calculate   = Calculate.OnEachTick;
+                EntriesPerDirection     = 1;
+                EntryHandling           = EntryHandling.AllEntries;
                 IsExitOnSessionCloseStrategy = true;
-                ExitOnSessionCloseSeconds = 30;
-                MaximumBarsLookBack = MaximumBarsLookBack.TwoHundredFiftySix;
-                StartBehavior = StartBehavior.WaitUntilFlat;
-                TimeInForce = TimeInForce.Gtc;
-                RealtimeErrorHandling = RealtimeErrorHandling.StopCancelClose;
-                StopTargetHandling = StopTargetHandling.PerEntryExecution;
-                BarsRequiredToTrade = 20;
+                ExitOnSessionCloseSeconds    = 30;
+                MaximumBarsLookBack     = MaximumBarsLookBack.TwoHundredFiftySix;
+                StartBehavior           = StartBehavior.WaitUntilFlat;
+                TimeInForce             = TimeInForce.Gtc;
+                RealtimeErrorHandling   = RealtimeErrorHandling.StopCancelClose;
+                StopTargetHandling      = StopTargetHandling.PerEntryExecution;
+                BarsRequiredToTrade     = 20;
                 
                 // Signal filters
-                MinConfluenceRequired = 5;
-                MaxBarsAfterYellowSquare = 3;
-                MinSolarWaveCount = 1;
-                StopLossUSD = 300;
-                TakeProfitUSD = 600;
-                CooldownBars = 10;
-                EnableAutoTrading = false;
-                MinConfluenceForAutoTrade = 5;
+                MinConfluenceRequired       = 5;
+                MaxBarsAfterYellowSquare    = 3;
+                MinSolarWaveCount           = 1;
+                StopLossUSD                 = 3000;   // Wide for simulation/replay testing
+                TakeProfitUSD               = 3000;   // Wide for simulation/replay testing
+                CooldownBars                = 10;
+                EnableAutoTrading           = true;
+                MinConfluenceForAutoTrade   = 5;
                 
-                // Trading hours filter - Optimized based on backtest analysis (10:00-11:00 only)
-                // Data: 182 trades, 38% win rate, +1,666t total, +9.2t per trade
+                // Trading hours filter
+                // Session 1: Pre-news  07:00 - 08:27
+                // Session 2: Post-news 09:00 - 10:58
                 UseTradingHoursFilter = true;
-                Session1StartHour = 10;
-                Session1StartMinute = 0;
-                Session1EndHour = 10;
-                Session1EndMinute = 59;
-                Session2StartHour = 10;
-                Session2StartMinute = 0;
-                Session2EndHour = 10;
-                Session2EndMinute = 59;
+                Session1StartHour   = 7;    Session1StartMinute = 0;
+                Session1EndHour     = 8;    Session1EndMinute   = 27;
+                Session2StartHour   = 9;    Session2StartMinute = 0;
+                Session2EndHour     = 10;   Session2EndMinute   = 58;
                 
-                // Auto-close positions
+                // News close: 08:28 — closes any position before 8:30 AM news
                 CloseBeforeNews = true;
-                NewsCloseHour = 8;
+                NewsCloseHour   = 8;
                 NewsCloseMinute = 28;
-                CloseAtEndOfDay = true;
-                EODCloseHour = 15;
-                EODCloseMinute = 58;
                 
-                // Indicator selection - all 7 enabled by default
-                UseRubyRiver = true;
-                UseDragonTrend = true;
-                UseSolarWave = true;
-                UseVIDYAPro = true;
-                UseEasyTrend = true;
-                UseT3Pro = true;
+                // EOD hard close: 11:00 — backstopped by OnMarketData tick sentinel
+                CloseAtEndOfDay = true;
+                EODCloseHour    = 11;
+                EODCloseMinute  = 0;
+                
+                // Indicator selection
+                UseRubyRiver    = true;
+                UseDragonTrend  = true;
+                UseSolarWave    = true;
+                UseVIDYAPro     = true;
+                UseEasyTrend    = true;
+                UseT3Pro        = false;   // Disabled — not reliable on this VPS config
                 UseAAATrendSync = true;
                 UseAIQSuperBands = true;
                 
                 // T3 Pro defaults
-                T3ProPeriod = 14;
-                T3ProTCount = 3;
-                T3ProVFactor = 0.7;
-                T3ProChaosSmoothingEnabled = true;
-                T3ProChaosSmoothingPeriod = 5;
-                T3ProFilterEnabled = true;
-                T3ProFilterMultiplier = 4.0;
+                T3ProPeriod             = 14;
+                T3ProTCount             = 3;
+                T3ProVFactor            = 0.7;
+                T3ProChaosSmoothingEnabled  = true;
+                T3ProChaosSmoothingPeriod   = 5;
+                T3ProFilterEnabled      = true;
+                T3ProFilterMultiplier   = 4.0;
                 
                 // VIDYA Pro defaults
-                VIDYAPeriod = 9;
-                VIDYAVolatilityPeriod = 9;
-                VIDYASmoothingEnabled = true;
-                VIDYASmoothingPeriod = 5;
-                VIDYAFilterEnabled = true;
-                VIDYAFilterMultiplier = 4.0;
+                VIDYAPeriod             = 9;
+                VIDYAVolatilityPeriod   = 9;
+                VIDYASmoothingEnabled   = true;
+                VIDYASmoothingPeriod    = 5;
+                VIDYAFilterEnabled      = true;
+                VIDYAFilterMultiplier   = 4.0;
                 
                 // Easy Trend defaults
-                EasyTrendPeriod = 30;
-                EasyTrendSmoothingEnabled = true;
-                EasyTrendSmoothingPeriod = 7;
-                EasyTrendFilterEnabled = true;
-                EasyTrendFilterMultiplier = 0.5;
-                EasyTrendATRPeriod = 100;
+                EasyTrendPeriod             = 30;
+                EasyTrendSmoothingEnabled   = true;
+                EasyTrendSmoothingPeriod    = 7;
+                EasyTrendFilterEnabled      = true;
+                EasyTrendFilterMultiplier   = 0.5;
+                EasyTrendATRPeriod          = 100;
                 
                 // Ruby River defaults
-                RubyRiverMAPeriod = 20;
-                RubyRiverSmoothingEnabled = true;
-                RubyRiverSmoothingPeriod = 5;
-                RubyRiverOffsetMultiplier = 0.15;
-                RubyRiverOffsetPeriod = 100;
+                RubyRiverMAPeriod           = 20;
+                RubyRiverSmoothingEnabled   = true;
+                RubyRiverSmoothingPeriod    = 5;
+                RubyRiverOffsetMultiplier   = 0.15;
+                RubyRiverOffsetPeriod       = 100;
                 
                 // Dragon Trend defaults
-                DragonTrendPeriod = 10;
+                DragonTrendPeriod           = 10;
                 DragonTrendSmoothingEnabled = true;
-                DragonTrendSmoothingPeriod = 5;
+                DragonTrendSmoothingPeriod  = 5;
                 
                 // Solar Wave defaults
-                SolarWaveATRPeriod = 100;
-                SolarWaveTrendMultiplier = 2;
-                SolarWaveStopMultiplier = 4;
+                SolarWaveATRPeriod          = 100;
+                SolarWaveTrendMultiplier    = 2;
+                SolarWaveStopMultiplier     = 4;
                 
                 EnableSoundAlert = true;
                 
                 // UniRenko settings
-                UniRenkoMode = false;
-                UseTimeBasedCooldown = false;
-                CooldownSeconds = 120;  // 2 minutes default
-                LogBarDetails = false;
+                UniRenkoMode            = true;
+                UseTimeBasedCooldown    = true;
+                CooldownSeconds         = 90;
+                LogBarDetails           = true;   // ON for simulation/replay analysis
                 
                 // Risk Management
-                EnableDailyLossLimit = true;
-                DailyLossLimitUSD = 300;
-                EnableDailyProfitTarget = true;
-                DailyProfitTargetUSD = 600;
+                EnableDailyLossLimit        = true;
+                DailyLossLimitUSD           = 2000;
                 ResetDailyPnLAtSessionStart = true;
-                StopLossBufferTicks = 2;  // Add 2 ticks buffer to reduce slippage
+                EnableDailyProfitTarget     = true;
+                DailyProfitTargetUSD        = 3000;
+                StopLossBufferTicks         = 0;
                 
-                // Dynamic Exit - let profits run when trend continues
-                EnableDynamicExit = false;  // Disabled - using simpler trailing stop instead
-                MinConfluenceToStay = 4;
-                TrailStopATRMultiplier = 1.5;
-                MaxProfitUSD = 500;  // Force exit at $500 profit
+                // Dynamic Exit (disabled — using trailing stop instead)
+                EnableDynamicExit       = false;
+                MinConfluenceToStay     = 4;
+                TrailStopATRMultiplier  = 1.5;
+                MaxProfitUSD            = 1000;
                 
                 // Trailing Stop Settings
-                EnableTrailingStop = true;
-                UseATRBasedTrail = true;           // NEW: Default to ATR-based
-                ATRTrailPeriod = 14;               // NEW: 14-period ATR
-                ATRTrailDistanceMultiplier = 1.5;  // NEW: Trail Distance = 1.5× ATR
-                ATRTrailActivationMultiplier = 2.0; // NEW: Activation = 2× ATR
-                TrailActivationTicks = 80;         // Tick-based fallback: Activate after +80t
-                TrailDistanceTicks = 30;           // Tick-based fallback: Trail 30t behind
+                EnableTrailingStop              = true;
+                UseATRBasedTrail                = true;
+                ATRTrailPeriod                  = 14;
+                ATRTrailDistanceMultiplier      = 1.5;
+                ATRTrailActivationMultiplier    = 2.0;
+                TrailActivationTicks            = 100;  // Tick-based fallback
+                TrailDistanceTicks              = 30;   // Tick-based fallback
                 
-                // Debug - CSV indicator logging OFF by default
-                EnableIndicatorCSVLog = false;
+                // Debug — ON for simulation/replay analysis phase
+                EnableIndicatorCSVLog = true;
             }
             else if (State == State.DataLoaded)
             {
@@ -613,7 +620,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 // Initialize ATR for trailing stop (separate indicator with configurable period)
                 atrTrailIndicator = ATR(ATRTrailPeriod);
                 
-                LogAlways($"ActiveNikiTrader | 7-indicator confluence | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                LogAlways($"ActiveNikiTrader | 8-indicator confluence | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
                 if (StopLossBufferTicks > 0)
                     LogAlways($"SL Buffer: {StopLossBufferTicks} ticks");
                 if (EnableDynamicExit)
@@ -636,9 +643,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (UseTradingHoursFilter)
                     LogAlways($"Trading Hours: {GetTradingHoursString()}");
                 if (CloseBeforeNews)
-                    LogAlways($"Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2}");
+                    LogAlways($"Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2} [OnMarketData sentinel active]");
                 if (CloseAtEndOfDay)
-                    LogAlways($"Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
+                    LogAlways($"Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2} [OnMarketData sentinel active]");
                 if (EnableDailyLossLimit)
                     LogAlways($"🛡️ Daily Loss Limit: ${DailyLossLimitUSD:F0}");
                 if (EnableDailyProfitTarget)
@@ -666,24 +673,28 @@ namespace NinjaTrader.NinjaScript.Strategies
             
             DateTime barTime = Time[0];
             
-            // Write CSV log row (every bar if enabled)
+            // Write CSV log row (every bar/tick if enabled)
             WriteCSVRow(barTime);
             
-            // Daily P&L reset check - reset at start of new trading day
+            // Daily P&L reset check — reset at start of new trading day
             if (ResetDailyPnLAtSessionStart && barTime.Date != lastTradeDate.Date)
             {
                 if (dailyPnL != 0 || dailyTradeCount > 0)
                     PrintAndLog($"📊 NEW DAY: Resetting Daily P&L (was ${dailyPnL:F2}, {dailyTradeCount} trades)");
-                dailyPnL = 0;
-                dailyTradeCount = 0;
-                dailyLossLimitHit = false;
+                dailyPnL            = 0;
+                dailyTradeCount     = 0;
+                dailyLossLimitHit   = false;
                 dailyProfitTargetHit = false;
-                lastTradeDate = barTime.Date;
+                lastTradeDate       = barTime.Date;
+                lastForceCloseMinute = -1;  // Reset force-close throttle for new day
             }
             
             // Daily loss limit / profit target check
+            // NOTE: CheckForceClose is called first so EOD/news close still fires
+            // even after daily limits are hit
             if ((EnableDailyLossLimit && dailyLossLimitHit) || (EnableDailyProfitTarget && dailyProfitTargetHit))
             {
+                CheckForceClose(barTime);
                 return;
             }
             
@@ -694,82 +705,36 @@ namespace NinjaTrader.NinjaScript.Strategies
                 PrintAndLog($"[BAR {CurrentBar}] {barTime:HH:mm:ss} | O={Open[0]:F2} H={High[0]:F2} L={Low[0]:F2} C={Close[0]:F2} | AIQ1={Ts(AIQ1_IsUp)} RR={Ts(RR_IsUp)} Bull={bull} Bear={bear}");
             }
             
-            if (CloseBeforeNews && Position.MarketPosition != MarketPosition.Flat)
-            {
-                int currentMinutes = barTime.Hour * 60 + barTime.Minute;
-                int newsCloseMinutes = NewsCloseHour * 60 + NewsCloseMinute;
-                
-                if (currentMinutes >= newsCloseMinutes && currentMinutes < newsCloseMinutes + 32)
-                {
-                    if (Position.MarketPosition == MarketPosition.Long)
-                    {
-                        ExitLong("Long", "PreNews Exit");
-                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - Before news window");
-                    }
-                    else if (Position.MarketPosition == MarketPosition.Short)
-                    {
-                        ExitShort("Short", "PreNews Exit");
-                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - Before news window");
-                    }
-                }
-            }
-            
-            if (CloseAtEndOfDay && Position.MarketPosition != MarketPosition.Flat)
-            {
-                int currentMinutes = barTime.Hour * 60 + barTime.Minute;
-                int eodCloseMinutes = EODCloseHour * 60 + EODCloseMinute;
-                
-                if (currentMinutes >= eodCloseMinutes)
-                {
-                    if (Position.MarketPosition == MarketPosition.Long)
-                    {
-                        ExitLong("Long", "EOD Exit");
-                        PrintAndLog($">>> AUTO-CLOSE LONG @ {barTime:HH:mm:ss} - End of day");
-                    }
-                    else if (Position.MarketPosition == MarketPosition.Short)
-                    {
-                        ExitShort("Short", "EOD Exit");
-                        PrintAndLog($">>> AUTO-CLOSE SHORT @ {barTime:HH:mm:ss} - End of day");
-                    }
-                }
-            }
+            // News and EOD force-close — also covered tick-by-tick in OnMarketData
+            CheckForceClose(barTime);
             
             // DYNAMIC EXIT MANAGEMENT
             if (EnableDynamicExit && Position.MarketPosition != MarketPosition.Flat && entryPrice > 0)
             {
-                double currentPrice = Close[0];
-                double pointValue = Instrument.MasterInstrument.PointValue;
-                double tpPoints = pointValue > 0 ? TakeProfitUSD / pointValue : 10;
-                double maxProfitPoints = pointValue > 0 ? MaxProfitUSD / pointValue : 25;
-                double atrValue = atrIndicator[0];
+                double currentPrice     = Close[0];
+                double pointValue       = Instrument.MasterInstrument.PointValue;
+                double tpPoints         = pointValue > 0 ? TakeProfitUSD / pointValue : 10;
+                double maxProfitPoints  = pointValue > 0 ? MaxProfitUSD / pointValue : 25;
+                double atrValue         = atrIndicator[0];
                 
                 var (bull, bear, total) = GetConfluence();
                 bool isLong = Position.MarketPosition == MarketPosition.Long;
                 
                 double unrealizedPoints = isLong ? (currentPrice - entryPrice) : (entryPrice - currentPrice);
-                double unrealizedPnL = unrealizedPoints * pointValue;
-                
-                bool pastTpLevel = unrealizedPoints >= tpPoints;
+                double unrealizedPnL    = unrealizedPoints * pointValue;
+                bool pastTpLevel        = unrealizedPoints >= tpPoints;
                 
                 if (unrealizedPoints >= maxProfitPoints)
                 {
-                    if (isLong)
-                    {
-                        ExitLong("Long", "MaxProfit Exit");
-                        PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}");
-                    }
-                    else
-                    {
-                        ExitShort("Short", "MaxProfit Exit");
-                        PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}");
-                    }
+                    if (isLong) { ExitLong("Long", "MaxProfit Exit");   PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}"); }
+                    else        { ExitShort("Short", "MaxProfit Exit");  PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}"); }
                     entryPrice = 0;
                     dynamicExitActive = false;
                 }
                 else if (pastTpLevel)
                 {
                     bool confluenceConfirmsTrend = isLong ? (bull >= MinConfluenceToStay) : (bear >= MinConfluenceToStay);
-                    bool trendStillValid = isLong ? RR_IsUp : !RR_IsUp;
+                    bool trendStillValid         = isLong ? RR_IsUp : !RR_IsUp;
                     
                     if (!dynamicExitActive)
                     {
@@ -778,33 +743,20 @@ namespace NinjaTrader.NinjaScript.Strategies
                             dynamicExitActive = true;
                             double trailDistance = atrValue * TrailStopATRMultiplier;
                             trailStopPrice = isLong ? (currentPrice - trailDistance) : (currentPrice + trailDistance);
-                            
-                            if (isLong)
-                                SetStopLoss("Long", CalculationMode.Price, trailStopPrice, true);
-                            else
-                                SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
-                                
+                            if (isLong) SetStopLoss("Long",  CalculationMode.Price, trailStopPrice, true);
+                            else        SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
                             PrintAndLog($"🚀 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}");
                         }
                         else
                         {
-                            if (isLong)
-                            {
-                                ExitLong("Long", "DynamicTP Exit");
-                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}");
-                            }
-                            else
-                            {
-                                ExitShort("Short", "DynamicTP Exit");
-                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}");
-                            }
+                            if (isLong) { ExitLong("Long", "DynamicTP Exit");   PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}"); }
+                            else        { ExitShort("Short", "DynamicTP Exit"); PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}"); }
                             entryPrice = 0;
                         }
                     }
                     else
                     {
                         double trailDistance = atrValue * TrailStopATRMultiplier;
-                        
                         if (isLong)
                         {
                             double newTrailStop = currentPrice - trailDistance;
@@ -814,15 +766,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                                 SetStopLoss("Long", CalculationMode.Price, trailStopPrice, true);
                                 PrintAndLog($"📈 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
                             }
-                            
                             if (currentPrice <= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
                             {
+                                string reason = currentPrice <= trailStopPrice ? "Trail Stop Hit" : !trendStillValid ? "RR Flipped" : $"Conf={bull}<{MinConfluenceToStay}";
                                 ExitLong("Long", "DynamicTrail Exit");
-                                string reason = currentPrice <= trailStopPrice ? "Trail Stop Hit" : 
-                                                !trendStillValid ? "RR Flipped" : $"Conf={bull}<{MinConfluenceToStay}";
                                 PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}");
-                                entryPrice = 0;
-                                dynamicExitActive = false;
+                                entryPrice = 0; dynamicExitActive = false;
                             }
                         }
                         else
@@ -834,15 +783,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                                 SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
                                 PrintAndLog($"📉 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}");
                             }
-                            
                             if (currentPrice >= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
                             {
+                                string reason = currentPrice >= trailStopPrice ? "Trail Stop Hit" : !trendStillValid ? "RR Flipped" : $"Conf={bear}<{MinConfluenceToStay}";
                                 ExitShort("Short", "DynamicTrail Exit");
-                                string reason = currentPrice >= trailStopPrice ? "Trail Stop Hit" : 
-                                                !trendStillValid ? "RR Flipped" : $"Conf={bear}<{MinConfluenceToStay}";
                                 PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}");
-                                entryPrice = 0;
-                                dynamicExitActive = false;
+                                entryPrice = 0; dynamicExitActive = false;
                             }
                         }
                     }
@@ -855,60 +801,49 @@ namespace NinjaTrader.NinjaScript.Strategies
                 double currentPrice = Close[0];
                 bool isLong = Position.MarketPosition == MarketPosition.Long;
                 
-                // Calculate current profit in ticks
-                double profitTicks = isLong 
-                    ? (currentPrice - entryPrice) / TickSize 
+                double profitTicks = isLong
+                    ? (currentPrice - entryPrice) / TickSize
                     : (entryPrice - currentPrice) / TickSize;
                 
-                // Determine activation threshold and trail distance based on mode
                 double activationThresholdTicks;
                 double trailDistancePoints;
                 double atrValue = 0;
                 
                 if (UseATRBasedTrail)
                 {
-                    // ATR-based trailing stop
-                    atrValue = atrTrailIndicator[0];
-                    double atrInTicks = atrValue / TickSize;
-                    activationThresholdTicks = atrInTicks * ATRTrailActivationMultiplier;
-                    trailDistancePoints = atrValue * ATRTrailDistanceMultiplier;
+                    atrValue                    = atrTrailIndicator[0];
+                    double atrInTicks           = atrValue / TickSize;
+                    activationThresholdTicks    = atrInTicks * ATRTrailActivationMultiplier;
+                    trailDistancePoints         = atrValue * ATRTrailDistanceMultiplier;
                 }
                 else
                 {
-                    // Fixed tick-based trailing stop
-                    activationThresholdTicks = TrailActivationTicks;
-                    trailDistancePoints = TrailDistanceTicks * TickSize;
+                    activationThresholdTicks    = TrailActivationTicks;
+                    trailDistancePoints         = TrailDistanceTicks * TickSize;
                 }
                 
-                // Check if we should activate the trail
                 if (!simpleTrailActive && profitTicks >= activationThresholdTicks)
                 {
-                    simpleTrailActive = true;
-                    simpleTrailStopLevel = isLong 
-                        ? currentPrice - trailDistancePoints 
+                    simpleTrailActive       = true;
+                    simpleTrailStopLevel    = isLong
+                        ? currentPrice - trailDistancePoints
                         : currentPrice + trailDistancePoints;
                     
-                    // Update expected stop for slippage tracking
                     expectedStopPrice = simpleTrailStopLevel;
                     
-                    // Update stop loss to trailing level
-                    if (isLong)
-                        SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
-                    else
-                        SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
+                    if (isLong) SetStopLoss("Long",  CalculationMode.Price, simpleTrailStopLevel, true);
+                    else        SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                     
                     if (UseATRBasedTrail)
                         PrintAndLog($"📈 TRAIL ACTIVATED (ATR) @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | ATR={atrValue:F2} | Thresh={activationThresholdTicks:F0}t | Dist={trailDistancePoints:F2} | Stop={simpleTrailStopLevel:F2}");
                     else
                         PrintAndLog($"📈 TRAIL ACTIVATED @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | Trail Stop={simpleTrailStopLevel:F2}");
                 }
-                // Update trailing stop if already active (only move in favorable direction)
                 else if (simpleTrailActive)
                 {
-                    // Recalculate trail distance (for ATR mode, it may change each bar)
                     if (UseATRBasedTrail)
                     {
-                        atrValue = atrTrailIndicator[0];
+                        atrValue            = atrTrailIndicator[0];
                         trailDistancePoints = atrValue * ATRTrailDistanceMultiplier;
                     }
                     
@@ -918,7 +853,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         if (newTrailStop > simpleTrailStopLevel)
                         {
                             simpleTrailStopLevel = newTrailStop;
-                            expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
+                            expectedStopPrice    = simpleTrailStopLevel;
                             SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
                             if (UseATRBasedTrail)
                                 PrintAndLog($"📈 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t");
@@ -932,7 +867,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         if (newTrailStop < simpleTrailStopLevel)
                         {
                             simpleTrailStopLevel = newTrailStop;
-                            expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
+                            expectedStopPrice    = simpleTrailStopLevel;
                             SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                             if (UseATRBasedTrail)
                                 PrintAndLog($"📉 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t");
@@ -943,16 +878,16 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
             }
             
+            // Reset state when flat
             if (Position.MarketPosition == MarketPosition.Flat)
             {
-                entryPrice = 0;
-                dynamicExitActive = false;
-                trailStopPrice = 0;
-                simpleTrailActive = false;
+                entryPrice          = 0;
+                dynamicExitActive   = false;
+                trailStopPrice      = 0;
+                simpleTrailActive   = false;
                 simpleTrailStopLevel = 0;
-                // Reset slippage tracking
-                signalPriceAtEntry = 0;
-                expectedStopPrice = 0;
+                signalPriceAtEntry  = 0;
+                expectedStopPrice   = 0;
                 expectedTargetPrice = 0;
             }
             
@@ -967,16 +902,14 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (lastSignalTime != DateTime.MinValue)
                 {
                     double secondsSinceSignal = (barTime - lastSignalTime).TotalSeconds;
-                    inCooldown = secondsSinceSignal < CooldownSeconds;
-                    if (inCooldown)
-                        cooldownStatus = $"{secondsSinceSignal:F0}s/{CooldownSeconds}s";
+                    inCooldown      = secondsSinceSignal < CooldownSeconds;
+                    if (inCooldown) cooldownStatus = $"{secondsSinceSignal:F0}s/{CooldownSeconds}s";
                 }
             }
             else
             {
                 inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
-                if (inCooldown)
-                    cooldownStatus = $"{barsSinceLastSignal}/{CooldownBars}";
+                if (inCooldown) cooldownStatus = $"{barsSinceLastSignal}/{CooldownBars}";
             }
             
             bool yellowSquareAppeared = AIQ1_IsUp && !prevAIQ1_IsUp && !isFirstBar;
@@ -986,19 +919,15 @@ namespace NinjaTrader.NinjaScript.Strategies
             {
                 barsSinceYellowSquare = 0;
                 barsSinceOrangeSquare = -1;
-                if (inCooldown)
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
-                else
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})");
+                if (inCooldown) PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
+                else            PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})");
             }
             else if (orangeSquareAppeared)
             {
                 barsSinceOrangeSquare = 0;
                 barsSinceYellowSquare = -1;
-                if (inCooldown)
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
-                else
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})");
+                if (inCooldown) PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})");
+                else            PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})");
             }
             else if (barsSinceYellowSquare >= 0)
             {
@@ -1024,10 +953,11 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (inCooldown)
             {
                 prevAIQ1_IsUp = AIQ1_IsUp;
-                isFirstBar = false;
+                isFirstBar    = false;
                 return;
             }
             
+            // LONG signal processing
             if (barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare)
             {
                 string confirmingIndicator = GetBullishConfirmation();
@@ -1041,42 +971,40 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("LONG", "YellowSquare+" + confirmingIndicator, barTime, bull, total);
                         UpdateSignalDisplay("YellowSquare+" + confirmingIndicator, bull, total, barTime, true);
 
-						if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR" && confirmingIndicator != "DT")
-						// if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR")
+                        // LONG filter: exclude RR and DT as confirming indicators
+                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat
+                            && confirmingIndicator != "RR" && confirmingIndicator != "DT")
                         {
                             if (bull >= MinConfluenceForAutoTrade)
                             {
                                 if (IsTradingHoursAllowed(barTime))
                                 {
                                     double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
-                                    double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
+                                    double tpPoints   = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
+                                    double slTicks    = (stopPoints / TickSize) + StopLossBufferTicks;
                                     
-                                    double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
-                                    
-                                    // Capture signal price and expected levels for slippage tracking
-                                    signalPriceAtEntry = GetCurrentAsk();
-                                    expectedStopPrice = signalPriceAtEntry - (slTicks * TickSize);
+                                    signalPriceAtEntry  = GetCurrentAsk();
+                                    expectedStopPrice   = signalPriceAtEntry - (slTicks * TickSize);
                                     expectedTargetPrice = signalPriceAtEntry + tpPoints;
                                     
                                     if (EnableDynamicExit)
                                     {
                                         SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
-                                        entryPrice = GetCurrentAsk();
+                                        entryPrice        = GetCurrentAsk();
                                         dynamicExitActive = false;
-                                        trailStopPrice = 0;
+                                        trailStopPrice    = 0;
                                     }
                                     else if (EnableTrailingStop)
                                     {
-                                        // Trailing stop: Set SL and TP, track entry for trail activation
-                                        SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
-                                        SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
-                                        entryPrice = GetCurrentAsk();
-                                        simpleTrailActive = false;
+                                        SetStopLoss("Long",      CalculationMode.Ticks, slTicks, true);
+                                        SetProfitTarget("Long",  CalculationMode.Ticks, tpPoints / TickSize);
+                                        entryPrice           = GetCurrentAsk();
+                                        simpleTrailActive    = false;
                                         simpleTrailStopLevel = 0;
                                     }
                                     else
                                     {
-                                        SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
+                                        SetStopLoss("Long",     CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
                                     }
                                     EnterLong("Long");
@@ -1084,27 +1012,22 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     PrintAndLog($">>> ORDER PLACED: LONG @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
                                 }
                                 else
-                                {
                                     PrintAndLog($">>> OUTSIDE TRADING HOURS: LONG signal not traded @ {barTime:HH:mm:ss}");
-                                }
                             }
                             else
-                            {
                                 PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bull}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}");
-                            }
                         }
                         
                         barsSinceYellowSquare = -1;
-                        barsSinceLastSignal = 0;
-                        lastSignalTime = barTime;
+                        barsSinceLastSignal   = 0;
+                        lastSignalTime        = barTime;
                     }
                     else
-                    {
                         PrintAndLog($"{confirmingIndicator} confirmed but confluence {bull}/{total} < {MinConfluenceRequired} @ {barTime:HH:mm:ss}");
-                    }
                 }
             }
             
+            // SHORT signal processing
             if (barsSinceOrangeSquare >= 0 && barsSinceOrangeSquare <= MaxBarsAfterYellowSquare)
             {
                 string confirmingIndicator = GetBearishConfirmation();
@@ -1118,43 +1041,39 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("SHORT", "OrangeSquare+" + confirmingIndicator, barTime, bear, total);
                         UpdateSignalDisplay("OrangeSquare+" + confirmingIndicator, bear, total, barTime, false);
                         
-	                    // if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
-						// Only take SHORT if RR is UP (contrarian filter)
-						if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
+                        // SHORT filter: only take SHORT if RR is UP (contrarian filter)
+                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
                         {
                             if (bear >= MinConfluenceForAutoTrade)
                             {
                                 if (IsTradingHoursAllowed(barTime))
                                 {
                                     double stopPoints = Instrument.MasterInstrument.PointValue > 0 ? StopLossUSD / Instrument.MasterInstrument.PointValue : 5;
-                                    double tpPoints = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
+                                    double tpPoints   = Instrument.MasterInstrument.PointValue > 0 ? TakeProfitUSD / Instrument.MasterInstrument.PointValue : 3;
+                                    double slTicks    = (stopPoints / TickSize) + StopLossBufferTicks;
                                     
-                                    double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
-                                    
-                                    // Capture signal price and expected levels for slippage tracking
-                                    signalPriceAtEntry = GetCurrentBid();
-                                    expectedStopPrice = signalPriceAtEntry + (slTicks * TickSize);
+                                    signalPriceAtEntry  = GetCurrentBid();
+                                    expectedStopPrice   = signalPriceAtEntry + (slTicks * TickSize);
                                     expectedTargetPrice = signalPriceAtEntry - tpPoints;
                                     
                                     if (EnableDynamicExit)
                                     {
                                         SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
-                                        entryPrice = GetCurrentBid();
+                                        entryPrice        = GetCurrentBid();
                                         dynamicExitActive = false;
-                                        trailStopPrice = 0;
+                                        trailStopPrice    = 0;
                                     }
                                     else if (EnableTrailingStop)
                                     {
-                                        // Trailing stop: Set SL and TP, track entry for trail activation
-                                        SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
+                                        SetStopLoss("Short",     CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
-                                        entryPrice = GetCurrentBid();
-                                        simpleTrailActive = false;
+                                        entryPrice           = GetCurrentBid();
+                                        simpleTrailActive    = false;
                                         simpleTrailStopLevel = 0;
                                     }
                                     else
                                     {
-                                        SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
+                                        SetStopLoss("Short",     CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
                                     }
                                     EnterShort("Short");
@@ -1162,37 +1081,31 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     PrintAndLog($">>> ORDER PLACED: SHORT @ Market | Signal={signalPriceAtEntry:F2} | SL={stopPoints:F2}pts (+{StopLossBufferTicks}t buffer) TP={tpPoints:F2}pts{exitMode}");
                                 }
                                 else
-                                {
                                     PrintAndLog($">>> OUTSIDE TRADING HOURS: SHORT signal not traded @ {barTime:HH:mm:ss}");
-                                }
                             }
                             else
-                            {
                                 PrintAndLog($">>> SIGNAL ONLY (no trade): Confluence {bear}/{total} < AutoTrade threshold {MinConfluenceForAutoTrade}");
-                            }
                         }
                         
                         barsSinceOrangeSquare = -1;
-                        barsSinceLastSignal = 0;
-                        lastSignalTime = barTime;
+                        barsSinceLastSignal   = 0;
+                        lastSignalTime        = barTime;
                     }
                     else
-                    {
                         PrintAndLog($"{confirmingIndicator} confirmed but bear confluence {bear}/{total} < {MinConfluenceRequired} @ {barTime:HH:mm:ss}");
-                    }
                 }
             }
             
-            prevRR_IsUp = RR_IsUp;
-            prevDT_IsUp = DT_IsUp;
-            prevVY_IsUp = VY_IsUp;
-            prevET_IsUp = ET_IsUp;
-            prevSW_IsUp = SW_IsUp;
-            prevT3P_IsUp = T3P_IsUp;
-            prevAAA_IsUp = AAA_IsUp;
-            prevSB_IsUp = SB_IsUp;
+            prevRR_IsUp   = RR_IsUp;
+            prevDT_IsUp   = DT_IsUp;
+            prevVY_IsUp   = VY_IsUp;
+            prevET_IsUp   = ET_IsUp;
+            prevSW_IsUp   = SW_IsUp;
+            prevT3P_IsUp  = T3P_IsUp;
+            prevAAA_IsUp  = AAA_IsUp;
+            prevSB_IsUp   = SB_IsUp;
             prevAIQ1_IsUp = AIQ1_IsUp;
-            isFirstBar = false;
+            isFirstBar    = false;
         }
     }
 }
