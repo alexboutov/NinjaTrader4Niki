@@ -1,15 +1,14 @@
 ================================================================================
-MAR 09, 2026 TRADING SESSION ANALYSIS
+MAR 10, 2026 TRADING SESSION ANALYSIS
 ================================================================================
 
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  106
-  - Orders placed:         1
-  - Outside hours:         9
+ActiveNikiTrader signals:  0
+  - Orders placed:         0
+  - Outside hours:         0
   - Blocked by cooldown:   0
-BAR data loaded:           124781 bars from CSV
 
 SESSION SUMMARY
 ---------------
@@ -19,150 +18,10 @@ Total P&L: +0 ticks ($+0.00)
   LONG:  0 trades, +0t
   SHORT: 0 trades, +0t
 
-ALL SIGNALS FIRED: 106
+ALL SIGNALS FIRED: 0
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
-20:50:52  SHORT Trader   [OrangeSquare+DT   ] 5/6   24136.25
-21:05:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   24100.00
-21:06:47  SHORT Trader   [OrangeSquare+DT   ] 5/6   24104.00
-21:13:42  SHORT Trader   [OrangeSquare+DT   ] 6/6   24073.25
-21:23:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   24073.75
-21:31:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24063.75
-21:41:44  SHORT Trader   [OrangeSquare+DT   ] 6/6   24058.50
-21:43:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24059.50
-21:54:56  SHORT Trader   [OrangeSquare+DT   ] 5/6   24027.75
-21:59:31  SHORT Trader   [OrangeSquare+DT   ] 6/6   24011.50
-22:17:08  SHORT Trader   [OrangeSquare+DT   ] 5/6   24007.50
-22:39:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24071.00
-22:45:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24085.25
-22:47:11  LONG  Trader   [YellowSquare+RR   ] 5/6   24081.00
-22:48:53  LONG  Trader   [YellowSquare+RR   ] 5/6   24082.25
-22:53:29  LONG  Trader   [YellowSquare+RR   ] 5/6   24086.00
-23:00:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24096.00
-23:09:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24100.00
-23:11:10  LONG  Trader   [YellowSquare+RR   ] 5/6   24101.50
-23:14:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24106.50
-23:21:43  LONG  Trader   [YellowSquare+RR   ] 5/6   24123.00
-23:46:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24084.25
-23:59:28  SHORT Trader   [OrangeSquare+DT   ] 5/6   24089.00
-00:05:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24118.25
-00:11:17  LONG  Trader   [YellowSquare+RR   ] 5/6   24132.50
-01:08:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24147.50
-01:13:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24144.50
-01:22:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24192.00
-01:24:28  LONG  Trader   [YellowSquare+RR   ] 5/6   24192.00
-01:26:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24201.25
-01:29:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24205.00
-01:36:23  LONG  Trader   [YellowSquare+RR   ] 5/6   24208.00
-01:47:36  LONG  Trader   [YellowSquare+RR   ] 5/6   24208.50
-02:02:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24254.25
-02:06:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24258.25
-02:13:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24295.00
-02:16:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24291.25
-02:45:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24253.25
-02:48:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24248.25
-02:52:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24236.75
-03:02:03  SHORT Trader   [OrangeSquare+RR   ] 5/6   24246.00
-03:05:47  SHORT Trader   [OrangeSquare+DT   ] 6/6   24213.00
-03:09:21  LONG  Trader   [YellowSquare+RR   ] 5/6   24265.75
-03:14:14  LONG  Trader   [YellowSquare+RR   ] 5/6   24273.25
-03:26:05  LONG  Trader   [YellowSquare+RR   ] 5/6   24304.25
-03:35:40  SHORT Trader   [OrangeSquare+DT   ] 5/6   24263.25
-03:51:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24272.00
-03:54:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24265.50
-04:06:04  SHORT Trader   [OrangeSquare+DT   ] 5/6   24267.50
-04:13:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24262.25
-04:25:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24308.50
-04:37:55  LONG  Trader   [YellowSquare+RR   ] 5/6   24329.00
-04:44:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24286.00
-04:59:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24314.00
-05:19:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24381.75
-05:23:29  LONG  Trader   [YellowSquare+RR   ] 5/6   24415.50
-05:26:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24414.25
-05:33:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24475.75
-05:36:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24489.25
-05:39:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24450.75
-05:43:45  SHORT Trader   [OrangeSquare+DT   ] 5/6   24454.25
-05:50:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   24432.00
-05:53:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   24399.75
-05:56:39  SHORT Trader   [OrangeSquare+DT   ] 5/6   24406.00
-06:10:55  SHORT Trader   [OrangeSquare+DT   ] 5/6   24381.00
-06:32:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   24370.50
-07:05:21  LONG  Trader   [YellowSquare+ET   ] 5/6   24403.00 ►
-07:20:17  SHORT Trader   [OrangeSquare+DT   ] 5/6   24358.50
-07:39:37  LONG  Trader   [YellowSquare+RR   ] 5/6   24416.00
-08:23:16  LONG  Trader   [YellowSquare+RR   ] 5/6   24454.50
-08:29:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24449.00
-08:39:29  SHORT Trader   [OrangeSquare+DT   ] 6/6   24397.25
-08:42:53  SHORT Trader   [OrangeSquare+DT   ] 6/6   24380.00
-08:46:19  SHORT Trader   [OrangeSquare+DT   ] 6/6   24364.25
-08:52:48  SHORT Trader   [OrangeSquare+DT   ] 6/6   24355.75
-09:13:06  LONG  Trader   [YellowSquare+RR   ] 5/6   24425.50
-09:27:40  SHORT Trader   [OrangeSquare+DT   ] 6/6   24399.25
-09:30:14  LONG  Trader   [YellowSquare+RR   ] 5/6   24469.50
-09:34:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24457.00
-09:36:02  SHORT Trader   [OrangeSquare+DT   ] 5/6   24469.75
-09:37:50  SHORT Trader   [OrangeSquare+DT   ] 6/6   24415.25
-09:39:28  SHORT Trader   [OrangeSquare+DT   ] 5/6   24408.75
-09:41:10  SHORT Trader   [OrangeSquare+DT   ] 5/6   24378.50
-09:42:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24363.50
-09:50:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24363.00
-09:55:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24375.50
-09:58:18  LONG  Trader   [YellowSquare+RR   ] 5/6   24403.75
-10:00:21  SHORT Trader   [OrangeSquare+DT   ] 6/6   24364.75
-10:03:23  LONG  Trader   [YellowSquare+RR   ] 5/6   24442.25
-10:04:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24468.50
-10:07:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24372.00
-10:10:07  SHORT Trader   [OrangeSquare+DT   ] 5/6   24373.50
-10:12:27  SHORT Trader   [OrangeSquare+DT   ] 5/6   24339.75
-10:17:02  LONG  Trader   [YellowSquare+RR   ] 5/6   24388.75
-10:18:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24393.75
-10:21:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   24366.50
-10:27:07  SHORT Trader   [OrangeSquare+DT   ] 5/6   24415.00
-10:28:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   24393.50
-10:30:36  LONG  Trader   [YellowSquare+RR   ] 5/6   24425.75
-10:33:10  LONG  Trader   [YellowSquare+RR   ] 5/6   24436.50
-10:35:57  LONG  Trader   [YellowSquare+RR   ] 5/6   24438.25
-10:40:15  LONG  Trader   [YellowSquare+RR   ] 5/6   24494.00
-10:44:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24510.00
-10:46:55  LONG  Trader   [YellowSquare+RR   ] 5/6   24558.00
-10:49:56  LONG  Trader   [YellowSquare+RR   ] 5/6   24569.25
-10:52:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24573.00
   (► = order placed by ActiveNikiTrader)
-
-==========================================================================================
-EXIT STRATEGY COMPARISON: SL/TP vs Confluence Drop vs Single Indicator Flip
-==========================================================================================
-
-(Exit times estimated by scanning BAR data for SL/TP price levels)
-
-STRATEGY COMPARISON SUMMARY
-----------------------------------------------------------------------
-Strategy                         Trades   Better    Worse          NET
-----------------------------------------------------------------------
-1. Current SL/TP (baseline)           0      ---      ---          +0t
-2. Confluence drop below 6            0      ---      ---          +0t
-3. Single indicator flip              0      ---      ---          +0t
-----------------------------------------------------------------------
-
-==========================================================================================
-TRAILING STOP SIMULATION ANALYSIS
-==========================================================================================
-
-Simulates trailing stops that activate after reaching profit threshold,
-then trail behind price by specified distance. Fixed SL/TP still honored.
-
-TRAILING STOP COMPARISON SUMMARY
-------------------------------------------------------------------------------------------
-Strategy                   Trades  Better   Worse   Same     Actual      Trail        NET
-------------------------------------------------------------------------------------------
-Fixed SL/TP (baseline)          0     ---     ---    ---         +0t        ---        +0t
-------------------------------------------------------------------------------------------
-
-TRAILING STOP RECOMMENDATION
-------------------------------
-  No trailing stop configuration improved results.
-  Current fixed SL/TP strategy performs best.
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
@@ -196,12 +55,6 @@ KEY INSIGHTS
 
 3. CONFLUENCE INSIGHTS:
 
-4. EXIT STRATEGY COMPARISON:
-   - Confluence drop: no trades affected
-   - Indicator flip:  no trades affected
-   - Trailing stop:   no improvement found
-   → Current SL/TP performs best
-
 5. RECOMMENDATIONS:
 
 ================================================================================
@@ -210,11 +63,11 @@ MULTI-DAY COMPARISON - VPS (Previous Days)
 
 Date        Trades  Win%    P&L      Signal Alignment
 ----------------------------------------------------------------------
-Feb 24        0     0%      +0t    N/A
 Feb 26        3     100%    +337t    3 aligned (+337t), 0 no signal (+0t)
 Feb 27        2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
 Feb 28        4     100%    +199t    4 aligned (+199t), 0 no signal (+0t)
 Mar 08        6     100%    +524t    6 aligned (+524t), 0 no signal (+0t)
+Mar 09        0     0%      +0t    N/A
 ----------------------------------------------------------------------
 TODAY         0     0%      +0t    0 aligned (+0t), 0 no signal (+0t)
 
