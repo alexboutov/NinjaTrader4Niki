@@ -1,956 +1,826 @@
 ================================================================================
-MAR 08, 2026 TRADING SESSION ANALYSIS
+MAR 09, 2026 TRADING SESSION ANALYSIS
 ================================================================================
 
 SIGNAL SOURCES
 --------------
-ActiveNikiMonitor signals: 886
-ActiveNikiTrader signals:  49
-  - Orders placed:         3
-  - Outside hours:         0
+ActiveNikiMonitor signals: 0
+ActiveNikiTrader signals:  211
+  - Orders placed:         6
+  - Outside hours:         14
   - Blocked by cooldown:   0
+BAR data loaded:           850224 bars from CSV
 
 SESSION SUMMARY
 ---------------
-Total Round-trips: 3
-Win/Loss: 2W / 1L (66.7% win rate)
-Total P&L: -526 ticks ($-2630.00)
-  LONG:  0 trades, +0t
-  SHORT: 3 trades, -526t
+Total Round-trips: 5
+Win/Loss: 4W / 1L (80.0% win rate)
+Total P&L: -484 ticks ($-2420.00)
+  LONG:  1 trades, +33t
+  SHORT: 4 trades, -517t
 
 CONFLUENCE LEVEL ANALYSIS
 -------------------------
-  5/6: 3 trades, 2W (67%), -526t
+  5/6: 5 trades, 4W (80%), -484t
 
 TRIGGER TYPE ANALYSIS
 ---------------------
-  OrangeSquare+DT: 3 trades, 2W (67%), -526t
+  OrangeSquare+DT: 4 trades, 4W (100%), +151t
+  YellowSquare+ET: 1 trades, 0W (0%), -635t
 
-ALL SIGNALS FIRED: 847
+ALL SIGNALS FIRED: 190
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
-07:05:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   24678.25
-07:10:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24651.75
-07:15:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   24648.00
-07:26:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24637.50
-07:28:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24641.75 ►
-07:39:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24631.75
-07:43:21  SHORT Trader   [OrangeSquare+DT   ] 6/6   24635.25
-08:10:11  LONG  Trader   [YellowSquare+RR   ] 5/6   24655.25
-08:12:29  LONG  Trader   [YellowSquare+RR   ] 5/6   24660.75
-08:16:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24656.50
-08:20:33  LONG  Trader   [YellowSquare+RR   ] 5/6   24677.25
-08:24:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24715.50
-08:35:18  SHORT Trader   [OrangeSquare+DT   ] 5/6   24688.00 ►
-08:42:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24673.75
-08:51:15  SHORT Trader   [OrangeSquare+DT   ] 6/6   24658.00
-08:55:31  SHORT Trader   [OrangeSquare+DT   ] 6/6   24647.00
-09:04:03  SHORT Trader   [OrangeSquare+RR   ] 5/6   24611.25
-09:31:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24703.00
-09:32:56  LONG  Trader   [YellowSquare+RR   ] 5/6   24782.50
-09:35:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24845.00
-09:36:32  LONG  Trader   [YellowSquare+RR   ] 5/6   24856.50
-09:38:13  SHORT Trader   [OrangeSquare+DT   ] 5/6   24831.50
-09:41:43  SHORT Trader   [OrangeSquare+DT   ] 5/6   24814.25
-09:44:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24808.25
-09:45:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24872.75
-09:47:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24860.25
-09:49:11  LONG  Trader   [YellowSquare+RR   ] 5/6   24885.00
-09:52:27  SHORT Trader   [OrangeSquare+DT   ] 6/6   24830.25
-09:53:58  SHORT Trader   [OrangeSquare+DT   ] 5/6   24821.00 ►
-09:57:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24856.50
-09:59:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24860.25
-10:02:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24887.75
-10:05:28  LONG  Trader   [YellowSquare+RR   ] 5/6   24894.25
-10:07:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24911.75
-10:12:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24939.75
-10:14:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24942.25
-10:17:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24938.25
-10:19:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24903.75
-10:21:10  SHORT Trader   [OrangeSquare+DT   ] 5/6   24909.00
-10:28:25  SHORT Trader   [OrangeSquare+DT   ] 6/6   24879.50
-10:31:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   24864.75
-10:33:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24847.25
-10:38:34  LONG  Trader   [YellowSquare+RR   ] 5/6   24902.00
-10:40:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24909.75
-10:42:20  LONG  Trader   [YellowSquare+RR   ] 5/6   24926.50
-10:55:26  SHORT Trader   [OrangeSquare+DT   ] 6/6   24881.25
-11:02:05  SHORT Trader   [OrangeSquare+DT   ] 5/6   24901.00
-11:05:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24935.50
-11:07:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24946.00
-00:04:28  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24573.25
-00:07:08  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24565.75
-00:09:52  LONG  Monitor  [YellowSquare+RR   ] 6/7   25124.75
-00:10:09  LONG  Monitor  [YellowSquare+RR   ] 6/7   25104.00
-00:10:54  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24573.25
-00:13:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24573.25
-00:20:38  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24742.50
-00:21:51  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24568.25
-00:22:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24802.75
-00:29:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24722.50
-00:30:19  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24802.75
-00:33:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   25127.25
-00:34:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24548.25
-00:38:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24730.00
-00:41:47  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24777.75
-00:46:30  LONG  Monitor  [YellowSquare+RR   ] 6/7   24600.75
-00:47:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24770.25
-00:47:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24727.50
-00:56:19  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24752.75
-01:03:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24682.50
-01:04:47  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24538.25
-01:05:19  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25026.50
-01:08:23  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24540.75
-01:14:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24986.50
-01:15:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24752.75
-01:16:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24513.25
-01:18:34  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24680.00
-01:18:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24505.75
-01:21:39  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24503.25
-01:22:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24637.50
-01:33:37  LONG  Monitor  [YellowSquare+RR   ] 6/7   24795.25
-01:37:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   24588.25
-01:40:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24994.00
-01:43:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24630.00
-01:46:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24605.00
-01:51:51  LONG  Monitor  [YellowSquare+RR   ] 6/7   25061.50
-01:51:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24530.00
-01:53:45  LONG  Monitor  [YellowSquare+RR   ] 6/7   25059.00
-01:55:29  LONG  Monitor  [YellowSquare+RR   ] 6/7   25064.00
-02:00:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24750.25
-02:00:07  LONG  Monitor  [YellowSquare+ET   ] 6/7   24592.50
-02:02:30  LONG  Monitor  [YellowSquare+RR   ] 6/7   24600.00
-02:03:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   24578.25
-02:03:35  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24745.25
-02:04:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24595.00
-02:09:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24542.50
-02:15:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24540.75
-02:15:26  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24732.75
-02:19:04  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24545.75
-02:26:33  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24717.75
-02:27:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24610.75
-02:31:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24700.25
-02:31:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24575.00
-02:32:26  LONG  Monitor  [YellowSquare+RR   ] 6/7   24610.75
-02:38:10  LONG  Monitor  [YellowSquare+RR   ] 6/7   24633.25
-02:40:07  LONG  Monitor  [YellowSquare+RR   ] 6/7   24635.75
-02:41:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24687.75
-02:42:06  LONG  Monitor  [YellowSquare+ET   ] 6/7   25137.25
-02:46:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24655.75
-02:49:43  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24685.25
-02:50:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   24660.75
-02:56:08  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24680.25
-02:56:18  LONG  Monitor  [YellowSquare+RR   ] 6/7   25129.75
-02:56:31  LONG  Monitor  [YellowSquare+RR   ] 6/7   24665.75
-02:57:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24547.50
-02:59:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24540.00
-03:00:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24655.25
-03:02:59  LONG  Monitor  [YellowSquare+RR   ] 6/7   24670.75
-03:03:13  SHORT Monitor  [OrangeSquare+DT   ] 6/7   25051.50
-03:07:38  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25009.00
-03:07:59  LONG  Monitor  [YellowSquare+RR   ] 6/7   24673.25
-03:08:04  SHORT Monitor  [OrangeSquare+SW   ] 6/7   24507.50
-03:09:27  SHORT Monitor  [OrangeSquare+SW   ] 6/7   25092.25
-03:09:45  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24507.50
-03:11:08  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25001.50
-03:14:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25092.25
-03:14:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25001.50
-03:16:40  LONG  Monitor  [YellowSquare+RR   ] 6/7   24663.25
-03:18:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25094.75
-03:18:18  SHORT Monitor  [OrangeSquare+SW   ] 6/7   24487.50
-03:18:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24670.75
-03:19:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24635.25
-03:21:07  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24640.25
-03:23:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25089.75
-03:24:12  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24637.75
-03:27:50  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24620.75
-03:29:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25037.25
-03:34:20  LONG  Monitor  [YellowSquare+RR   ] 6/7   24522.50
-03:40:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24552.75
-03:41:41  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24623.25
-03:42:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24555.25
-03:44:25  LONG  Monitor  [YellowSquare+ET   ] 6/7   25087.25
-03:45:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   24557.50
-03:48:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24658.25
-03:49:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   24567.50
-03:50:53  LONG  Monitor  [YellowSquare+RR   ] 6/7   25102.25
-03:55:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   25029.00
-03:56:24  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24515.25
-03:58:33  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24517.75
-04:01:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   25054.00
-04:02:13  LONG  Monitor  [YellowSquare+RR   ] 6/7   24542.75
-04:03:19  LONG  Monitor  [YellowSquare+RR   ] 6/7   24582.50
-04:03:58  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25054.75
-04:05:23  LONG  Monitor  [YellowSquare+RR   ] 6/7   24547.75
-04:05:55  LONG  Monitor  [YellowSquare+RR   ] 6/7   25126.50
-04:06:04  LONG  Monitor  [YellowSquare+RR   ] 6/7   24587.50
-04:08:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25052.25
-04:09:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   25161.50
-04:11:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   24570.25
-04:13:35  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25022.25
-04:14:06  LONG  Monitor  [YellowSquare+RR   ] 6/7   25191.50
-04:15:31  LONG  Monitor  [YellowSquare+RR   ] 6/7   24698.25
-04:17:06  LONG  Monitor  [YellowSquare+RR   ] 6/7   24630.00
-04:17:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25156.50
-04:17:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25014.75
-04:18:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24710.75
-04:18:33  SHORT Monitor  [OrangeSquare+SW   ] 6/7   24532.75
-04:20:47  LONG  Monitor  [YellowSquare+RR   ] 6/7   24710.75
-04:21:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   25189.00
-04:21:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24989.75
-04:21:24  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24530.25
-04:21:38  LONG  Monitor  [YellowSquare+RR   ] 6/7   24635.00
-04:23:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   25186.50
-04:26:32  SHORT Monitor  [OrangeSquare+ET   ] 6/7   25146.50
-04:27:40  LONG  Monitor  [YellowSquare+RR   ] 6/7   24640.00
-04:29:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25126.50
-04:30:42  LONG  Monitor  [YellowSquare+DT   ] 6/7   24713.25
-04:31:29  LONG  Monitor  [YellowSquare+RR   ] 6/7   24645.00
-04:31:43  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24520.25
-04:32:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24964.75
-04:34:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24515.25
-04:34:17  LONG  Monitor  [YellowSquare+RR   ] 6/7   24713.25
-04:35:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24937.25
-04:35:54  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24500.25
-04:37:32  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25126.50
-04:37:38  LONG  Monitor  [YellowSquare+RR   ] 6/7   24728.25
-04:40:31  LONG  Monitor  [YellowSquare+ET   ] 6/7   24540.25
-04:42:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24535.25
-04:42:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24914.75
-04:43:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25101.50
-04:46:12  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24914.75
-04:47:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24740.75
-04:49:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24485.25
-04:49:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25094.00
-04:50:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24470.25
-04:50:45  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24897.25
-04:53:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24460.25
-04:54:40  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25089.00
-04:58:57  LONG  Monitor  [YellowSquare+RR   ] 6/7   24755.75
-05:00:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24447.75
-05:02:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24445.25
-05:08:17  LONG  Monitor  [YellowSquare+RR   ] 6/7   24763.25
-05:08:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24670.00
-05:09:37  LONG  Monitor  [YellowSquare+RR   ] 6/7   24954.75
-05:09:47  LONG  Monitor  [YellowSquare+RR   ] 6/7   24825.75
-05:11:31  LONG  Monitor  [YellowSquare+RR   ] 6/7   24845.75
-05:16:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24853.25
-05:19:13  LONG  Monitor  [YellowSquare+SW   ] 6/7   25131.50
-05:20:08  LONG  Monitor  [YellowSquare+RR   ] 6/7   24465.25
-05:22:22  LONG  Monitor  [YellowSquare+RR   ] 6/7   24472.75
-05:26:42  LONG  Monitor  [YellowSquare+RR   ] 6/7   25134.00
-05:29:19  LONG  Monitor  [YellowSquare+RR   ] 6/7   25134.00
-05:29:45  LONG  Monitor  [YellowSquare+RR   ] 6/7   24969.75
-05:29:54  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24808.25
-05:32:04  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24808.25
-05:32:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24437.75
-05:34:32  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24395.25
-05:36:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24402.75
-05:37:49  LONG  Monitor  [YellowSquare+RR   ] 6/7   25136.50
-05:38:27  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24402.75
-05:41:38  LONG  Monitor  [YellowSquare+RR   ] 6/7   24672.50
-05:42:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   24452.75
-05:44:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   24672.50
-05:44:47  LONG  Monitor  [YellowSquare+RR   ] 6/7   24457.75
-05:46:35  LONG  Monitor  [YellowSquare+ET   ] 6/7   24840.75
-05:46:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   24472.75
-05:48:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24845.75
-05:49:59  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24932.25
-05:50:00  LONG  Monitor  [YellowSquare+DT   ] 6/7   24840.75
-05:51:43  SHORT Monitor  [OrangeSquare+SW   ] 6/7   25094.00
-05:58:38  SHORT Monitor  [OrangeSquare+DT   ] 6/7   25101.50
-05:59:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24427.75
-06:00:52  SHORT Monitor  [OrangeSquare+DT   ] 6/7   25104.00
-06:02:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24932.25
-06:02:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24870.75
-06:04:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   24472.75
-06:05:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   24863.25
-06:07:45  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24894.75
-06:08:52  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24427.75
-06:10:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24435.25
-06:13:32  LONG  Monitor  [YellowSquare+RR   ] 6/7   24944.75
-06:13:35  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24432.75
-06:14:15  LONG  Monitor  [YellowSquare+SW   ] 6/7   25134.00
-06:15:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   24868.25
-06:16:23  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24430.25
-06:19:18  LONG  Monitor  [YellowSquare+RR   ] 6/7   24878.25
-06:20:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24397.75
-06:20:38  LONG  Monitor  [YellowSquare+RR   ] 6/7   24942.25
-06:22:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   24888.25
-06:23:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   24420.25
-06:26:34  LONG  Monitor  [YellowSquare+RR   ] 6/7   24470.25
-06:26:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   25136.50
-06:26:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   24957.25
-06:27:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   24885.75
-06:28:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   24957.25
-06:28:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24472.75
-06:30:16  LONG  Monitor  [YellowSquare+RR   ] 6/7   25141.50
-06:32:34  LONG  Monitor  [YellowSquare+RR   ] 6/7   24475.25
-06:35:42  LONG  Monitor  [YellowSquare+RR   ] 6/7   24472.75
-06:36:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   24685.00
-06:36:26  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24835.75
-06:41:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24830.75
-06:42:47  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24879.75
-06:44:35  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24864.75
-06:44:36  LONG  Monitor  [YellowSquare+RR   ] 6/7   24680.00
-06:44:46  LONG  Monitor  [YellowSquare+DT   ] 6/7   24495.25
-06:49:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   24725.00
-06:49:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24818.25
-06:52:07  LONG  Monitor  [YellowSquare+RR   ] 6/7   24715.00
-06:56:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24813.25
-06:57:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24677.50
-07:00:40  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24849.75
-07:01:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24685.00
-07:02:41  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25084.00
-07:02:49  LONG  Monitor  [YellowSquare+DT   ] 6/7   24500.25
-07:06:27  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24847.25
-07:08:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24815.75
-07:08:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   24525.25
-07:10:30  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24847.25
-07:11:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24552.75
-07:12:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25091.50
-07:14:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   24562.75
-07:16:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24813.25
-07:17:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25086.50
-07:19:48  LONG  Monitor  [YellowSquare+RR   ] 6/7   24560.25
-07:20:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24778.25
-07:22:32  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24775.75
-07:22:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24592.75
-07:24:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24763.25
-07:26:43  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24753.25
-07:28:14  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24750.75
-07:28:51  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24640.00
-07:30:58  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24733.25
-07:32:29  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24725.75
-07:33:34  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24834.75
-07:36:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25096.50
-07:36:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24637.50
-07:40:42  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25091.50
-07:42:41  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25094.00
-07:43:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   24778.25
-07:48:39  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25081.50
-07:49:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   24595.25
-07:51:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24602.75
-08:03:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24560.25
-08:06:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24555.25
-08:08:31  LONG  Monitor  [YellowSquare+RR   ] 6/7   24868.25
-08:08:59  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25036.50
-08:09:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   24852.25
-08:11:32  LONG  Monitor  [YellowSquare+RR   ] 6/7   24857.25
-08:12:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   24913.25
-08:12:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24540.25
-08:12:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25029.00
-08:14:40  LONG  Monitor  [YellowSquare+RR   ] 6/7   24915.75
-08:16:23  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24540.25
-08:20:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24875.75
-08:22:39  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24873.25
-08:30:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24877.25
-08:30:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24520.25
-08:31:04  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24873.25
-08:35:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24687.50
-08:36:39  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25001.50
-08:36:47  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24480.25
-08:38:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24792.25
-08:39:31  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25004.00
-08:41:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24759.75
-08:42:55  LONG  Monitor  [YellowSquare+SW   ] 6/7   24908.25
-08:43:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24737.25
-08:43:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24492.75
-08:44:33  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24729.75
-08:45:14  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24490.25
-08:46:30  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24702.25
-08:47:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24913.25
-08:48:42  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24472.75
-08:50:48  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24659.75
-08:51:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24472.75
-08:52:21  LONG  Monitor  [YellowSquare+VY   ] 6/7   25046.50
-08:54:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24657.25
-09:01:14  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24994.00
-09:05:14  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24639.75
-09:06:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24639.75
-09:07:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24989.00
-09:08:31  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24639.75
-09:08:56  LONG  Monitor  [YellowSquare+RR   ] 6/7   24497.75
-09:12:02  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24624.75
-09:18:26  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24619.75
-09:21:53  LONG  Monitor  [YellowSquare+RR   ] 6/7   24505.25
-09:23:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   24532.75
-09:23:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24976.50
-09:25:18  LONG  Monitor  [YellowSquare+RR   ] 6/7   24530.25
-09:27:50  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24858.25
-09:28:08  LONG  Monitor  [YellowSquare+SW   ] 6/7   24662.25
-09:30:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   24537.75
-09:30:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24692.25
-09:30:19  LONG  Monitor  [YellowSquare+ET   ] 6/7   24893.25
-09:31:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   25049.00
-09:31:44  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24672.25
-09:32:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   25066.50
-09:33:16  LONG  Monitor  [YellowSquare+RR   ] 6/7   24709.75
-09:33:17  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24572.75
-09:33:33  LONG  Monitor  [YellowSquare+SW   ] 6/7   24950.75
-09:34:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24810.00
-09:34:37  LONG  Monitor  [YellowSquare+RR   ] 6/7   25089.00
-09:35:24  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24517.75
-09:35:29  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24925.75
-09:36:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24639.75
-09:36:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   25096.50
-09:37:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24605.25
-09:37:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24878.25
-09:37:47  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24619.75
-09:38:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   25106.50
-09:38:42  LONG  Monitor  [YellowSquare+RR   ] 6/7   24647.75
-09:39:17  LONG  Monitor  [YellowSquare+RR   ] 6/7   24694.75
-09:40:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24868.25
-09:40:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24597.75
-09:40:45  SHORT Monitor  [OrangeSquare+VY   ] 6/7   25069.00
-09:41:51  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24575.25
-09:42:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24845.75
-09:43:13  LONG  Monitor  [YellowSquare+RR   ] 6/7   24714.75
-09:43:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24540.25
-09:44:29  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25061.50
-09:44:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24682.25
-09:44:59  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24848.25
-09:45:32  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24520.25
-09:47:01  LONG  Monitor  [YellowSquare+VY   ] 6/7   24885.75
-09:47:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24639.75
-09:47:34  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24555.25
-09:48:42  LONG  Monitor  [YellowSquare+RR   ] 6/7   25114.00
-09:49:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24520.25
-09:50:04  LONG  Monitor  [YellowSquare+RR   ] 6/7   24687.25
-09:51:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24878.25
-09:51:17  LONG  Monitor  [YellowSquare+SW   ] 6/7   25126.50
-09:51:41  LONG  Monitor  [YellowSquare+RR   ] 6/7   24565.25
-09:51:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   24729.75
-09:53:15  LONG  Monitor  [YellowSquare+RR   ] 6/7   25129.00
-09:53:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24694.75
-09:54:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24817.50
-09:54:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   24938.25
-09:54:54  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24687.25
-09:56:38  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24657.25
-09:56:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   25139.00
-09:58:07  SHORT Monitor  [OrangeSquare+VY   ] 6/7   24507.75
-09:59:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24895.75
-09:59:50  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24492.75
-10:00:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24707.25
-10:00:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   24965.75
-10:02:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24500.25
-10:02:15  LONG  Monitor  [YellowSquare+RR   ] 6/7   24762.25
-10:02:24  LONG  Monitor  [YellowSquare+RR   ] 6/7   25194.00
-10:04:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24898.25
-10:05:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24475.25
-10:05:42  LONG  Monitor  [YellowSquare+RR   ] 6/7   24948.25
-10:05:45  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24722.25
-10:06:45  LONG  Monitor  [YellowSquare+RR   ] 6/7   24530.25
-10:07:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24958.25
-10:07:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   24759.75
-10:08:45  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25129.00
-10:09:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24709.75
-10:09:26  LONG  Monitor  [YellowSquare+RR   ] 6/7   24915.00
-10:09:34  LONG  Monitor  [YellowSquare+ET   ] 6/7   24517.75
-10:10:49  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24677.25
-10:12:06  LONG  Monitor  [YellowSquare+RR   ] 6/7   24525.25
-10:12:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   24749.75
-10:12:48  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25139.00
-10:13:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24497.75
-10:14:38  LONG  Monitor  [YellowSquare+RR   ] 6/7   24779.75
-10:15:18  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24495.25
-10:15:36  LONG  Monitor  [YellowSquare+RR   ] 6/7   25174.00
-10:16:41  LONG  Monitor  [YellowSquare+DT   ] 6/7   24940.00
-10:17:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24462.75
-10:17:40  LONG  Monitor  [YellowSquare+SW   ] 6/7   25005.75
-10:19:04  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24897.50
-10:19:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25116.50
-10:20:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24427.75
-10:20:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   24789.75
-10:21:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25091.50
-10:21:14  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24905.00
-10:22:53  LONG  Monitor  [YellowSquare+RR   ] 6/7   24794.75
-10:22:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   25075.75
-10:23:09  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25054.00
-10:24:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24397.75
-10:24:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   24819.75
-10:24:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   25080.75
-10:24:55  LONG  Monitor  [YellowSquare+ET   ] 6/7   24912.50
-10:25:38  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25019.00
-10:26:09  LONG  Monitor  [YellowSquare+RR   ] 6/7   25088.25
-10:26:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24377.75
-10:26:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   24920.00
-10:27:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24819.75
-10:27:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25014.00
-10:28:07  LONG  Monitor  [YellowSquare+RR   ] 6/7   25128.25
-10:28:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24365.25
-10:30:02  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24999.00
-10:30:15  LONG  Monitor  [YellowSquare+RR   ] 6/7   24834.75
-10:31:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   25138.25
-10:31:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   24407.75
-10:31:47  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24941.50
-10:32:51  LONG  Monitor  [YellowSquare+RR   ] 6/7   24857.25
-10:35:55  LONG  Monitor  [YellowSquare+RR   ] 6/7   24864.75
-10:36:15  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24855.00
-10:37:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   24452.75
-10:37:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   24996.50
-10:38:01  LONG  Monitor  [YellowSquare+SW   ] 6/7   24890.00
-10:38:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   25021.50
-10:39:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   24907.50
-10:40:31  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25083.25
-10:40:41  LONG  Monitor  [YellowSquare+RR   ] 6/7   24465.25
-10:41:20  LONG  Monitor  [YellowSquare+RR   ] 6/7   25056.50
-10:42:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25065.75
-10:42:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24837.25
-10:43:37  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24415.25
-10:43:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25065.75
-10:43:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24932.50
-10:43:51  LONG  Monitor  [YellowSquare+RR   ] 6/7   24935.00
-10:44:28  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25026.50
-10:45:33  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24827.25
-10:46:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25045.75
-10:48:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24809.75
-10:49:06  SHORT Monitor  [OrangeSquare+SW   ] 6/7   24410.25
-10:50:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24792.25
-10:52:09  LONG  Monitor  [YellowSquare+RR   ] 6/7   25084.00
-10:53:32  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24767.25
-10:53:45  LONG  Monitor  [YellowSquare+RR   ] 6/7   25086.50
-10:54:54  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24377.75
-10:55:23  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24887.50
-10:55:51  LONG  Monitor  [YellowSquare+RR   ] 6/7   24839.75
-10:56:30  LONG  Monitor  [YellowSquare+RR   ] 6/7   24425.25
-10:58:06  LONG  Monitor  [YellowSquare+RR   ] 6/7   24879.75
-10:58:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   24440.25
-10:59:05  LONG  Monitor  [YellowSquare+DT   ] 6/7   25076.50
-11:00:30  LONG  Monitor  [YellowSquare+RR   ] 6/7   24455.25
-11:02:09  LONG  Monitor  [YellowSquare+RR   ] 6/7   24457.75
-11:02:36  LONG  Monitor  [YellowSquare+RR   ] 6/7   24874.75
-11:03:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   25150.75
-11:03:55  SHORT Monitor  [OrangeSquare+ET   ] 6/7   25046.50
-11:04:10  LONG  Monitor  [YellowSquare+RR   ] 6/7   24480.25
-11:05:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   24897.25
-11:05:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   24537.75
-11:05:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25039.00
-11:07:22  LONG  Monitor  [YellowSquare+RR   ] 6/7   24562.75
-11:07:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25024.00
-11:08:59  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24849.75
-11:09:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   24582.75
-11:11:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24839.75
-11:11:32  LONG  Monitor  [YellowSquare+RR   ] 6/7   24975.00
-11:12:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24966.50
-11:12:37  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24824.75
-11:13:31  LONG  Monitor  [YellowSquare+DT   ] 6/7   24572.75
-11:14:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24817.25
-11:15:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   24582.75
-11:15:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25065.75
-11:16:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24974.00
-11:17:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   24607.75
-11:18:06  SHORT Monitor  [OrangeSquare+DT   ] 6/7   25073.25
-11:19:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24947.50
-11:19:07  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24961.50
-11:21:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24951.50
-11:21:29  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24817.25
-11:21:50  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24922.50
-11:22:53  LONG  Monitor  [YellowSquare+RR   ] 6/7   25004.00
-11:23:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24794.75
-11:24:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25055.75
-11:24:32  LONG  Monitor  [YellowSquare+RR   ] 6/7   24620.25
-11:24:51  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24920.00
-11:26:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   24999.00
-11:27:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24632.75
-11:28:31  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24855.00
-11:28:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   25108.25
-11:30:38  LONG  Monitor  [YellowSquare+RR   ] 6/7   25110.75
-11:32:03  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24865.00
-11:32:41  LONG  Monitor  [YellowSquare+RR   ] 6/7   24844.75
-11:33:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24580.25
-11:35:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   24615.25
-11:35:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   25133.25
-11:35:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24902.50
-11:37:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   24632.75
-11:37:59  LONG  Monitor  [YellowSquare+RR   ] 6/7   24859.75
-11:38:04  LONG  Monitor  [YellowSquare+RR   ] 6/7   24942.50
-11:39:08  LONG  Monitor  [YellowSquare+VY   ] 6/7   25031.50
-11:39:49  LONG  Monitor  [YellowSquare+RR   ] 6/7   24962.50
-11:40:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   25125.75
-11:40:36  LONG  Monitor  [YellowSquare+RR   ] 6/7   24859.75
-11:41:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24625.25
-11:43:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24597.75
-11:45:17  LONG  Monitor  [YellowSquare+RR   ] 6/7   24864.75
-11:45:32  LONG  Monitor  [YellowSquare+RR   ] 6/7   24657.75
-11:46:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   25168.25
-11:46:57  LONG  Monitor  [YellowSquare+RR   ] 6/7   25039.00
-11:47:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   24894.75
-11:47:23  LONG  Monitor  [YellowSquare+RR   ] 6/7   25025.00
-11:48:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   25160.75
-11:49:12  LONG  Monitor  [YellowSquare+DT   ] 6/7   25027.50
-11:50:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24897.25
-11:51:51  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24670.25
-11:52:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24904.75
-11:55:44  LONG  Monitor  [YellowSquare+DT   ] 6/7   25022.50
-11:56:08  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24854.75
-11:56:49  LONG  Monitor  [YellowSquare+RR   ] 6/7   24702.75
-11:58:15  LONG  Monitor  [YellowSquare+RR   ] 6/7   24884.75
-12:00:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24672.75
-12:03:33  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24650.25
-12:04:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   25030.00
-12:05:56  LONG  Monitor  [YellowSquare+RR   ] 6/7   25111.50
-12:08:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24842.25
-12:08:56  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24645.25
-12:09:30  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25059.00
-12:10:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   25032.50
-12:10:34  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24637.75
-12:11:11  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24842.25
-12:12:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24630.25
-12:13:58  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24834.75
-12:16:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24824.75
-12:16:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24996.50
-12:19:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   24677.75
-12:19:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   25062.50
-12:20:27  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24959.00
-12:22:37  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24951.50
-12:23:07  LONG  Monitor  [YellowSquare+RR   ] 6/7   25065.00
-12:24:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   24695.25
-12:27:45  LONG  Monitor  [YellowSquare+RR   ] 6/7   24692.75
-12:30:34  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24929.00
-12:32:13  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24804.75
-12:32:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25115.75
-12:32:59  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24645.25
-12:33:24  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24876.50
-12:34:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24866.50
-12:35:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24807.25
-12:36:04  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24610.25
-12:36:33  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24864.00
-12:38:42  LONG  Monitor  [YellowSquare+RR   ] 6/7   25145.75
-12:39:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24767.25
-12:40:43  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24769.75
-12:42:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   24647.75
-12:42:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24757.25
-12:42:33  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24849.00
-12:44:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24846.50
-12:46:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   25163.25
-12:48:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24836.50
-12:49:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24682.75
-12:49:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24816.50
-12:53:20  LONG  Monitor  [YellowSquare+RR   ] 6/7   25165.75
-12:54:21  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24642.75
-12:56:21  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24791.50
-12:57:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24635.25
-12:57:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   24812.25
-12:58:17  LONG  Monitor  [YellowSquare+RR   ] 6/7   25170.75
-12:59:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   25062.50
-13:05:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24687.75
-13:05:04  LONG  Monitor  [YellowSquare+RR   ] 6/7   25070.00
-13:05:16  LONG  Monitor  [YellowSquare+RR   ] 6/7   24836.50
-13:07:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24849.00
-13:07:30  LONG  Monitor  [YellowSquare+RR   ] 6/7   24692.75
-13:07:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   25175.75
-13:08:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24819.75
-13:09:40  LONG  Monitor  [YellowSquare+RR   ] 6/7   24864.00
-13:09:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24697.75
-13:11:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24824.75
-13:14:46  LONG  Monitor  [YellowSquare+RR   ] 6/7   24887.25
-13:17:46  LONG  Monitor  [YellowSquare+ET   ] 6/7   24700.25
-13:19:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   24702.75
-13:21:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24806.50
-13:21:36  LONG  Monitor  [YellowSquare+RR   ] 6/7   24737.75
-13:21:41  LONG  Monitor  [YellowSquare+RR   ] 6/7   24887.25
-13:23:41  LONG  Monitor  [YellowSquare+RR   ] 6/7   24755.25
-13:24:02  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24859.75
-13:25:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25017.50
-13:26:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24844.75
-13:26:19  LONG  Monitor  [YellowSquare+RR   ] 6/7   24755.25
-13:28:32  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24794.00
-13:28:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24829.75
-13:30:42  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25027.50
-13:32:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24794.00
-13:32:45  LONG  Monitor  [YellowSquare+DT   ] 6/7   24765.25
-13:34:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25022.50
-13:35:10  LONG  Monitor  [YellowSquare+RR   ] 6/7   24780.25
-13:35:48  LONG  Monitor  [YellowSquare+RR   ] 6/7   25195.75
-13:36:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   24790.25
-13:37:07  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24819.75
-13:37:59  LONG  Monitor  [YellowSquare+RR   ] 6/7   24811.50
-13:40:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   24826.50
-13:42:13  LONG  Monitor  [YellowSquare+RR   ] 6/7   25203.25
-13:43:09  LONG  Monitor  [YellowSquare+RR   ] 6/7   24825.25
-13:44:10  LONG  Monitor  [YellowSquare+RR   ] 6/7   24856.50
-13:45:43  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25010.00
-13:49:38  LONG  Monitor  [YellowSquare+DT   ] 6/7   25203.25
-13:50:41  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24809.00
-13:51:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24990.00
-13:52:31  LONG  Monitor  [YellowSquare+RR   ] 6/7   24815.25
-13:53:42  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24809.75
-13:54:30  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24789.00
-13:59:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24799.75
-14:00:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24970.00
-14:00:23  LONG  Monitor  [YellowSquare+DT   ] 6/7   24810.25
-14:00:47  LONG  Monitor  [YellowSquare+RR   ] 6/7   24821.50
-14:01:52  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24975.00
-14:02:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24802.25
-14:02:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   24839.00
-14:04:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24802.25
-14:04:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24839.00
-14:07:06  SHORT Monitor  [OrangeSquare+SW   ] 6/7   24775.25
-14:10:18  LONG  Monitor  [YellowSquare+RR   ] 6/7   25210.75
-14:12:41  LONG  Monitor  [YellowSquare+RR   ] 6/7   24839.75
-14:12:47  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24745.25
-14:13:37  LONG  Monitor  [YellowSquare+RR   ] 6/7   25215.75
-14:15:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   25055.00
-14:16:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24844.75
-14:17:24  LONG  Monitor  [YellowSquare+RR   ] 6/7   24780.25
-14:17:53  LONG  Monitor  [YellowSquare+RR   ] 6/7   24849.00
-14:19:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24856.50
-14:20:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24780.25
-14:20:33  LONG  Monitor  [YellowSquare+RR   ] 6/7   25080.00
-14:22:20  LONG  Monitor  [YellowSquare+RR   ] 6/7   24866.50
-14:22:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   24790.25
-14:27:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24819.00
-14:29:34  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24757.75
-14:30:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24826.50
-14:30:26  LONG  Monitor  [YellowSquare+ET   ] 6/7   24832.25
-14:31:58  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24755.25
-14:32:43  LONG  Monitor  [YellowSquare+RR   ] 6/7   25082.50
-14:33:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   24829.75
-14:35:19  LONG  Monitor  [YellowSquare+RR   ] 6/7   24834.75
-14:35:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24804.00
-14:36:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24717.75
-14:38:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24807.75
-14:41:29  LONG  Monitor  [YellowSquare+DT   ] 6/7   24800.25
-14:42:13  LONG  Monitor  [YellowSquare+RR   ] 6/7   24841.50
-14:43:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   24807.75
-14:44:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   24849.00
-14:46:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   24835.25
-14:46:25  LONG  Monitor  [YellowSquare+RR   ] 6/7   25090.00
-14:48:08  LONG  Monitor  [YellowSquare+RR   ] 6/7   24861.50
-14:55:24  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24780.25
-15:00:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24775.25
-15:07:21  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25040.00
-15:09:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   24810.25
-15:09:49  LONG  Monitor  [YellowSquare+RR   ] 6/7   24904.00
-15:10:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24997.50
-15:11:34  LONG  Monitor  [YellowSquare+RR   ] 6/7   24815.25
-15:12:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   24924.00
-15:12:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24975.00
-15:14:14  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24972.50
-15:16:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   25002.50
-15:16:38  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24772.75
-15:17:11  LONG  Monitor  [YellowSquare+RR   ] 6/7   24924.00
-15:18:49  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25140.75
-15:18:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   25015.00
-15:20:18  LONG  Monitor  [YellowSquare+RR   ] 6/7   24941.50
-15:22:25  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24760.25
-15:23:09  LONG  Monitor  [YellowSquare+RR   ] 6/7   24951.50
-15:24:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25125.75
-15:25:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24755.25
-15:26:37  SHORT Monitor  [OrangeSquare+SW   ] 6/7   24972.50
-15:31:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24965.00
-15:35:18  LONG  Monitor  [YellowSquare+RR   ] 6/7   24787.75
-15:38:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24991.50
-15:40:04  LONG  Monitor  [YellowSquare+RR   ] 6/7   25012.50
-15:45:50  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24961.50
-15:45:58  LONG  Monitor  [YellowSquare+RR   ] 6/7   25010.00
-15:46:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24765.25
-15:48:41  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24750.25
-15:50:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   25022.50
-15:50:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   25016.50
-15:50:18  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24755.25
-15:51:50  LONG  Monitor  [YellowSquare+DT   ] 6/7   25030.00
-15:52:14  LONG  Monitor  [YellowSquare+RR   ] 6/7   25011.50
-15:53:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24722.75
-15:54:10  LONG  Monitor  [YellowSquare+RR   ] 6/7   25030.00
-15:54:27  LONG  Monitor  [YellowSquare+RR   ] 6/7   25019.00
-15:56:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   25031.50
-15:57:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25130.75
-15:57:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   25047.50
-15:59:49  LONG  Monitor  [YellowSquare+RR   ] 6/7   25054.00
-16:00:07  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25118.25
-16:05:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   25044.00
-16:05:40  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25010.00
-16:06:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24735.25
-16:15:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   25148.25
-16:17:52  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24987.50
-16:22:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24987.50
-16:25:24  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24732.75
-18:00:54  LONG  Monitor  [YellowSquare+RR   ] 6/7   25156.50
-18:02:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24700.75
-18:03:08  LONG  Monitor  [YellowSquare+RR   ] 6/7   25159.00
-18:03:14  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24977.75
-18:04:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24688.25
-18:11:23  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24972.75
-18:15:02  LONG  Monitor  [YellowSquare+RR   ] 6/7   24750.75
-18:23:58  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24952.75
-18:26:21  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24950.25
-18:28:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24703.25
-18:29:16  LONG  Monitor  [YellowSquare+SW   ] 6/7   25049.75
-18:32:03  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24955.25
-18:32:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24703.25
-18:40:05  LONG  Monitor  [YellowSquare+RR   ] 6/7   25052.25
-18:43:41  LONG  Monitor  [YellowSquare+DT   ] 6/7   25166.50
-18:46:17  LONG  Monitor  [YellowSquare+RR   ] 6/7   25064.75
-18:51:47  LONG  Monitor  [YellowSquare+RR   ] 6/7   25059.75
-19:00:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24700.75
-19:02:41  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24683.25
-19:04:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24688.25
-19:04:55  LONG  Monitor  [YellowSquare+RR   ] 6/7   25179.00
-19:08:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24685.75
-19:11:45  SHORT Monitor  [OrangeSquare+DT   ] 6/7   24955.25
-19:16:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24942.75
-19:20:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24935.25
-19:21:50  LONG  Monitor  [YellowSquare+RR   ] 6/7   24795.75
-19:26:07  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24930.25
-19:35:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24932.75
-19:37:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24713.25
-19:37:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   25084.75
-19:39:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24700.75
-19:41:06  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24700.75
-19:50:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24743.25
-19:54:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24935.25
-19:58:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24748.25
-20:02:31  LONG  Monitor  [YellowSquare+RR   ] 6/7   24755.75
-20:02:39  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25201.50
-20:09:57  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25201.50
-20:11:43  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24710.75
-20:13:26  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24705.75
-20:15:31  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25191.50
-20:17:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24703.25
-20:18:48  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24695.75
-20:19:19  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25156.50
-20:21:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24658.25
-20:23:15  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24655.75
-20:23:28  LONG  Monitor  [YellowSquare+RR   ] 6/7   24947.75
-20:25:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24645.75
-20:30:59  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24640.75
-20:33:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24640.75
-20:37:52  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24907.75
-20:40:21  LONG  Monitor  [YellowSquare+RR   ] 6/7   24695.75
-20:42:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   24695.75
-20:43:20  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24905.25
-20:44:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25091.50
-20:45:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24902.75
-20:50:16  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24653.25
-20:50:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24900.25
-20:56:44  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24880.25
-21:03:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24845.25
-21:05:00  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24648.25
-21:06:26  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24845.25
-21:07:48  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24645.75
-21:07:50  LONG  Monitor  [YellowSquare+ET   ] 6/7   25082.25
-21:08:10  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24840.25
-21:09:51  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24643.25
-21:11:21  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24842.75
-21:16:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24840.25
-21:20:35  LONG  Monitor  [YellowSquare+RR   ] 6/7   25109.75
-21:23:55  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24820.25
-21:33:34  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24615.75
-21:37:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24600.75
-21:42:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24600.75
-21:45:39  LONG  Monitor  [YellowSquare+RR   ] 6/7   24865.25
-21:49:26  LONG  Monitor  [YellowSquare+RR   ] 6/7   24875.25
-21:49:47  LONG  Monitor  [YellowSquare+RR   ] 6/7   25104.00
-21:49:52  LONG  Monitor  [YellowSquare+RR   ] 6/7   24645.75
-21:52:03  LONG  Monitor  [YellowSquare+RR   ] 6/7   25116.50
-22:00:20  LONG  Monitor  [YellowSquare+RR   ] 6/7   24870.25
-22:01:59  SHORT Monitor  [OrangeSquare+ET   ] 6/7   24610.75
-22:04:27  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24593.25
-22:14:23  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24595.75
-22:18:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24845.25
-22:20:38  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24585.75
-22:24:22  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24568.25
-22:27:59  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25056.50
-22:30:17  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25036.50
-22:30:45  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24558.25
-22:35:34  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25036.50
-22:39:04  SHORT Monitor  [OrangeSquare+RR   ] 6/7   25034.00
-22:43:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24865.25
-22:57:44  LONG  Monitor  [YellowSquare+RR   ] 6/7   24575.75
-23:05:01  LONG  Monitor  [YellowSquare+RR   ] 6/7   24608.25
-23:10:45  LONG  Monitor  [YellowSquare+RR   ] 6/7   24635.75
-23:14:53  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24830.25
-23:21:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   25081.50
-23:22:58  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24598.25
-23:30:01  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24590.75
-23:33:12  LONG  Monitor  [YellowSquare+RR   ] 6/7   25107.25
-23:33:36  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24812.75
-23:33:46  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24580.75
-23:36:04  LONG  Monitor  [YellowSquare+RR   ] 6/7   25081.50
-23:36:12  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24585.75
-23:47:13  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24807.75
-23:48:53  LONG  Monitor  [YellowSquare+RR   ] 6/7   25094.00
-23:50:56  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24797.75
-23:54:50  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24580.75
-23:57:00  LONG  Monitor  [YellowSquare+RR   ] 6/7   25099.00
-23:57:05  SHORT Monitor  [OrangeSquare+RR   ] 6/7   24797.75
+21:06:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   24107.25
+21:10:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24067.75
+21:13:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   24074.25
+21:23:37  SHORT Trader   [OrangeSquare+DT   ] 5/6   24076.50
+21:31:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24063.75
+21:35:10  LONG  Trader   [YellowSquare+RR   ] 5/6   24109.00
+21:41:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24062.25
+21:43:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24059.50
+21:48:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24036.25
+21:59:31  SHORT Trader   [OrangeSquare+DT   ] 6/6   24011.00
+22:19:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24011.00
+22:26:54  LONG  Trader   [YellowSquare+RR   ] 5/6   24049.25
+22:39:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24071.75
+22:45:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24086.25
+22:47:10  LONG  Trader   [YellowSquare+RR   ] 5/6   24080.75
+22:48:53  LONG  Trader   [YellowSquare+RR   ] 5/6   24083.25
+22:50:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24088.50
+22:53:29  LONG  Trader   [YellowSquare+RR   ] 5/6   24085.50
+23:00:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24095.75
+23:14:56  LONG  Trader   [YellowSquare+RR   ] 5/6   24105.50
+23:21:43  LONG  Trader   [YellowSquare+RR   ] 5/6   24123.50
+23:46:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24084.00
+23:59:39  SHORT Trader   [OrangeSquare+DT   ] 5/6   24087.75
+00:05:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24118.25
+00:11:17  LONG  Trader   [YellowSquare+RR   ] 5/6   24132.75
+01:08:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24148.25
+01:13:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24145.50
+01:22:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24189.25
+01:24:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24191.25
+01:26:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24200.75
+01:29:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24201.75
+02:02:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24254.00
+02:06:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24258.25
+02:13:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24296.00
+02:16:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24291.25
+02:39:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24265.00
+02:45:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24254.75
+02:48:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24247.00
+02:52:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24236.75
+03:05:47  SHORT Trader   [OrangeSquare+DT   ] 6/6   24213.25
+03:09:21  LONG  Trader   [YellowSquare+RR   ] 5/6   24266.00
+03:13:41  LONG  Trader   [YellowSquare+RR   ] 5/6   24271.25
+03:15:37  LONG  Trader   [YellowSquare+RR   ] 5/6   24276.50
+03:26:05  LONG  Trader   [YellowSquare+RR   ] 5/6   24304.75
+03:35:40  SHORT Trader   [OrangeSquare+DT   ] 5/6   24263.25
+03:51:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24272.75
+03:54:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24265.25
+04:06:04  SHORT Trader   [OrangeSquare+DT   ] 5/6   24267.50
+04:13:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24262.50
+04:25:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24308.50
+04:33:36  LONG  Trader   [YellowSquare+RR   ] 5/6   24327.00
+04:36:53  LONG  Trader   [YellowSquare+RR   ] 5/6   24336.75
+04:44:10  SHORT Trader   [OrangeSquare+DT   ] 5/6   24287.00
+05:06:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24292.00
+05:19:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24381.25
+05:26:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24415.00
+05:33:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24474.25
+05:36:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24489.00
+05:39:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24450.75
+05:50:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   24431.50
+05:53:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   24399.25
+05:56:39  SHORT Trader   [OrangeSquare+DT   ] 5/6   24405.75
+06:10:55  SHORT Trader   [OrangeSquare+DT   ] 5/6   24382.00
+06:24:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   24382.75
+06:32:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   24369.75
+06:50:57  SHORT Trader   [OrangeSquare+DT   ] 6/6   24362.25
+07:05:21  LONG  Trader   [YellowSquare+RR   ] 5/6   24403.50
+07:20:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   24358.00
+07:39:37  LONG  Trader   [YellowSquare+RR   ] 5/6   24416.25
+08:22:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24454.50
+08:29:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24448.50
+08:37:55  SHORT Trader   [OrangeSquare+DT   ] 6/6   24399.50
+08:39:29  SHORT Trader   [OrangeSquare+DT   ] 6/6   24397.25
+08:42:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24384.25
+08:46:19  SHORT Trader   [OrangeSquare+DT   ] 6/6   24364.50
+08:46:20  SHORT Trader   [OrangeSquare+DT   ] 6/6   24364.50
+08:49:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24365.00
+08:52:48  SHORT Trader   [OrangeSquare+DT   ] 6/6   24355.75
+09:13:05  LONG  Trader   [YellowSquare+RR   ] 5/6   24425.75
+09:13:06  LONG  Trader   [YellowSquare+RR   ] 5/6   24425.75
+09:27:40  SHORT Trader   [OrangeSquare+DT   ] 5/6   24398.25 ►
+09:31:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24511.25
+09:33:59  SHORT Trader   [OrangeSquare+DT   ] 5/6   24457.00
+09:34:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24464.00
+09:36:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24445.75
+09:38:31  SHORT Trader   [OrangeSquare+DT   ] 6/6   24411.00
+09:38:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24408.00
+09:40:16  SHORT Trader   [OrangeSquare+DT   ] 5/6   24393.50
+09:42:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24361.00
+09:46:11  LONG  Trader   [YellowSquare+RR   ] 5/6   24417.00
+09:50:29  SHORT Trader   [OrangeSquare+DT   ] 5/6   24371.75 ►
+09:50:32  SHORT Trader   [OrangeSquare+DT   ] 5/6   24369.75
+09:52:01  SHORT Trader   [OrangeSquare+DT   ] 5/6   24342.75 ►
+09:52:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24378.75
+09:55:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24370.25
+09:58:18  LONG  Trader   [YellowSquare+RR   ] 5/6   24403.75
+10:00:19  SHORT Trader   [OrangeSquare+DT   ] 6/6   24367.50
+10:02:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24391.75
+10:04:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24468.75
+10:07:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   24368.25
+10:11:27  SHORT Trader   [OrangeSquare+DT   ] 6/6   24342.25
+10:13:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24326.00
+10:15:22  LONG  Trader   [YellowSquare+ET   ] 5/6   24368.50 ►
+10:17:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24387.00
+10:20:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24392.25
+10:21:46  SHORT Trader   [OrangeSquare+DT   ] 5/6   24369.75 ►
+10:23:55  LONG  Trader   [YellowSquare+RR   ] 5/6   24459.50
+10:27:06  SHORT Trader   [OrangeSquare+DT   ] 6/6   24419.25
+10:28:37  SHORT Trader   [OrangeSquare+DT   ] 5/6   24393.50
+10:30:36  LONG  Trader   [YellowSquare+RR   ] 5/6   24426.50
+10:33:10  LONG  Trader   [YellowSquare+RR   ] 5/6   24434.75
+10:40:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24491.50
+10:41:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24496.50
+10:43:33  LONG  Trader   [YellowSquare+RR   ] 5/6   24509.75
+10:49:56  LONG  Trader   [YellowSquare+RR   ] 5/6   24569.00
+10:52:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24572.25
+11:03:42  LONG  Trader   [YellowSquare+RR   ] 5/6   24573.75
+11:15:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24603.00
+11:16:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24618.25
+11:22:05  LONG  Trader   [YellowSquare+RR   ] 5/6   24613.25
+11:25:28  LONG  Trader   [YellowSquare+RR   ] 5/6   24623.25
+11:29:36  LONG  Trader   [YellowSquare+RR   ] 5/6   24648.25
+11:31:28  LONG  Trader   [YellowSquare+RR   ] 5/6   24640.50
+11:35:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24599.25
+11:37:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   24598.50
+11:51:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24630.00
+11:57:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24656.25
+12:16:09  LONG  Trader   [YellowSquare+RR   ] 5/6   24666.50
+12:18:16  LONG  Trader   [YellowSquare+RR   ] 5/6   24666.50
+12:25:57  LONG  Trader   [YellowSquare+RR   ] 5/6   24675.00
+12:31:52  SHORT Trader   [OrangeSquare+DT   ] 5/6   24669.25
+12:38:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24708.50
+12:46:23  LONG  Trader   [YellowSquare+RR   ] 5/6   24743.50
+12:52:15  LONG  Trader   [YellowSquare+RR   ] 5/6   24737.25
+13:02:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   24687.75
+13:06:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24680.75
+13:15:57  SHORT Trader   [OrangeSquare+DT   ] 6/6   24674.00
+13:18:38  SHORT Trader   [OrangeSquare+DT   ] 6/6   24654.75
+13:24:13  SHORT Trader   [OrangeSquare+DT   ] 6/6   24620.25
+13:27:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24606.00
+13:30:42  SHORT Trader   [OrangeSquare+DT   ] 6/6   24606.00
+13:32:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   24606.25
+13:34:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24607.75
+13:36:54  SHORT Trader   [OrangeSquare+DT   ] 6/6   24603.50
+13:40:13  SHORT Trader   [OrangeSquare+DT   ] 6/6   24592.50
+13:42:53  SHORT Trader   [OrangeSquare+DT   ] 6/6   24588.50
+13:46:32  SHORT Trader   [OrangeSquare+DT   ] 5/6   24587.25
+14:16:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24645.50
+14:35:18  LONG  Trader   [YellowSquare+RR   ] 5/6   24693.75
+14:41:53  LONG  Trader   [YellowSquare+RR   ] 5/6   24695.00
+15:04:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24656.75
+15:19:23  LONG  Trader   [YellowSquare+RR   ] 5/6   24708.50
+15:20:55  LONG  Trader   [YellowSquare+RR   ] 5/6   24833.25
+15:23:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24886.75
+15:26:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24871.00
+15:28:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24921.00
+15:30:48  SHORT Trader   [OrangeSquare+DT   ] 5/6   24919.00
+15:32:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24951.50
+15:36:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24955.25
+15:39:54  LONG  Trader   [YellowSquare+RR   ] 5/6   25040.25
+15:42:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24940.00
+15:45:09  LONG  Trader   [YellowSquare+RR   ] 5/6   24976.25
+15:51:14  SHORT Trader   [OrangeSquare+DT   ] 6/6   24946.50
+15:54:07  SHORT Trader   [OrangeSquare+DT   ] 6/6   24948.00
+16:05:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   24963.50
+16:08:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24957.00
+16:12:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24936.75
+16:55:08  LONG  Trader   [YellowSquare+RR   ] 5/6   24968.00
+18:04:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24888.00
+18:07:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24951.25
+18:11:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24929.75
+18:13:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   24924.00
+18:18:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24917.00
+18:21:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24891.75
+18:24:35  SHORT Trader   [OrangeSquare+DT   ] 6/6   24883.75
+18:28:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24921.25
+18:37:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24895.75
+19:01:06  SHORT Trader   [OrangeSquare+DT   ] 6/6   24897.00
+19:34:16  SHORT Trader   [OrangeSquare+RR   ] 5/6   24904.00
+20:01:13  SHORT Trader   [OrangeSquare+DT   ] 5/6   24873.00
+20:10:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24853.00
+20:13:57  SHORT Trader   [OrangeSquare+DT   ] 6/6   24836.00
+20:22:34  LONG  Trader   [YellowSquare+ET   ] 5/6   24884.50
+20:29:15  LONG  Trader   [YellowSquare+RR   ] 5/6   24909.25
+20:31:15  LONG  Trader   [YellowSquare+RR   ] 5/6   24920.00
+20:41:30  LONG  Trader   [YellowSquare+RR   ] 5/6   24944.25
+20:51:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24960.00
+21:11:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24967.75
+21:15:13  LONG  Trader   [YellowSquare+RR   ] 5/6   24974.25
+22:07:23  LONG  Trader   [YellowSquare+RR   ] 5/6   24985.75
   (► = order placed by ActiveNikiTrader)
 
 STRATEGY TRADES
 ---------------
-  07:28:00 SHORT    +58t ($+290.00) ✓ [OrangeSquare+DT] 5/6
-  08:35:18 SHORT    +25t ($+125.00) ✓ [OrangeSquare+DT] 5/6
-  09:53:58 SHORT   -609t ($-3045.00) ✗ [OrangeSquare+DT] 5/6
+  09:27:40 SHORT    +20t ($+100.00) ✓ [OrangeSquare+DT] 5/6 [conf 5→5: cost 18t]
+  09:27:40 SHORT    +62t ($+310.00) ✓ [OrangeSquare+DT] 5/6 [conf 5→5: cost 55t]
+  09:50:29 SHORT    +36t ($+180.00) ✓ [OrangeSquare+DT] 5/6 [conf 5→5: cost 55t]
+  09:52:01 LONG     +33t ($+165.00) ✓ [OrangeSquare+DT] 5/6 [conf 2→2: cost 10t]
+  10:15:22 SHORT   -635t ($-3175.00) ✗ [YellowSquare+ET] 5/6 [conf 1→1: save +638t]
+
+==========================================================================================
+EXIT STRATEGY COMPARISON: SL/TP vs Confluence Drop vs Single Indicator Flip
+==========================================================================================
+
+(Exit times estimated by scanning BAR data for SL/TP price levels)
+
+STRATEGY COMPARISON SUMMARY
+----------------------------------------------------------------------
+Strategy                         Trades   Better    Worse          NET
+----------------------------------------------------------------------
+1. Current SL/TP (baseline)           5      ---      ---          +0t
+2. Confluence drop below 6            5        1        4        +500t
+3. Single indicator flip              5        1        4        +493t
+----------------------------------------------------------------------
+
+STRATEGY 2: CONFLUENCE DROP BELOW 6
+----------------------------------------
+Trades affected: 5 of 5
+  Losers with drop: 1 → savings: +638t
+  Winners with drop: 4 → cost: -138t
+  NET: +500t
+
+  Entry     Dir   Exit  Actual  @Time     Conf   Hypo    Diff   Result
+  09:27:40 SHORT SL     +20t  09:27:40  5→5      +2t   -18t COST(W)
+  09:27:40 SHORT SL     +62t  09:27:40  5→5      +7t   -55t COST(W)
+  09:50:29 SHORT TP     +36t  09:50:29  5→5     -19t   -55t COST(W)
+  09:52:01 LONG  TP     +33t  09:52:01  2→2     +23t   -10t COST(W)
+  10:15:22 SHORT SL    -635t  10:15:22  1→1      +3t  +638t SAVE(L)
+
+STRATEGY 3: SINGLE INDICATOR FLIP
+----------------------------------------
+Trades affected: 5 of 5
+  Losers with flip: 1 → savings: +639t
+  Winners with flip: 4 → cost: -146t
+  NET: +493t
+
+  Entry     Dir   Exit  Actual  @Time     Ind   Hypo    Diff   Result
+  09:27:40 SHORT SL     +20t  09:27:40  RR       -8t   -28t COST(W)
+  09:27:40 SHORT SL     +62t  09:27:40  RR       -3t   -65t COST(W)
+  09:50:29 SHORT TP     +36t  09:50:32  RR       +6t   -30t COST(W)
+  09:52:01 LONG  TP     +33t  09:52:01  RR      +10t   -23t COST(W)
+  10:15:22 SHORT SL    -635t  10:15:22  ET       +4t  +639t SAVE(L)
+
+==========================================================================================
+TRAILING STOP SIMULATION ANALYSIS
+==========================================================================================
+
+Simulates trailing stops that activate after reaching profit threshold,
+then trail behind price by specified distance. Fixed SL/TP still honored.
+
+TRAILING STOP COMPARISON SUMMARY
+------------------------------------------------------------------------------------------
+Strategy                   Trades  Better   Worse   Same     Actual      Trail        NET
+------------------------------------------------------------------------------------------
+Fixed SL/TP (baseline)          5     ---     ---    ---       -484t        ---        +0t
+Trail-100/30                    5       3       2      0      -484t       +72t      +556t
+Trail-100/40                    5       3       2      0      -484t      +120t      +604t
+Trail-100/50                    5       3       2      0      -484t      +120t      +604t
+Trail-110/55                    5       3       2      0      -484t      +120t      +604t
+Trail-40/20                     5       3       2      0      -484t       +70t      +554t
+Trail-50/25                     5       3       2      0      -484t       -36t      +448t
+Trail-60/30                     5       2       2      1      -484t       -15t      +469t
+Trail-70/35                     5       3       2      0      -484t      +120t      +604t
+Trail-80/30                     5       3       2      0      -484t       +72t      +556t
+Trail-80/40                     5       3       2      0      -484t      +120t      +604t
+Trail-80/50                     5       3       2      0      -484t      +120t      +604t
+Trail-90/40                     5       3       2      0      -484t      +120t      +604t
+Trail-90/45                     5       3       2      0      -484t      +120t      +604t
+------------------------------------------------------------------------------------------
+
+TRAILING STOP: Trail-100/30
+  Configuration: Activate at +100t, trail 30t (very tight)
+  - Activation threshold: +100 ticks (+$125)
+  - Trail distance: 30 ticks ($38)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +556t ($+2780.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 1 (20%)
+    TRAIL: 1 (20%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: -39t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t    +72t   +36t TRAIL   +102t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-100/40
+  Configuration: Activate at +100t, trail 40t (tight)
+  - Activation threshold: +100 ticks (+$125)
+  - Trail distance: 40 ticks ($50)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-100/50
+  Configuration: Activate at +100t, trail 50t
+  - Activation threshold: +100 ticks (+$125)
+  - Trail distance: 50 ticks ($62)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-110/55
+  Configuration: Activate at +110t, trail 55t (near TP)
+  - Activation threshold: +110 ticks (+$138)
+  - Trail distance: 55 ticks ($69)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-40/20
+  Configuration: Activate at +40t, trail 20t (tight)
+  - Activation threshold: +40 ticks (+$50)
+  - Trail distance: 20 ticks ($25)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +554t ($+2770.00)
+
+  Exit Type Breakdown:
+    SL: 1 (20%)
+    TRAIL: 4 (80%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: -41t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    +21t    +1t TRAIL    +41t  Yes
+  09:27:40 SHORT    +62t    +26t   -36t TRAIL    +46t  Yes
+  09:50:29 SHORT    +36t    +20t   -16t TRAIL    +40t  Yes
+  09:52:01 LONG     +33t    +43t   +10t TRAIL    +63t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-50/25
+  Configuration: Activate at +50t, trail 25t
+  - Activation threshold: +50 ticks (+$62)
+  - Trail distance: 25 ticks ($31)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +448t ($+2240.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TRAIL: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: -147t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t    +46t   +10t TRAIL    +71t  Yes
+  09:52:01 LONG     +33t    +38t    +5t TRAIL    +63t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-60/30
+  Configuration: Activate at +60t, trail 30t
+  - Activation threshold: +60 ticks (+$75)
+  - Trail distance: 30 ticks ($38)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +469t ($+2345.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TRAIL: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 1, Trail worse: 2
+    Winner P&L change: -126t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t    +72t   +36t TRAIL   +102t  Yes
+  09:52:01 LONG     +33t    +33t    +0t TRAIL    +63t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-70/35
+  Configuration: Activate at +70t, trail 35t
+  - Activation threshold: +70 ticks (+$88)
+  - Trail distance: 35 ticks ($44)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-80/30
+  Configuration: Activate at +80t, trail 30t (tighter)
+  - Activation threshold: +80 ticks (+$100)
+  - Trail distance: 30 ticks ($38)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +556t ($+2780.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 1 (20%)
+    TRAIL: 1 (20%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: -39t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t    +72t   +36t TRAIL   +102t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-80/40
+  Configuration: Activate at +80t, trail 40t
+  - Activation threshold: +80 ticks (+$100)
+  - Trail distance: 40 ticks ($50)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-80/50
+  Configuration: Activate at +80t, trail 50t (looser)
+  - Activation threshold: +80 ticks (+$100)
+  - Trail distance: 50 ticks ($62)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-90/40
+  Configuration: Activate at +90t, trail 40t
+  - Activation threshold: +90 ticks (+$112)
+  - Trail distance: 40 ticks ($50)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP: Trail-90/45
+  Configuration: Activate at +90t, trail 45t
+  - Activation threshold: +90 ticks (+$112)
+  - Trail distance: 45 ticks ($56)
+--------------------------------------------------
+  Trades analyzed: 5
+  NET impact: +604t ($+3020.00)
+
+  Exit Type Breakdown:
+    SL: 3 (60%)
+    TP: 2 (40%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 4
+    Trail better: 2, Trail worse: 2
+    Winner P&L change: +9t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +595t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 72t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  09:27:40 SHORT    +20t    -40t   -60t SL       +41t  No
+  09:27:40 SHORT    +62t    -40t  -102t SL       +46t  No
+  09:50:29 SHORT    +36t   +120t   +84t TP      +126t  Yes
+  09:52:01 LONG     +33t   +120t   +87t TP      +120t  Yes
+  10:15:22 SHORT   -635t    -40t  +595t SL       +25t  No
+
+TRAILING STOP RECOMMENDATION
+------------------------------
+  Best trailing config: Trail-80/40 with +604t improvement
+  Consider implementing this trailing stop strategy.
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
 
-ALIGNED with signals: 3 trades, -526t
-  07:28:00 SHORT   +58t <- Trader @ 07:28:00 [OrangeSquare+DT] 5/6 ✓
-  08:35:18 SHORT   +25t <- Trader @ 08:35:18 [OrangeSquare+DT] 5/6 ✓
-  09:53:58 SHORT  -609t <- Trader @ 09:53:58 [OrangeSquare+DT] 5/6 
+ALIGNED with signals: 3 trades, +118t
+  09:27:40 SHORT   +20t <- Trader @ 09:27:40 [OrangeSquare+DT] 5/6 ✓
+  09:27:40 SHORT   +62t <- Trader @ 09:27:40 [OrangeSquare+DT] 5/6 ✓
+  09:50:29 SHORT   +36t <- Trader @ 09:50:29 [OrangeSquare+DT] 5/6 ✓
 
-COUNTER to signals: 0 trades, +0t
+COUNTER to signals: 2 trades, -602t
+  09:52:01 LONG    +33t <- Against SHORT @ 09:52:01 [OrangeSquare+DT]
+  10:15:22 SHORT  -635t <- Against LONG @ 10:15:22 [YellowSquare+ET]
 
 NO SIGNAL nearby: 0 trades, +0t
+
+EXIT TRIGGER OCCURRENCE (during trades)
+---------------------------------------------
+Trades with BAR data: 5
+  Confluence dropped below 6: 5 trades
+    - On losers: 1
+    - On winners: 4
+  Single indicator flipped: 5 trades
+    - On losers: 1
+    - On winners: 4
+  Neither triggered: 0 (conf) / 0 (flip)
 
 INDICATOR STATE CORRELATION
 ---------------------------
 Indicator   UP(W/L)     DN(W/L)     Notes
-  AAA       0/0 (   0%)  2/1 (  67%)  Better when DN
-  DT        0/0 (   0%)  2/1 (  67%)  Better when DN
-  ET        0/0 (   0%)  2/1 (  67%)  Better when DN
-  RR        2/1 (  67%)  0/0 (   0%)  Better when UP
-  SB        0/0 (   0%)  2/1 (  67%)  Better when DN
-  SW        0/0 (   0%)  2/1 (  67%)  Better when DN
-  T3P       2/1 (  67%)  0/0 (   0%)  Better when UP
-  VY        0/0 (   0%)  2/1 (  67%)  Better when DN
+  AAA       0/0 (   0%)  4/1 (  80%)  Better when DN
+  DT        0/1 (   0%)  4/0 ( 100%)  Better when DN
+  ET        0/1 (   0%)  4/0 ( 100%)  Better when DN
+  RR        4/1 (  80%)  0/0 (   0%)  Better when UP
+  SB        0/0 (   0%)  4/1 (  80%)  Better when DN
+  SW        0/1 (   0%)  4/0 ( 100%)  Better when DN
+  T3P       4/1 (  80%)  0/0 (   0%)  Better when UP
+  VY        0/1 (   0%)  4/0 ( 100%)  Better when DN
 
 BEST & WORST TRADES
 -------------------
 
 TOP 5 WINNERS:
-  07:28:00 SHORT   +58t [Trader:OrangeSquare+DT] 5/6
-  08:35:18 SHORT   +25t [Trader:OrangeSquare+DT] 5/6
-  09:53:58 SHORT  -609t [Trader:OrangeSquare+DT] 5/6
+  09:27:40 SHORT   +62t [Trader:OrangeSquare+DT] 5/6
+  09:50:29 SHORT   +36t [Trader:OrangeSquare+DT] 5/6
+  09:52:01 LONG    +33t [Trader:OrangeSquare+DT] 5/6
+  09:27:40 SHORT   +20t [Trader:OrangeSquare+DT] 5/6
+  10:15:22 SHORT  -635t [Trader:YellowSquare+ET] 5/6
 
 BOTTOM 5 LOSERS:
-  07:28:00 SHORT   +58t [Trader:OrangeSquare+DT] 5/6
-  08:35:18 SHORT   +25t [Trader:OrangeSquare+DT] 5/6
-  09:53:58 SHORT  -609t [Trader:OrangeSquare+DT] 5/6
+  09:27:40 SHORT   +62t [Trader:OrangeSquare+DT] 5/6
+  09:50:29 SHORT   +36t [Trader:OrangeSquare+DT] 5/6
+  09:52:01 LONG    +33t [Trader:OrangeSquare+DT] 5/6
+  09:27:40 SHORT   +20t [Trader:OrangeSquare+DT] 5/6
+  10:15:22 SHORT  -635t [Trader:YellowSquare+ET] 5/6
 
 TIME-BASED ANALYSIS
 -------------------
-Pre-8:30    : 1 trades, 1W, +58t
-8:30-9:00   : 1 trades, 1W, +25t
-9:00-10:00  : 1 trades, 0W, -609t
+9:00-10:00  : 4 trades, 4W, +151t
+10:00-11:00 : 1 trades, 0W, -635t
 
 ================================================================================
 KEY INSIGHTS
 ================================================================================
 
 1. SIGNAL ALIGNMENT:
-   - 3 of 3 trades (100%) aligned with signals
+   - 3 of 5 trades (60%) aligned with signals
 
 2. P&L BY ALIGNMENT:
-   - ALIGNED trades: -526t ($-2630.00)
-   - COUNTER trades: +0t ($+0.00)
+   - ALIGNED trades: +118t ($+590.00)
+   - COUNTER trades: -602t ($-3010.00)
    - NO SIGNAL trades: +0t ($+0.00)
 
 3. CONFLUENCE INSIGHTS:
-   - Best performing: 5/6 with -526t
-   - High confluence (N-1 or higher): -526t
+   - Best performing: 5/6 with -484t
+   - High confluence (N-1 or higher): -484t
+
+4. EXIT STRATEGY COMPARISON:
+   - Confluence drop: SAVE 500t (5 trades affected)
+   - Indicator flip:  SAVE 493t (5 trades affected)
+   - Trailing stop:   SAVE 604t (best: Trail-80/40)
+   → Trailing stop (Trail-80/40) would improve results by +604t
 
 5. RECOMMENDATIONS:
+   - Avoiding COUNTER trades would have saved 602t
+   - Best trigger: OrangeSquare+DT with +151t
 
 ================================================================================
 SLIPPAGE ANALYSIS
 ================================================================================
 
 ENTRY SLIPPAGE:
-   Trades with data: 3
+   Trades with data: 5
    Mean:   +0.0t ($+0.00)
    Median: +0.0t
    Std Dev: 0.0t
@@ -958,28 +828,28 @@ ENTRY SLIPPAGE:
    TOTAL:  +0t ($+0.00)
 
 EXIT SLIPPAGE (all exits):
-   Trades with data: 3
-   Mean:   +8.0t ($+40.00)
-   Median: +9.0t
-   Std Dev: 2.2t
-   Range:  +5t to +10t
-   TOTAL:  +24t ($+120.00)
+   Trades with data: 5
+   Mean:   +10.8t ($+54.00)
+   Median: +7.0t
+   Std Dev: 11.6t
+   Range:  -1t to +32t
+   TOTAL:  +54t ($+270.00)
 
 EXIT SLIPPAGE BY REASON:
-   SL       (  1 trades): Mean  +9.0t | Total     +9t ($+45.00)
-   TRAIL    (  2 trades): Mean  +7.5t | Total    +15t ($+75.00)
+   SL       (  1 trades): Mean +32.0t | Total    +32t ($+160.00)
+   TRAIL    (  4 trades): Mean  +5.5t | Total    +22t ($+110.00)
 
 COST SUMMARY:
-   Gross P&L:        -526t ($-2630.00)
+   Gross P&L:        -484t ($-2420.00)
    Entry Slippage:   +0t ($+0.00)
-   Exit Slippage:    +24t ($+120.00)
-   Total Slippage:   +24t ($+120.00)
-   Broker Fees:      3 × $4.50 = $13.50
+   Exit Slippage:    +54t ($+270.00)
+   Total Slippage:   +54t ($+270.00)
+   Broker Fees:      5 × $4.50 = $22.50
    ─────────────────────────────────────
-   NET P&L:          $-2763.50
+   NET P&L:          $-2712.50
 
-   Slippage as % of |Gross|: 4.6%
-   Total costs as % of |Gross|: 5.1%
+   Slippage as % of |Gross|: 11.2%
+   Total costs as % of |Gross|: 12.1%
 
 ================================================================================
 MULTI-DAY COMPARISON - VPS (Previous Days)
@@ -987,12 +857,12 @@ MULTI-DAY COMPARISON - VPS (Previous Days)
 
 Date        Trades  Win%    P&L      Signal Alignment
 ----------------------------------------------------------------------
-Mar 03        7     100%    +434t    7 aligned (+434t), 0 no signal (+0t)
 Mar 04        4     50%   -1087t    4 aligned (-1087t), 0 no signal (+0t)
 Mar 05        1     100%    +600t    1 aligned (+600t), 0 no signal (+0t)
 Mar 06       18     83%    +317t    18 aligned (+317t), 0 no signal (+0t)
 Mar 07        3     100%    +409t    3 aligned (+409t), 0 no signal (+0t)
+Mar 08        3     67%    -526t    3 aligned (-526t), 0 no signal (+0t)
 ----------------------------------------------------------------------
-TODAY         3     67%    -526t    3 aligned (-526t), 0 no signal (+0t)
+TODAY         5     80%    -484t    3 aligned (+118t), 0 no signal (+0t)
 
 ================================================================================
