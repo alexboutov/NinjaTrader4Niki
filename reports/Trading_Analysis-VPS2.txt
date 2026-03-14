@@ -1,61 +1,565 @@
 ================================================================================
-MAR 10, 2026 TRADING SESSION ANALYSIS
+MAR 14, 2026 TRADING SESSION ANALYSIS
 ================================================================================
 
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  0
-  - Orders placed:         0
-  - Outside hours:         0
+ActiveNikiTrader signals:  401
+  - Orders placed:         13
+  - Outside hours:         40
   - Blocked by cooldown:   0
 
 SESSION SUMMARY
 ---------------
-Total Round-trips: 0
-Win/Loss: 0W / 0L (0.0% win rate)
-Total P&L: +0 ticks ($+0.00)
-  LONG:  0 trades, +0t
-  SHORT: 0 trades, +0t
+Total Round-trips: 13
+Win/Loss: 9W / 4L (69.2% win rate)
+Total P&L: -47 ticks ($-235.00)
+  LONG:  1 trades, +115t
+  SHORT: 12 trades, -162t
 
-ALL SIGNALS FIRED: 0
+CONFLUENCE LEVEL ANALYSIS
+-------------------------
+  5/6: 13 trades, 9W (69%), -47t
+
+TRIGGER TYPE ANALYSIS
+---------------------
+  YellowSquare+ET: 1 trades, 1W (100%), +115t
+  OrangeSquare+DT: 12 trades, 8W (67%), -162t
+
+ALL SIGNALS FIRED: 401
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
+00:05:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24118.50
+00:11:17  LONG  Trader   [YellowSquare+RR   ] 5/6   24132.50
+01:08:13  LONG  Trader   [YellowSquare+RR   ] 5/6   24148.00
+01:13:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24144.50
+01:22:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24189.75
+01:24:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24191.75
+01:26:25  LONG  Trader   [YellowSquare+RR   ] 5/6   24201.25
+01:29:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24203.75
+02:02:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24254.50
+02:06:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24259.25
+02:13:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24295.50
+02:16:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24291.25
+02:39:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24265.00
+02:45:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24251.75
+02:48:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24248.25
+02:52:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24235.50
+03:05:47  SHORT Trader   [OrangeSquare+DT   ] 6/6   24213.00
+03:09:21  LONG  Trader   [YellowSquare+RR   ] 5/6   24266.00
+03:13:41  LONG  Trader   [YellowSquare+RR   ] 5/6   24272.00
+03:15:37  LONG  Trader   [YellowSquare+RR   ] 5/6   24277.00
+03:26:05  LONG  Trader   [YellowSquare+RR   ] 5/6   24303.25
+03:35:40  SHORT Trader   [OrangeSquare+DT   ] 5/6   24262.75
+03:51:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24272.25
+03:54:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24266.25
+04:04:35  SHORT Trader   [OrangeSquare+DT   ] 5/6   24269.00
+04:06:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   24259.75
+04:13:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24263.25
+04:25:04  LONG  Trader   [YellowSquare+RR   ] 5/6   24307.75
+04:33:36  LONG  Trader   [YellowSquare+RR   ] 5/6   24326.50
+04:36:53  LONG  Trader   [YellowSquare+RR   ] 5/6   24336.50
+04:44:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24286.00
+05:06:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24291.75
+05:19:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24381.75
+05:23:29  LONG  Trader   [YellowSquare+RR   ] 5/6   24415.50
+05:26:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24414.75
+05:33:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24475.00
+05:36:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24488.50
+05:39:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24449.25
+05:50:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   24431.50
+05:53:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   24400.25
+05:56:39  SHORT Trader   [OrangeSquare+DT   ] 5/6   24407.50
+06:10:55  SHORT Trader   [OrangeSquare+DT   ] 5/6   24380.75
+06:24:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   24383.00
+06:32:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   24369.50
+07:06:47  LONG  Trader   [YellowSquare+RR   ] 5/6   24402.00
+07:20:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   24356.75
+07:39:37  LONG  Trader   [YellowSquare+RR   ] 5/6   24418.00
+08:22:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24454.25
+08:29:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24449.00
+08:39:29  SHORT Trader   [OrangeSquare+DT   ] 6/6   24397.00
+08:42:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24384.25
+08:46:19  SHORT Trader   [OrangeSquare+DT   ] 6/6   24365.25
+08:49:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24364.25
+08:52:48  SHORT Trader   [OrangeSquare+DT   ] 6/6   24355.00
+09:13:06  LONG  Trader   [YellowSquare+RR   ] 5/6   24425.25
+09:27:40  SHORT Trader   [OrangeSquare+DT   ] 5/6   24399.50 ►
+01:10:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24951.00
+01:43:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24944.75
+03:29:15  LONG  Trader   [YellowSquare+RR   ] 5/6   25062.50
+04:07:12  LONG  Trader   [YellowSquare+RR   ] 5/6   25097.25
+04:08:48  LONG  Trader   [YellowSquare+RR   ] 5/6   25136.75
+04:56:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   25094.00
+05:18:59  LONG  Trader   [YellowSquare+RR   ] 5/6   25122.25
+06:11:44  SHORT Trader   [OrangeSquare+DT   ] 6/6   25062.75
+06:16:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   25063.25
+06:23:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   25048.25
+06:36:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   25051.50
+06:38:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   25030.75
+07:04:39  LONG  Trader   [YellowSquare+RR   ] 5/6   25082.75
+07:11:15  SHORT Trader   [OrangeSquare+DT   ] 6/6   25029.00
+07:18:53  SHORT Trader   [OrangeSquare+DT   ] 6/6   25006.75
+07:36:36  SHORT Trader   [OrangeSquare+DT   ] 6/6   25003.75
+07:42:18  SHORT Trader   [OrangeSquare+DT   ] 6/6   24993.75
+07:59:25  SHORT Trader   [OrangeSquare+DT   ] 5/6   24969.50 ►
+08:06:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24917.75
+08:08:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24919.00
+08:40:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24949.00
+08:49:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24978.50
+08:53:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24988.75
+09:23:20  LONG  Trader   [YellowSquare+RR   ] 5/6   24990.00
+09:30:00  LONG  Trader   [YellowSquare+RR   ] 5/6   25008.75
+09:32:02  LONG  Trader   [YellowSquare+RR   ] 5/6   25068.00
+09:33:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   25023.25
+09:35:35  SHORT Trader   [OrangeSquare+DT   ] 6/6   25012.50
+09:37:18  SHORT Trader   [OrangeSquare+RR   ] 5/6   25003.25
+09:40:23  SHORT Trader   [OrangeSquare+DT   ] 5/6   25011.50
+09:42:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24993.00
+09:43:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24977.25
+09:45:08  LONG  Trader   [YellowSquare+RR   ] 5/6   25032.25
+09:47:26  LONG  Trader   [YellowSquare+RR   ] 5/6   25042.00
+09:50:27  LONG  Trader   [YellowSquare+RR   ] 5/6   25039.25
+09:55:26  SHORT Trader   [OrangeSquare+DT   ] 6/6   24983.00
+09:57:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24969.25
+09:58:34  SHORT Trader   [OrangeSquare+DT   ] 5/6   24966.25 ►
+10:00:23  SHORT Trader   [OrangeSquare+DT   ] 5/6   24954.25 ►
+10:05:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24992.25
+10:07:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24947.00
+10:10:59  SHORT Trader   [OrangeSquare+DT   ] 5/6   24914.25 ►
+10:16:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   24911.75 ►
+10:20:20  LONG  Trader   [YellowSquare+RR   ] 5/6   24957.75
+10:22:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24986.75
+10:28:13  LONG  Trader   [YellowSquare+RR   ] 5/6   25014.00
+10:35:25  LONG  Trader   [YellowSquare+RR   ] 5/6   25051.75
+10:38:14  LONG  Trader   [YellowSquare+RR   ] 5/6   25067.00
+10:41:33  LONG  Trader   [YellowSquare+RR   ] 5/6   25086.50
+10:45:02  LONG  Trader   [YellowSquare+RR   ] 5/6   25108.50
+10:49:59  LONG  Trader   [YellowSquare+RR   ] 5/6   25116.00
+10:51:53  LONG  Trader   [YellowSquare+RR   ] 5/6   25119.50
+11:13:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   25127.75
+11:34:44  SHORT Trader   [OrangeSquare+DT   ] 6/6   25114.25
+11:36:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   25114.75
+12:05:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   25114.25
+12:34:27  LONG  Trader   [YellowSquare+RR   ] 5/6   25152.25
+12:39:44  LONG  Trader   [YellowSquare+RR   ] 5/6   25160.00
+12:44:11  LONG  Trader   [YellowSquare+RR   ] 5/6   25160.75
+12:50:01  SHORT Trader   [OrangeSquare+DT   ] 5/6   25127.25
+12:57:17  LONG  Trader   [YellowSquare+RR   ] 5/6   25165.75
+13:05:51  LONG  Trader   [YellowSquare+RR   ] 5/6   25177.50
+13:24:51  LONG  Trader   [YellowSquare+RR   ] 5/6   25198.25
+13:34:18  SHORT Trader   [OrangeSquare+DT   ] 5/6   25170.25
+13:36:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   25148.50
+13:39:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   25106.75
+13:51:05  LONG  Trader   [YellowSquare+RR   ] 5/6   25174.25
+14:03:20  LONG  Trader   [YellowSquare+DT   ] 5/6   25177.75
+14:10:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   25139.50
+14:14:09  SHORT Trader   [OrangeSquare+DT   ] 6/6   25095.75
+14:17:04  SHORT Trader   [OrangeSquare+DT   ] 5/6   25047.75
+14:19:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   25008.00
+14:22:11  SHORT Trader   [OrangeSquare+DT   ] 6/6   24992.00
+14:23:55  LONG  Trader   [YellowSquare+RR   ] 5/6   25033.00
+14:25:43  LONG  Trader   [YellowSquare+RR   ] 5/6   25052.50
+14:27:53  LONG  Trader   [YellowSquare+RR   ] 5/6   25094.25
+14:31:49  LONG  Trader   [YellowSquare+RR   ] 5/6   25099.00
+14:35:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   25043.50
+14:37:31  LONG  Trader   [YellowSquare+RR   ] 5/6   25071.25
+14:40:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   25038.50
+14:51:45  LONG  Trader   [YellowSquare+RR   ] 5/6   25081.00
+14:55:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   25045.00
+14:58:47  SHORT Trader   [OrangeSquare+DT   ] 6/6   25029.25
+15:00:48  SHORT Trader   [OrangeSquare+DT   ] 6/6   25028.00
+15:06:21  SHORT Trader   [OrangeSquare+DT   ] 5/6   25025.75
+15:11:06  SHORT Trader   [OrangeSquare+RR   ] 5/6   25026.25
+15:28:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   25000.50
+15:31:46  SHORT Trader   [OrangeSquare+DT   ] 5/6   24983.50
+15:35:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24973.75
+15:50:07  SHORT Trader   [OrangeSquare+DT   ] 6/6   24960.50
+15:51:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   24947.75
+16:04:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24997.75
+16:11:59  LONG  Trader   [YellowSquare+RR   ] 5/6   25016.75
+16:18:24  LONG  Trader   [YellowSquare+RR   ] 5/6   25027.25
+18:02:12  SHORT Trader   [OrangeSquare+DT   ] 5/6   24985.00
+18:06:09  SHORT Trader   [OrangeSquare+DT   ] 5/6   24989.00
+18:26:26  SHORT Trader   [OrangeSquare+DT   ] 6/6   24990.00
+19:56:23  LONG  Trader   [YellowSquare+RR   ] 5/6   25023.50
+20:06:09  LONG  Trader   [YellowSquare+RR   ] 5/6   25024.25
+20:09:37  LONG  Trader   [YellowSquare+RR   ] 5/6   25068.50
+20:16:20  LONG  Trader   [YellowSquare+RR   ] 5/6   25064.00
+21:58:09  LONG  Trader   [YellowSquare+RR   ] 5/6   25093.00
+22:15:45  LONG  Trader   [YellowSquare+RR   ] 5/6   25094.75
+01:22:39  SHORT Trader   [OrangeSquare+DT   ] 6/6   25058.00
+01:30:05  SHORT Trader   [OrangeSquare+DT   ] 6/6   25062.25
+01:52:09  SHORT Trader   [OrangeSquare+DT   ] 6/6   25029.25
+02:09:49  SHORT Trader   [OrangeSquare+DT   ] 6/6   25019.50
+03:09:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   25021.75
+03:15:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   25029.00
+03:24:05  SHORT Trader   [OrangeSquare+DT   ] 6/6   25017.00
+03:33:38  SHORT Trader   [OrangeSquare+DT   ] 6/6   24994.25
+03:55:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24998.25
+04:01:36  LONG  Trader   [YellowSquare+RR   ] 5/6   25024.00
+04:10:31  LONG  Trader   [YellowSquare+RR   ] 5/6   25022.50
+04:13:02  LONG  Trader   [YellowSquare+RR   ] 5/6   25020.50
+04:45:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24989.50
+04:56:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24948.00
+04:58:17  LONG  Trader   [YellowSquare+RR   ] 5/6   24996.25
+05:03:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24937.75
+05:06:31  SHORT Trader   [OrangeSquare+DT   ] 6/6   24930.25
+05:10:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24936.50
+05:36:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   24933.00
+05:41:35  SHORT Trader   [OrangeSquare+DT   ] 6/6   24929.50
+05:49:29  SHORT Trader   [OrangeSquare+DT   ] 5/6   24926.25
+05:56:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24909.50
+06:07:07  LONG  Trader   [YellowSquare+ET   ] 5/6   24943.50
+06:14:17  LONG  Trader   [YellowSquare+RR   ] 5/6   24962.25
+06:28:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24976.50
+06:52:04  LONG  Trader   [YellowSquare+RR   ] 5/6   25023.00
+07:00:11  LONG  Trader   [YellowSquare+RR   ] 5/6   25023.25
+07:34:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24975.00
+07:36:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24976.25
+07:39:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24979.75
+07:45:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24958.25
+07:49:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   24947.50
+07:55:57  SHORT Trader   [OrangeSquare+DT   ] 6/6   24953.00
+08:03:45  SHORT Trader   [OrangeSquare+DT   ] 5/6   24958.00 ►
+08:16:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   24950.75
+08:30:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24999.25
+00:19:34  LONG  Trader   [YellowSquare+RR   ] 5/6   24742.50
+01:05:52  LONG  Trader   [YellowSquare+RR   ] 5/6   24771.00
+01:08:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24773.00
+02:05:06  LONG  Trader   [YellowSquare+RR   ] 5/6   24767.50
+02:21:40  LONG  Trader   [YellowSquare+RR   ] 5/6   24767.50
+02:26:08  LONG  Trader   [YellowSquare+RR   ] 5/6   24782.50
+02:47:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24800.00
+02:53:33  LONG  Trader   [YellowSquare+RR   ] 5/6   24808.25
+03:25:55  LONG  Trader   [YellowSquare+RR   ] 5/6   24832.75
+04:08:58  LONG  Trader   [YellowSquare+RR   ] 5/6   24901.50
+04:37:28  SHORT Trader   [OrangeSquare+DT   ] 5/6   24859.00
+05:00:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24883.50
+05:42:28  LONG  Trader   [YellowSquare+RR   ] 5/6   24894.50
+05:49:12  LONG  Trader   [YellowSquare+RR   ] 5/6   24902.25
+07:02:22  SHORT Trader   [OrangeSquare+DT   ] 6/6   24876.00
+07:18:48  SHORT Trader   [OrangeSquare+DT   ] 6/6   24861.50
+07:26:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   24872.00 ►
+08:10:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24817.50
+08:21:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24823.25
+08:33:23  SHORT Trader   [OrangeSquare+DT   ] 5/6   24816.50
+08:45:12  SHORT Trader   [OrangeSquare+DT   ] 5/6   24812.00
+09:10:30  LONG  Trader   [YellowSquare+RR   ] 5/6   24847.00
+09:18:34  SHORT Trader   [OrangeSquare+DT   ] 6/6   24779.75
+09:20:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24781.75
+09:22:37  SHORT Trader   [OrangeSquare+DT   ] 6/6   24765.75
+09:33:13  LONG  Trader   [YellowSquare+ET   ] 5/6   24785.25 ►
+09:35:13  LONG  Trader   [YellowSquare+RR   ] 5/6   24818.00
+09:42:32  SHORT Trader   [OrangeSquare+DT   ] 6/6   24779.50
+09:46:57  SHORT Trader   [OrangeSquare+DT   ] 6/6   24709.75
+09:51:09  LONG  Trader   [YellowSquare+RR   ] 5/6   24753.75
+09:55:22  SHORT Trader   [OrangeSquare+DT   ] 6/6   24667.25
+09:57:35  SHORT Trader   [OrangeSquare+DT   ] 5/6   24650.25 ►
+10:00:55  LONG  Trader   [YellowSquare+RR   ] 5/6   24696.25
+10:10:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24701.00
+10:23:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24671.00
+10:32:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24611.75
+10:41:16  LONG  Trader   [YellowSquare+RR   ] 5/6   24618.00
+10:46:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24648.75
+10:48:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24647.00
+10:50:19  SHORT Trader   [OrangeSquare+DT   ] 6/6   24612.50
+11:00:20  SHORT Trader   [OrangeSquare+DT   ] 6/6   24619.75
+11:09:23  SHORT Trader   [OrangeSquare+RR   ] 5/6   24599.50
+11:27:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24632.50
+11:40:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24695.75
+11:41:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24655.25
+11:43:30  LONG  Trader   [YellowSquare+RR   ] 5/6   24702.75
+11:54:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24674.75
+12:02:10  LONG  Trader   [YellowSquare+RR   ] 5/6   24679.25
+12:09:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24592.75
+12:16:52  LONG  Trader   [YellowSquare+RR   ] 5/6   24692.50
+12:25:48  SHORT Trader   [OrangeSquare+DT   ] 6/6   24665.75
+12:27:55  SHORT Trader   [OrangeSquare+DT   ] 6/6   24640.75
+12:32:12  SHORT Trader   [OrangeSquare+DT   ] 6/6   24633.25
+12:36:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24681.75
+12:39:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24710.25
+12:41:02  LONG  Trader   [YellowSquare+RR   ] 5/6   24706.25
+13:06:48  LONG  Trader   [YellowSquare+RR   ] 5/6   24710.00
+13:12:03  SHORT Trader   [OrangeSquare+DT   ] 5/6   24680.75
+13:14:01  SHORT Trader   [OrangeSquare+DT   ] 5/6   24680.25
+13:16:06  SHORT Trader   [OrangeSquare+DT   ] 6/6   24657.50
+13:24:37  LONG  Trader   [YellowSquare+RR   ] 5/6   24678.00
+13:27:15  LONG  Trader   [YellowSquare+RR   ] 5/6   24682.25
+13:37:04  LONG  Trader   [YellowSquare+ET   ] 5/6   24687.50
+13:40:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24682.00
+14:03:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24651.00
+14:25:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   24627.50
+14:27:55  SHORT Trader   [OrangeSquare+DT   ] 6/6   24624.25
+14:39:43  SHORT Trader   [OrangeSquare+DT   ] 5/6   24618.25
+14:43:05  SHORT Trader   [OrangeSquare+DT   ] 6/6   24612.00
+14:56:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24604.25
+14:58:54  SHORT Trader   [OrangeSquare+DT   ] 6/6   24598.50
+15:05:45  SHORT Trader   [OrangeSquare+DT   ] 5/6   24599.50
+15:11:07  SHORT Trader   [OrangeSquare+DT   ] 6/6   24593.50
+15:17:24  SHORT Trader   [OrangeSquare+DT   ] 5/6   24585.50
+15:45:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24574.00
+15:50:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24572.25
+15:52:00  SHORT Trader   [OrangeSquare+DT   ] 5/6   24566.25
+15:54:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24552.00
+16:00:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24554.50
+16:01:40  SHORT Trader   [OrangeSquare+DT   ] 6/6   24552.00
+16:13:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   24531.75
+18:00:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24578.50
+18:46:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24590.75
+19:36:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   24571.75
+19:45:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24556.75
+19:55:15  SHORT Trader   [OrangeSquare+DT   ] 6/6   24538.75
+20:01:25  SHORT Trader   [OrangeSquare+DT   ] 6/6   24499.75
+20:18:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24615.25
+20:26:27  LONG  Trader   [YellowSquare+RR   ] 5/6   24616.25
+20:31:16  LONG  Trader   [YellowSquare+RR   ] 5/6   24631.75
+20:38:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24641.00
+21:05:54  LONG  Trader   [YellowSquare+RR   ] 5/6   24645.75
+21:16:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24655.50
+22:37:56  SHORT Trader   [OrangeSquare+DT   ] 5/6   24625.50
+22:49:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   24605.50
+23:04:50  SHORT Trader   [OrangeSquare+DT   ] 6/6   24603.50
+23:11:58  SHORT Trader   [OrangeSquare+DT   ] 5/6   24606.50
+23:27:37  SHORT Trader   [OrangeSquare+DT   ] 5/6   24597.50
+23:36:45  SHORT Trader   [OrangeSquare+DT   ] 5/6   24590.25
+00:49:40  SHORT Trader   [OrangeSquare+DT   ] 6/6   24573.50
+01:11:43  SHORT Trader   [OrangeSquare+DT   ] 6/6   24561.50
+02:31:53  SHORT Trader   [OrangeSquare+DT   ] 6/6   24547.75
+02:43:55  SHORT Trader   [OrangeSquare+DT   ] 6/6   24527.50
+02:48:35  SHORT Trader   [OrangeSquare+DT   ] 6/6   24505.25
+02:52:10  SHORT Trader   [OrangeSquare+DT   ] 6/6   24492.75
+02:56:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24477.50
+03:00:01  SHORT Trader   [OrangeSquare+DT   ] 6/6   24479.25
+03:10:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24427.25
+03:13:04  SHORT Trader   [OrangeSquare+DT   ] 6/6   24432.00
+03:15:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24424.25
+03:21:24  SHORT Trader   [OrangeSquare+DT   ] 6/6   24425.00
+04:04:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24424.75
+04:07:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24417.50
+04:08:56  SHORT Trader   [OrangeSquare+DT   ] 5/6   24420.50
+04:13:22  SHORT Trader   [OrangeSquare+DT   ] 6/6   24399.75
+04:15:16  SHORT Trader   [OrangeSquare+DT   ] 6/6   24401.75
+04:44:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24480.00
+04:48:52  LONG  Trader   [YellowSquare+RR   ] 5/6   24471.75
+04:57:14  LONG  Trader   [YellowSquare+RR   ] 5/6   24520.75
+05:01:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24536.00
+05:11:38  SHORT Trader   [OrangeSquare+DT   ] 5/6   24533.00
+05:16:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   24518.50
+05:31:11  SHORT Trader   [OrangeSquare+DT   ] 6/6   24518.50
+05:39:03  SHORT Trader   [OrangeSquare+DT   ] 6/6   24518.75
+06:56:56  LONG  Trader   [YellowSquare+RR   ] 5/6   24609.50
+07:06:00  LONG  Trader   [YellowSquare+RR   ] 5/6   24634.50
+07:07:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24636.00
+07:37:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24643.00
+07:51:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24653.00
+07:55:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24663.50
+08:45:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24707.50
+08:49:04  SHORT Trader   [OrangeSquare+DT   ] 5/6   24684.25
+09:00:27  SHORT Trader   [OrangeSquare+DT   ] 6/6   24674.00
+09:03:07  SHORT Trader   [OrangeSquare+DT   ] 6/6   24676.75
+09:16:32  SHORT Trader   [OrangeSquare+DT   ] 5/6   24659.00 ►
+09:35:12  SHORT Trader   [OrangeSquare+DT   ] 6/6   24645.25
+09:38:43  LONG  Trader   [YellowSquare+RR   ] 5/6   24659.50
+09:40:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24684.50
+09:42:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24722.75
+09:44:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24770.25
+09:50:55  SHORT Trader   [OrangeSquare+DT   ] 6/6   24738.75
+09:54:59  LONG  Trader   [YellowSquare+RR   ] 5/6   24789.25
+09:57:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   24747.50
+09:59:13  SHORT Trader   [OrangeSquare+DT   ] 6/6   24731.25
+10:02:06  SHORT Trader   [OrangeSquare+DT   ] 6/6   24728.00
+10:07:08  SHORT Trader   [OrangeSquare+DT   ] 5/6   24708.50 ►
+10:09:31  SHORT Trader   [OrangeSquare+DT   ] 6/6   24691.75
+10:11:59  SHORT Trader   [OrangeSquare+DT   ] 6/6   24670.50
+10:14:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   24670.00
+10:18:56  SHORT Trader   [OrangeSquare+DT   ] 6/6   24639.25
+10:21:08  LONG  Trader   [YellowSquare+RR   ] 5/6   24679.50
+10:24:31  LONG  Trader   [YellowSquare+RR   ] 5/6   24686.75
+10:30:30  LONG  Trader   [YellowSquare+RR   ] 5/6   24697.50
+10:35:22  SHORT Trader   [OrangeSquare+DT   ] 5/6   24678.00
+10:43:13  SHORT Trader   [OrangeSquare+DT   ] 6/6   24617.75
+10:46:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24574.25
+10:51:24  SHORT Trader   [OrangeSquare+DT   ] 5/6   24565.00
+10:53:14  SHORT Trader   [OrangeSquare+DT   ] 5/6   24559.00 ►
+10:55:15  SHORT Trader   [OrangeSquare+DT   ] 6/6   24545.75
+10:57:42  SHORT Trader   [OrangeSquare+DT   ] 6/6   24493.75
+10:59:44  SHORT Trader   [OrangeSquare+DT   ] 5/6   24500.25
+11:02:02  SHORT Trader   [OrangeSquare+DT   ] 6/6   24470.75
+11:03:57  SHORT Trader   [OrangeSquare+DT   ] 5/6   24478.00
+11:06:00  SHORT Trader   [OrangeSquare+RR   ] 5/6   24482.75
+11:11:45  LONG  Trader   [YellowSquare+RR   ] 5/6   24533.50
+11:13:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24558.00
+11:15:49  LONG  Trader   [YellowSquare+RR   ] 5/6   24559.00
+11:23:31  SHORT Trader   [OrangeSquare+DT   ] 5/6   24515.50
+11:26:47  SHORT Trader   [OrangeSquare+DT   ] 6/6   24470.25
+11:29:39  SHORT Trader   [OrangeSquare+DT   ] 6/6   24466.75
+11:38:41  SHORT Trader   [OrangeSquare+DT   ] 5/6   24455.50
+11:40:44  SHORT Trader   [OrangeSquare+RR   ] 5/6   24456.25
+11:45:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24416.75
+11:47:26  LONG  Trader   [YellowSquare+RR   ] 5/6   24466.75
+11:50:25  SHORT Trader   [OrangeSquare+DT   ] 5/6   24433.75
+11:55:26  SHORT Trader   [OrangeSquare+DT   ] 5/6   24414.25
+12:10:02  LONG  Trader   [YellowSquare+RR   ] 5/6   24466.25
+12:17:06  SHORT Trader   [OrangeSquare+DT   ] 6/6   24419.50
+12:36:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24460.00
+12:44:41  SHORT Trader   [OrangeSquare+DT   ] 6/6   24433.25
+12:52:51  LONG  Trader   [YellowSquare+RR   ] 5/6   24459.50
+12:58:51  SHORT Trader   [OrangeSquare+DT   ] 6/6   24410.00
+13:02:28  SHORT Trader   [OrangeSquare+DT   ] 6/6   24391.75
+13:14:52  LONG  Trader   [YellowSquare+RR   ] 5/6   24452.75
+13:35:28  SHORT Trader   [OrangeSquare+DT   ] 5/6   24425.50
+13:37:22  SHORT Trader   [OrangeSquare+DT   ] 6/6   24425.75
+13:40:16  SHORT Trader   [OrangeSquare+DT   ] 5/6   24428.75
+13:44:12  SHORT Trader   [OrangeSquare+DT   ] 5/6   24419.50
+13:45:59  SHORT Trader   [OrangeSquare+DT   ] 5/6   24419.25
+13:49:23  SHORT Trader   [OrangeSquare+DT   ] 6/6   24384.25
+13:54:04  SHORT Trader   [OrangeSquare+DT   ] 5/6   24371.50
+14:14:30  LONG  Trader   [YellowSquare+RR   ] 5/6   24402.50
+14:30:38  LONG  Trader   [YellowSquare+ET   ] 5/6   24414.00
+14:34:18  LONG  Trader   [YellowSquare+RR   ] 5/6   24438.25
+14:36:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24442.50
+14:39:28  LONG  Trader   [YellowSquare+RR   ] 5/6   24444.25
+14:50:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24460.25
+14:54:44  LONG  Trader   [YellowSquare+RR   ] 5/6   24466.00
+15:12:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24419.25
+15:16:46  SHORT Trader   [OrangeSquare+DT   ] 6/6   24416.75
+15:20:11  SHORT Trader   [OrangeSquare+DT   ] 6/6   24416.25
+15:25:44  SHORT Trader   [OrangeSquare+DT   ] 6/6   24377.50
+15:29:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24371.50
+15:32:09  SHORT Trader   [OrangeSquare+DT   ] 5/6   24384.25
+15:45:37  SHORT Trader   [OrangeSquare+DT   ] 5/6   24363.00
+16:55:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24346.00
   (► = order placed by ActiveNikiTrader)
+
+STRATEGY TRADES
+---------------
+  09:27:40 SHORT   -211t ($-1055.00) ✗ [OrangeSquare+DT] 5/6
+  07:59:25 SHORT   +151t ($+755.00) ✓ [OrangeSquare+DT] 5/6
+  09:58:34 SHORT    +23t ($+115.00) ✓ [OrangeSquare+DT] 5/6
+  10:00:23 SHORT    +74t ($+370.00) ✓ [OrangeSquare+DT] 5/6
+  10:10:59 SHORT    +23t ($+115.00) ✓ [OrangeSquare+DT] 5/6
+  10:16:22 SHORT   -204t ($-1020.00) ✗ [OrangeSquare+DT] 5/6
+  08:03:45 SHORT   -169t ($-845.00) ✗ [OrangeSquare+DT] 5/6
+  07:26:57 SHORT    +26t ($+130.00) ✓ [OrangeSquare+DT] 5/6
+  09:33:13 LONG    +115t ($+575.00) ✓ [YellowSquare+ET] 5/6
+  09:57:35 SHORT   -197t ($-985.00) ✗ [OrangeSquare+DT] 5/6
+  09:16:32 SHORT    +45t ($+225.00) ✓ [OrangeSquare+DT] 5/6
+  10:07:08 SHORT    +32t ($+160.00) ✓ [OrangeSquare+DT] 5/6
+  10:53:14 SHORT   +245t ($+1225.00) ✓ [OrangeSquare+DT] 5/6
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
 
-ALIGNED with signals: 0 trades, +0t
+ALIGNED with signals: 13 trades, -47t
+  09:27:40 SHORT  -211t <- Trader @ 09:27:40 [OrangeSquare+DT] 5/6 
+  07:59:25 SHORT  +151t <- Trader @ 07:59:25 [OrangeSquare+DT] 5/6 ✓
+  09:58:34 SHORT   +23t <- Trader @ 09:58:34 [OrangeSquare+DT] 5/6 ✓
+  10:00:23 SHORT   +74t <- Trader @ 10:00:23 [OrangeSquare+DT] 5/6 ✓
+  10:10:59 SHORT   +23t <- Trader @ 10:10:59 [OrangeSquare+DT] 5/6 ✓
+  10:16:22 SHORT  -204t <- Trader @ 10:16:22 [OrangeSquare+DT] 5/6 
+  08:03:45 SHORT  -169t <- Trader @ 08:03:45 [OrangeSquare+DT] 5/6 
+  07:26:57 SHORT   +26t <- Trader @ 07:26:57 [OrangeSquare+DT] 5/6 ✓
+  09:33:13 LONG   +115t <- Trader @ 09:33:13 [YellowSquare+ET] 5/6 ✓
+  09:57:35 SHORT  -197t <- Trader @ 09:57:35 [OrangeSquare+DT] 5/6 
+  09:16:32 SHORT   +45t <- Trader @ 09:16:32 [OrangeSquare+DT] 5/6 ✓
+  10:07:08 SHORT   +32t <- Trader @ 10:07:08 [OrangeSquare+DT] 5/6 ✓
+  10:53:14 SHORT  +245t <- Trader @ 10:53:14 [OrangeSquare+DT] 5/6 ✓
 
 COUNTER to signals: 0 trades, +0t
 
 NO SIGNAL nearby: 0 trades, +0t
 
+INDICATOR STATE CORRELATION
+---------------------------
+Indicator   UP(W/L)     DN(W/L)     Notes
+  AAA       0/0 (   0%)  9/4 (  69%)  Better when DN
+  DT        1/0 ( 100%)  8/4 (  67%)  Better when UP
+  ET        1/0 ( 100%)  8/4 (  67%)  Better when UP
+  RR        9/4 (  69%)  0/0 (   0%)  Better when UP
+  SB        0/0 (   0%)  9/4 (  69%)  Better when DN
+  SW        1/0 ( 100%)  8/4 (  67%)  Better when UP
+  T3P       9/4 (  69%)  0/0 (   0%)  Better when UP
+  VY        1/0 ( 100%)  8/4 (  67%)  Better when UP
+
 BEST & WORST TRADES
 -------------------
 
 TOP 5 WINNERS:
+  10:53:14 SHORT  +245t [Trader:OrangeSquare+DT] 5/6
+  07:59:25 SHORT  +151t [Trader:OrangeSquare+DT] 5/6
+  09:33:13 LONG   +115t [Trader:YellowSquare+ET] 5/6
+  10:00:23 SHORT   +74t [Trader:OrangeSquare+DT] 5/6
+  09:16:32 SHORT   +45t [Trader:OrangeSquare+DT] 5/6
 
 BOTTOM 5 LOSERS:
+  10:10:59 SHORT   +23t [Trader:OrangeSquare+DT] 5/6
+  08:03:45 SHORT  -169t [Trader:OrangeSquare+DT] 5/6
+  09:57:35 SHORT  -197t [Trader:OrangeSquare+DT] 5/6
+  10:16:22 SHORT  -204t [Trader:OrangeSquare+DT] 5/6
+  09:27:40 SHORT  -211t [Trader:OrangeSquare+DT] 5/6
 
 TIME-BASED ANALYSIS
 -------------------
+Pre-8:30    : 3 trades, 2W, +8t
+9:00-10:00  : 5 trades, 3W, -225t
+10:00-11:00 : 5 trades, 4W, +170t
 
 ================================================================================
 KEY INSIGHTS
 ================================================================================
 
 1. SIGNAL ALIGNMENT:
+   - 13 of 13 trades (100%) aligned with signals
 
 2. P&L BY ALIGNMENT:
-   - ALIGNED trades: +0t ($+0.00)
+   - ALIGNED trades: -47t ($-235.00)
    - COUNTER trades: +0t ($+0.00)
    - NO SIGNAL trades: +0t ($+0.00)
 
 3. CONFLUENCE INSIGHTS:
+   - Best performing: 5/6 with -47t
+   - High confluence (N-1 or higher): -47t
 
 5. RECOMMENDATIONS:
+   - Best trigger: YellowSquare+ET with +115t
+
+================================================================================
+SLIPPAGE ANALYSIS
+================================================================================
+
+ENTRY SLIPPAGE:
+   Trades with data: 13
+   Mean:   +0.4t ($+1.92)
+   Median: +0.0t
+   Std Dev: 0.7t
+   Range:  +0t to +2t
+   TOTAL:  +5t ($+25.00)
+
+EXIT SLIPPAGE (all exits):
+   Trades with data: 13
+   Mean:   +5.6t ($+28.08)
+   Median: +4.0t
+   Std Dev: 10.7t
+   Range:  -14t to +24t
+   TOTAL:  +73t ($+365.00)
+
+EXIT SLIPPAGE BY REASON:
+   SL       (  3 trades): Mean  +4.0t | Total    +12t ($+60.00)
+   TRAIL    (  9 trades): Mean  +6.8t | Total    +61t ($+305.00)
+
+COST SUMMARY:
+   Gross P&L:        -47t ($-235.00)
+   Entry Slippage:   +5t ($+25.00)
+   Exit Slippage:    +73t ($+365.00)
+   Total Slippage:   +78t ($+390.00)
+   Broker Fees:      13 × $4.50 = $58.50
+   ─────────────────────────────────────
+   NET P&L:          $-683.50
+
+   Slippage as % of |Gross|: 166.0%
+   Total costs as % of |Gross|: 190.9%
 
 ================================================================================
 MULTI-DAY COMPARISON - VPS (Previous Days)
@@ -63,12 +567,12 @@ MULTI-DAY COMPARISON - VPS (Previous Days)
 
 Date        Trades  Win%    P&L      Signal Alignment
 ----------------------------------------------------------------------
-Feb 26        3     100%    +337t    3 aligned (+337t), 0 no signal (+0t)
 Feb 27        2     100%    +106t    2 aligned (+106t), 0 no signal (+0t)
 Feb 28        4     100%    +199t    4 aligned (+199t), 0 no signal (+0t)
 Mar 08        6     100%    +524t    6 aligned (+524t), 0 no signal (+0t)
 Mar 09        0     0%      +0t    N/A
+Mar 10        0     0%      +0t    N/A
 ----------------------------------------------------------------------
-TODAY         0     0%      +0t    0 aligned (+0t), 0 no signal (+0t)
+TODAY        13     69%     -47t    13 aligned (-47t), 0 no signal (+0t)
 
 ================================================================================
