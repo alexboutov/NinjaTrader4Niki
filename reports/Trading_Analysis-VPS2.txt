@@ -1,25 +1,33 @@
 ================================================================================
-MAR 16, 2026 TRADING SESSION ANALYSIS
+MAR 17, 2026 TRADING SESSION ANALYSIS
 ================================================================================
 
 SIGNAL SOURCES
 --------------
 ActiveNikiMonitor signals: 0
-ActiveNikiTrader signals:  27
-  - Orders placed:         1
+ActiveNikiTrader signals:  66
+  - Orders placed:         2
   - Outside hours:         0
   - Blocked by cooldown:   0
-BAR data loaded:           34924 bars from CSV
+BAR data loaded:           132694 bars from CSV
 
 SESSION SUMMARY
 ---------------
-Total Round-trips: 0
-Win/Loss: 0W / 0L (0.0% win rate)
-Total P&L: +0 ticks ($+0.00)
+Total Round-trips: 1
+Win/Loss: 0W / 1L (0.0% win rate)
+Total P&L: -203 ticks ($-1015.00)
   LONG:  0 trades, +0t
-  SHORT: 0 trades, +0t
+  SHORT: 1 trades, -203t
 
-ALL SIGNALS FIRED: 27
+CONFLUENCE LEVEL ANALYSIS
+-------------------------
+  5/6: 1 trades, 0W (0%), -203t
+
+TRIGGER TYPE ANALYSIS
+---------------------
+  OrangeSquare+DT: 1 trades, 0W (0%), -203t
+
+ALL SIGNALS FIRED: 66
 ----------------------------------------
 Time      Dir   Source   Trigger              Conf   Price
 05:33:40  SHORT Trader   [OrangeSquare+DT   ] 6/6   24706.50
@@ -49,7 +57,50 @@ Time      Dir   Source   Trigger              Conf   Price
 10:49:42  SHORT Trader   [OrangeSquare+DT   ] 5/6   24858.25
 10:56:03  LONG  Trader   [YellowSquare+RR   ] 5/6   24890.75
 10:59:14  LONG  Trader   [YellowSquare+RR   ] 5/6   24891.50
+11:02:51  LONG  Trader   [YellowSquare+RR   ] 5/6   24902.50
+11:06:26  SHORT Trader   [OrangeSquare+DT   ] 6/6   24864.50
+11:17:50  LONG  Trader   [YellowSquare+RR   ] 5/6   24911.00
+00:00:00  SHORT Trader   [OrangeSquare+RR   ] 6/6   24789.75
+01:11:07  LONG  Trader   [YellowSquare+RR   ] 5/6   24843.25
+02:08:33  SHORT Trader   [OrangeSquare+DT   ] 6/6   24734.75
+02:14:30  SHORT Trader   [OrangeSquare+DT   ] 6/6   24737.25
+03:27:01  LONG  Trader   [YellowSquare+RR   ] 5/6   24796.25
+04:09:25  SHORT Trader   [OrangeSquare+DT   ] 5/6   24779.25
+04:14:17  SHORT Trader   [OrangeSquare+DT   ] 6/6   24764.50
+04:28:08  SHORT Trader   [OrangeSquare+DT   ] 6/6   24766.00
+04:35:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   24757.75
+05:19:34  LONG  Trader   [YellowSquare+RR   ] 5/6   24793.50
+05:44:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24837.50
+05:47:13  LONG  Trader   [YellowSquare+RR   ] 5/6   24844.00
+05:58:34  LONG  Trader   [YellowSquare+RR   ] 5/6   24843.00
+07:42:32  LONG  Trader   [YellowSquare+RR   ] 5/6   24855.50
+08:27:35  LONG  Trader   [YellowSquare+RR   ] 5/6   24914.25
+08:38:34  LONG  Trader   [YellowSquare+RR   ] 5/6   24931.00
+08:43:39  LONG  Trader   [YellowSquare+RR   ] 5/6   24933.50
+08:53:38  LONG  Trader   [YellowSquare+RR   ] 5/6   24930.25
+08:59:19  LONG  Trader   [YellowSquare+RR   ] 5/6   24930.50
+09:24:07  LONG  Trader   [YellowSquare+RR   ] 5/6   25009.00
+09:29:14  LONG  Trader   [YellowSquare+RR   ] 5/6   25013.00
+09:33:56  LONG  Trader   [YellowSquare+RR   ] 5/6   25060.50
+09:35:40  LONG  Trader   [YellowSquare+RR   ] 5/6   25065.75
+09:38:59  LONG  Trader   [YellowSquare+RR   ] 5/6   25073.50
+09:45:11  LONG  Trader   [YellowSquare+RR   ] 5/6   25069.00
+09:48:59  LONG  Trader   [YellowSquare+RR   ] 5/6   25111.00
+10:07:58  SHORT Trader   [OrangeSquare+DT   ] 6/6   25067.50
+10:14:00  SHORT Trader   [OrangeSquare+DT   ] 6/6   25035.75
+10:17:45  SHORT Trader   [OrangeSquare+DT   ] 6/6   25013.25
+10:20:14  LONG  Trader   [YellowSquare+ET   ] 5/6   25056.25 ►
+10:21:51  LONG  Trader   [YellowSquare+RR   ] 5/6   25063.25
+10:26:08  LONG  Trader   [YellowSquare+RR   ] 5/6   25062.00
+10:30:11  LONG  Trader   [YellowSquare+RR   ] 5/6   25069.25
+10:37:50  LONG  Trader   [YellowSquare+RR   ] 5/6   25078.00
+10:51:31  LONG  Trader   [YellowSquare+RR   ] 5/6   25080.75
+10:53:35  LONG  Trader   [YellowSquare+RR   ] 5/6   25080.25
   (► = order placed by ActiveNikiTrader)
+
+STRATEGY TRADES
+---------------
+  10:36:38 SHORT   -203t ($-1015.00) ✗ [OrangeSquare+DT] 5/6 [conf 5→5: save +198t]
 
 ==========================================================================================
 EXIT STRATEGY COMPARISON: SL/TP vs Confluence Drop vs Single Indicator Flip
@@ -61,10 +112,20 @@ STRATEGY COMPARISON SUMMARY
 ----------------------------------------------------------------------
 Strategy                         Trades   Better    Worse          NET
 ----------------------------------------------------------------------
-1. Current SL/TP (baseline)           0      ---      ---          +0t
-2. Confluence drop below 6            0      ---      ---          +0t
+1. Current SL/TP (baseline)           1      ---      ---          +0t
+2. Confluence drop below 6            1        1        0        +198t
 3. Single indicator flip              0      ---      ---          +0t
 ----------------------------------------------------------------------
+
+STRATEGY 2: CONFLUENCE DROP BELOW 6
+----------------------------------------
+Trades affected: 1 of 1
+  Losers with drop: 1 → savings: +198t
+  Winners with drop: 0 → cost: +0t
+  NET: +198t
+
+  Entry     Dir   Exit  Actual  @Time     Conf   Hypo    Diff   Result
+  10:36:38 SHORT TP    -203t  10:36:38  5→5      -5t  +198t SAVE(L)
 
 ==========================================================================================
 TRAILING STOP SIMULATION ANALYSIS
@@ -77,53 +138,503 @@ TRAILING STOP COMPARISON SUMMARY
 ------------------------------------------------------------------------------------------
 Strategy                   Trades  Better   Worse   Same     Actual      Trail        NET
 ------------------------------------------------------------------------------------------
-Fixed SL/TP (baseline)          0     ---     ---    ---         +0t        ---        +0t
+Fixed SL/TP (baseline)          1     ---     ---    ---       -203t        ---        +0t
+Trail-100/30                    1       1       0      0      -203t      +120t      +323t
+Trail-100/40                    1       1       0      0      -203t      +120t      +323t
+Trail-100/50                    1       1       0      0      -203t      +120t      +323t
+Trail-110/55                    1       1       0      0      -203t      +120t      +323t
+Trail-40/20                     1       1       0      0      -203t       +25t      +228t
+Trail-50/25                     1       1       0      0      -203t      +120t      +323t
+Trail-60/30                     1       1       0      0      -203t      +120t      +323t
+Trail-70/35                     1       1       0      0      -203t      +120t      +323t
+Trail-80/30                     1       1       0      0      -203t      +120t      +323t
+Trail-80/40                     1       1       0      0      -203t      +120t      +323t
+Trail-80/50                     1       1       0      0      -203t      +120t      +323t
+Trail-90/40                     1       1       0      0      -203t      +120t      +323t
+Trail-90/45                     1       1       0      0      -203t      +120t      +323t
 ------------------------------------------------------------------------------------------
+
+TRAILING STOP: Trail-100/30
+  Configuration: Activate at +100t, trail 30t (very tight)
+  - Activation threshold: +100 ticks (+$125)
+  - Trail distance: 30 ticks ($38)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-100/40
+  Configuration: Activate at +100t, trail 40t (tight)
+  - Activation threshold: +100 ticks (+$125)
+  - Trail distance: 40 ticks ($50)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-100/50
+  Configuration: Activate at +100t, trail 50t
+  - Activation threshold: +100 ticks (+$125)
+  - Trail distance: 50 ticks ($62)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-110/55
+  Configuration: Activate at +110t, trail 55t (near TP)
+  - Activation threshold: +110 ticks (+$138)
+  - Trail distance: 55 ticks ($69)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-40/20
+  Configuration: Activate at +40t, trail 20t (tight)
+  - Activation threshold: +40 ticks (+$50)
+  - Trail distance: 20 ticks ($25)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +228t ($+1140.00)
+
+  Exit Type Breakdown:
+    TRAIL: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +228t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t    +25t  +228t TRAIL    +45t  Yes
+
+TRAILING STOP: Trail-50/25
+  Configuration: Activate at +50t, trail 25t
+  - Activation threshold: +50 ticks (+$62)
+  - Trail distance: 25 ticks ($31)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-60/30
+  Configuration: Activate at +60t, trail 30t
+  - Activation threshold: +60 ticks (+$75)
+  - Trail distance: 30 ticks ($38)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-70/35
+  Configuration: Activate at +70t, trail 35t
+  - Activation threshold: +70 ticks (+$88)
+  - Trail distance: 35 ticks ($44)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-80/30
+  Configuration: Activate at +80t, trail 30t (tighter)
+  - Activation threshold: +80 ticks (+$100)
+  - Trail distance: 30 ticks ($38)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-80/40
+  Configuration: Activate at +80t, trail 40t
+  - Activation threshold: +80 ticks (+$100)
+  - Trail distance: 40 ticks ($50)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-80/50
+  Configuration: Activate at +80t, trail 50t (looser)
+  - Activation threshold: +80 ticks (+$100)
+  - Trail distance: 50 ticks ($62)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-90/40
+  Configuration: Activate at +90t, trail 40t
+  - Activation threshold: +90 ticks (+$112)
+  - Trail distance: 40 ticks ($50)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
+
+TRAILING STOP: Trail-90/45
+  Configuration: Activate at +90t, trail 45t
+  - Activation threshold: +90 ticks (+$112)
+  - Trail distance: 45 ticks ($56)
+--------------------------------------------------
+  Trades analyzed: 1
+  NET impact: +323t ($+1615.00)
+
+  Exit Type Breakdown:
+    TP: 1 (100%)
+
+  Impact on Winners (actual result was profitable):
+    Analyzed: 0
+    Trail better: 0, Trail worse: 0
+    Winner P&L change: +0t
+
+  Impact on Losers (actual result was loss):
+    Analyzed: 1
+    Trail better: 1, Trail worse: 0
+    Loser P&L change: +323t
+
+  'Let Winners Run' Analysis:
+    Trades where price exceeded 120t TP: 1
+    Average max profit reached: 121t
+
+  Trade Details (showing impact per trade):
+  Entry     Dir    Actual  Trail   Diff   Exit  MaxProf  Trail?
+  10:36:38 SHORT   -203t   +120t  +323t TP      +121t  Yes
 
 TRAILING STOP RECOMMENDATION
 ------------------------------
-  No trailing stop configuration improved results.
-  Current fixed SL/TP strategy performs best.
+  Best trailing config: Trail-60/30 with +323t improvement
+  Consider implementing this trailing stop strategy.
 
 SIGNAL ALIGNMENT ANALYSIS
 -------------------------
 
-ALIGNED with signals: 0 trades, +0t
+ALIGNED with signals: 1 trades, -203t
+  10:36:38 SHORT  -203t <- Trader @ 10:36:38 [OrangeSquare+DT] 5/6 
 
 COUNTER to signals: 0 trades, +0t
 
 NO SIGNAL nearby: 0 trades, +0t
 
+EXIT TRIGGER OCCURRENCE (during trades)
+---------------------------------------------
+Trades with BAR data: 1
+  Confluence dropped below 6: 1 trades
+    - On losers: 1
+    - On winners: 0
+  Single indicator flipped: 0 trades
+    - On losers: 0
+    - On winners: 0
+  Neither triggered: 0 (conf) / 1 (flip)
+
+INDICATOR STATE CORRELATION
+---------------------------
+Indicator   UP(W/L)     DN(W/L)     Notes
+  AAA       0/0 (   0%)  0/1 (   0%)  
+  DT        0/0 (   0%)  0/1 (   0%)  
+  ET        0/0 (   0%)  0/1 (   0%)  
+  RR        0/1 (   0%)  0/0 (   0%)  
+  SB        0/0 (   0%)  0/1 (   0%)  
+  SW        0/0 (   0%)  0/1 (   0%)  
+  T3P       0/1 (   0%)  0/0 (   0%)  
+  VY        0/0 (   0%)  0/1 (   0%)  
+
 BEST & WORST TRADES
 -------------------
 
 TOP 5 WINNERS:
+  10:36:38 SHORT  -203t [Trader:OrangeSquare+DT] 5/6
 
 BOTTOM 5 LOSERS:
+  10:36:38 SHORT  -203t [Trader:OrangeSquare+DT] 5/6
 
 TIME-BASED ANALYSIS
 -------------------
+10:00-11:00 : 1 trades, 0W, -203t
 
 ================================================================================
 KEY INSIGHTS
 ================================================================================
 
 1. SIGNAL ALIGNMENT:
+   - 1 of 1 trades (100%) aligned with signals
 
 2. P&L BY ALIGNMENT:
-   - ALIGNED trades: +0t ($+0.00)
+   - ALIGNED trades: -203t ($-1015.00)
    - COUNTER trades: +0t ($+0.00)
    - NO SIGNAL trades: +0t ($+0.00)
 
 3. CONFLUENCE INSIGHTS:
+   - Best performing: 5/6 with -203t
+   - High confluence (N-1 or higher): -203t
 
 4. EXIT STRATEGY COMPARISON:
-   - Confluence drop: no trades affected
+   - Confluence drop: SAVE 198t (1 trades affected)
    - Indicator flip:  no trades affected
-   - Trailing stop:   no improvement found
-   → Current SL/TP performs best
+   - Trailing stop:   SAVE 323t (best: Trail-60/30)
+   → Trailing stop (Trail-60/30) would improve results by +323t
 
 5. RECOMMENDATIONS:
+
+================================================================================
+SLIPPAGE ANALYSIS
+================================================================================
+
+ENTRY SLIPPAGE:
+   Trades with data: 1
+   Mean:   +0.0t ($+0.00)
+   Median: +0.0t
+   Std Dev: 0.0t
+   Range:  +0t to +0t
+   TOTAL:  +0t ($+0.00)
+
+EXIT SLIPPAGE (all exits):
+   Trades with data: 1
+   Mean:   +0.0t ($+0.00)
+   Median: +0.0t
+   Std Dev: 0.0t
+   Range:  +0t to +0t
+   TOTAL:  +0t ($+0.00)
+
+EXIT SLIPPAGE BY REASON:
+
+COST SUMMARY:
+   Gross P&L:        -203t ($-1015.00)
+   Entry Slippage:   +0t ($+0.00)
+   Exit Slippage:    +0t ($+0.00)
+   Total Slippage:   +0t ($+0.00)
+   Broker Fees:      1 × $4.50 = $4.50
+   ─────────────────────────────────────
+   NET P&L:          $-1019.50
+
+   Slippage as % of |Gross|: 0.0%
+   Total costs as % of |Gross|: 0.4%
 
 ================================================================================
 MULTI-DAY COMPARISON - VPS (Previous Days)
@@ -131,12 +642,12 @@ MULTI-DAY COMPARISON - VPS (Previous Days)
 
 Date        Trades  Win%    P&L      Signal Alignment
 ----------------------------------------------------------------------
-Feb 28        4     100%    +199t    4 aligned (+199t), 0 no signal (+0t)
 Mar 08        6     100%    +524t    6 aligned (+524t), 0 no signal (+0t)
 Mar 09        0     0%      +0t    N/A
 Mar 10        0     0%      +0t    N/A
 Mar 14       13     69%     -47t    13 aligned (-47t), 0 no signal (+0t)
+Mar 16        0     0%      +0t    N/A
 ----------------------------------------------------------------------
-TODAY         0     0%      +0t    0 aligned (+0t), 0 no signal (+0t)
+TODAY         1     0%    -203t    1 aligned (-203t), 0 no signal (+0t)
 
 ================================================================================
