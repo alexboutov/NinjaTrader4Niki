@@ -304,7 +304,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     string exitSlipStr = exitSlippageTicks >= 0 ? $"+{exitSlippageTicks:F0}t" : $"{exitSlippageTicks:F0}t";
                     
                     // Comprehensive trade closed log line for analysis script - includes exit slippage
-                    PrintAndLog($"{pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason} | Exit Slip: {exitSlipStr}", time);
+                    PrintAndLog($">>> {pnlIcon} TRADE CLOSED: {tradeEntryDirection} | Entry={tradeEntryPrice:F2} Exit={exitPrice:F2} | {ticksStr} ${tradePnL:F2} | Reason: {exitReason} | Exit Slip: {exitSlipStr}", time);
                     PrintAndLog($"   Daily P&L: ${dailyPnL:F2} ({dailyTradeCount} trades) | Entry Time: {tradeEntryTime:yyyy-MM-dd HH:mm:ss}", time);
                     
                     // Reset entry tracking
