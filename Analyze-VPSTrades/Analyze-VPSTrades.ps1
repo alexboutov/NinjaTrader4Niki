@@ -5,12 +5,11 @@
 
 .DESCRIPTION
     - Scans ALL log files in the NT8 log directory (any date in filename)
-    - Auto-detects trading date from log timestamps (supports replay sessions)
+    - Extracts today's trading data from all files (handles cross-day strategy sessions)
     - Creates dated analysis folder under ActiveNikiAnalysis\YYYY-MM-DD\
     - Generates trades_final.txt, signals.txt
     - Copies ActiveNikiMonitor, ActiveNikiTrader, and IndicatorValues files
-    - Runs Python analysis to produce Trading_Analysis-VPS[1/2/3].txt
-    - Report Time column shows full yyyy-MM-dd HH:mm:ss (from log timestamps, not system clock)
+    - Runs Python analysis to produce {Mon}{DD}_Trading_Analysis.txt
     - Designed to run unattended via scheduled task (SYSTEM account)
 
     Processing order (smallest files first for performance):
@@ -20,46 +19,53 @@
       4. IndicatorValues_*   â†’ copy for BAR analysis (largest)
 
 .PARAMETER Date
-    The trading date to analyze. If omitted, auto-detected from log file timestamps.
-    Format: yyyy-MM-dd. Useful for replays or specific historical dates.
-
-.PARAMETER NT8LogPath
-    Path to the NinjaTrader 8 log directory.
-    Defaults to the standard NT8 path on VPS (Administrator account) if omitted.
-
-.PARAMETER RepoRoot
-    Path to the local git repo root (must contain a reports\ subfolder).
-    Defaults to the VPS repo path. Override for local testing.
-
+    The trading date to analyze. Defaults to today. Format: yyyy-MM-dd
 
 .EXAMPLE
     .\Analyze-VPSTrades.ps1
-    # Analyzes logs — date auto-detected, uses default VPS log path
+    # Analyzes today's logs
 
 .EXAMPLE
     .\Analyze-VPSTrades.ps1 -Date "2026-02-07"
     # Analyzes logs for a specific date
-
-.EXAMPLE
-    .Analyze-VPSTrades.ps1 -Date "2026-02-02" -NT8LogPath "C:\Users\alexb\OneDrive\Documents\NinjaTrader 8\log" -RepoRoot "C:\Users\alexb\Documents\TradingRepo\NinjaTrader4Niki"
-    # Local test — Steps 7 and 9 skipped automatically (IP not a known VPS)
 #>
 
 param(
-    [string]$Date       = "",
-    [string]$NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log",
-    [string]$RepoRoot   = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
+    [string]$Date = (Get-Date -Format "yyyy-MM-dd")
 )
 
 # === CONFIGURATION ===
+
+# Auto-detect NT8 log path - check OneDrive first
+if ($env:USERNAME -eq "Administrator") {
+    $NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log"
+} elseif (Test-Path "$env:USERPROFILE\OneDrive\Documents\NinjaTrader 8\log") {
+    $NT8LogPath = "$env:USERPROFILE\OneDrive\Documents\NinjaTrader 8\log"
+    Write-Host "[CONFIG] Using OneDrive Documents" -ForegroundColor Cyan
+} else {
+    $NT8LogPath = "$env:USERPROFILE\Documents\NinjaTrader 8\log"
+    Write-Host "[CONFIG] Using standard Documents" -ForegroundColor Cyan
+}
+
 $AnalysisBasePath = Join-Path $NT8LogPath "ActiveNikiAnalysis"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonScript = Join-Path $ScriptDir "main.py"
-$PythonExe = "C:\Program Files\Python313\python.exe"
-if (!(Test-Path $PythonExe)) {
-    $pyCmd = Get-Command python -ErrorAction SilentlyContinue
-    if ($pyCmd) { $PythonExe = $pyCmd.Source }
+
+# Auto-detect Python location (check PATH first, then common install locations)
+$PythonExe = if (Get-Command python -ErrorAction SilentlyContinue) {
+    (Get-Command python).Source
+} elseif (Test-Path "C:\Program Files\Python313\python.exe") {
+    "C:\Program Files\Python313\python.exe"
+} elseif (Test-Path "$env:USERPROFILE\AppData\Local\Programs\Python\Python313\python.exe") {
+    "$env:USERPROFILE\AppData\Local\Programs\Python\Python313\python.exe"
+} elseif (Test-Path "C:\Program Files\Python312\python.exe") {
+    "C:\Program Files\Python312\python.exe"
+} elseif (Test-Path "$env:USERPROFILE\AppData\Local\Programs\Python\Python312\python.exe") {
+    "$env:USERPROFILE\AppData\Local\Programs\Python\Python312\python.exe"
+} else {
+    $null
 }
+
 $RunLog = Join-Path $AnalysisBasePath "run.log"
 
 # === FUNCTIONS ===
@@ -79,44 +85,6 @@ function Write-Log {
 }
 
 # === MAIN SCRIPT ===
-
-# === AUTO-DETECT DATE FROM LOG FILES (if not provided) ===
-if ([string]::IsNullOrEmpty($Date)) {
-    Write-Host "[INFO] No date specified — detecting from log file timestamps..."
-
-    # Strategy 1: Read most recent ActiveNikiTrader_*.txt and grab first timestamp line
-    $traderDetect = Get-ChildItem -Path $NT8LogPath -Filter "ActiveNikiTrader_*.txt" -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending | Select-Object -First 1
-
-    if ($traderDetect) {
-        $firstLine = Get-Content $traderDetect.FullName -TotalCount 60 -ErrorAction SilentlyContinue |
-            Where-Object { $_ -match "^\d{4}-\d{2}-\d{2} " } | Select-Object -First 1
-        if ($firstLine -match "^(\d{4}-\d{2}-\d{2})") {
-            $Date = $Matches[1]
-            Write-Host "[INFO] Date detected from ActiveNikiTrader log: $Date"
-        }
-    }
-
-    # Strategy 2: Fall back to most recent IndicatorValues_*.csv
-    if ([string]::IsNullOrEmpty($Date)) {
-        $csvDetect = Get-ChildItem -Path $NT8LogPath -Filter "IndicatorValues_*.csv" -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if ($csvDetect) {
-            $firstLine = Get-Content $csvDetect.FullName -TotalCount 5 -ErrorAction SilentlyContinue |
-                Where-Object { $_ -match "^\d{4}-\d{2}-\d{2}" } | Select-Object -First 1
-            if ($firstLine -match "^(\d{4}-\d{2}-\d{2})") {
-                $Date = $Matches[1]
-                Write-Host "[INFO] Date detected from IndicatorValues CSV: $Date"
-            }
-        }
-    }
-
-    # Strategy 3: Fall back to today (last resort)
-    if ([string]::IsNullOrEmpty($Date)) {
-        $Date = Get-Date -Format "yyyy-MM-dd"
-        Write-Host "[WARN] Could not detect date from log files — falling back to today: $Date"
-    }
-}
 
 # Ensure base analysis directory exists
 if (!(Test-Path $AnalysisBasePath)) {
@@ -258,8 +226,8 @@ try {
     if ((Test-Path $PythonScript) -and (Test-Path $PythonExe)) {
         $hasData = ($allTrades.Count -gt 0) -or ($traderCopied -gt 0)
         if ($hasData) {
-            Write-Log "  $PythonExe $PythonScript $analysisFolder --date $Date --full-timestamps"
-            $pythonOutput = & $PythonExe $PythonScript $analysisFolder --date $Date --full-timestamps 2>&1
+            Write-Log "  $PythonExe $PythonScript $analysisFolder --date $Date"
+            $pythonOutput = & $PythonExe $PythonScript $analysisFolder --date $Date 2>&1
             $pythonOutput | ForEach-Object { Write-Log "  [PY] $_" }
 
             if ($LASTEXITCODE -eq 0) {
@@ -305,59 +273,86 @@ try {
         Write-Log "  - $($_.Name) ($size)"
     }
 
+# Auto-detect repo path based on environment
+if ($env:USERNAME -eq "Administrator") {
+    # VPS location
+    $repoRoot = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using VPS repo path" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\Downloads\ActiveNiki\code") {
+    # Local laptop location
+    $repoRoot = "$env:USERPROFILE\Downloads\ActiveNiki\code"
+    Write-Host "[CONFIG] Using laptop repo path (Downloads)" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki") {
+    # OneDrive Documents location
+    $repoRoot = "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using OneDrive repo path" -ForegroundColor Cyan
+} else {
+    # Standard Documents location
+    $repoRoot = "$env:USERPROFILE\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using standard Documents repo path" -ForegroundColor Cyan
+}
+    $reportsDir = Join-Path $repoRoot "reports"
+
+
     # ==================== STEP 7: PUSH REPORT TO GITHUB ====================
-    Write-Log "Step 7: Pushing report to GitHub..."
-    $gitExe    = "C:\Program Files\Git\cmd\git.exe"
-    $reportsDir = Join-Path $RepoRoot "reports"
+    Write-Log "Step 7: GitHub is commented out ..."
+    Write-Log "Step 8: Clean up old logs is commented out ..."
+<#
+    $gitExe = "C:\Program Files\Git\cmd\git.exe"
+# Auto-detect repo path based on environment
+if ($env:USERNAME -eq "Administrator") {
+    # VPS location
+    $repoRoot = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using VPS repo path" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\Downloads\ActiveNiki\code") {
+    # Local laptop location
+    $repoRoot = "$env:USERPROFILE\Downloads\ActiveNiki\code"
+    Write-Host "[CONFIG] Using laptop repo path (Downloads)" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki") {
+    # OneDrive Documents location
+    $repoRoot = "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using OneDrive repo path" -ForegroundColor Cyan
+} else {
+    # Standard Documents location
+    $repoRoot = "$env:USERPROFILE\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using standard Documents repo path" -ForegroundColor Cyan
+}
+    $reportsDir = Join-Path $repoRoot "reports"
 
     $reportFile = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($reportFile) {
-        # Resolve VPS name from public IP — skip git push if running on an unrecognized machine
-        $publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
-        $VpsName = switch ($publicIP) {
-            "104.237.203.83" { "VPS1" }
-            "205.234.153.21" { "VPS2" }
-            "64.44.56.21"    { "VPS3" }
-            default          { $null }
-        }
-
-        if (-not $VpsName) {
-            Write-Log "  Skipping git push — IP $publicIP is not a known VPS. Run this step manually from a VPS." "WARN"
-        } else {
-        Write-Log "  VPS identity: $VpsName (IP: $publicIP)"
-
         # Ensure reports directory exists
         if (!(Test-Path $reportsDir)) {
             New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
             Write-Log "  Created reports directory: $reportsDir" "OK"
         }
-
-        $destReport  = Join-Path $reportsDir "Trading_Analysis-${VpsName}.txt"
-        $tradesFile  = Join-Path $analysisFolder "trades_final.txt"
-        $signalsFile = Join-Path $analysisFolder "signals.txt"
-
-        Copy-Item $reportFile.FullName $destReport -Force
-        if (Test-Path $tradesFile)  { Copy-Item $tradesFile  (Join-Path $reportsDir "trades_final.txt") -Force }
-        if (Test-Path $signalsFile) { Copy-Item $signalsFile (Join-Path $reportsDir "signals.txt")      -Force }
-
-        if (!(Test-Path $gitExe)) {
-            $gitCmd = Get-Command git -ErrorAction SilentlyContinue
-            if ($gitCmd) { $gitExe = $gitCmd.Source }
+        # Resolve VPS name from public IP address
+        $publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+        $vpsName = switch ($publicIP) {
+            "104.237.203.83" { "VPS1" }
+            "205.234.153.21" { "VPS2" }
+            "64.44.56.21"    { "VPS3" }
+            default          { "VPS_$publicIP" }
         }
+        Write-Log "  VPS identity: $vpsName (IP: $publicIP)"
+        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt") -Force
+        $tradesFile = Join-Path $analysisFolder "trades_final.txt"
+        $signalsFile = Join-Path $analysisFolder "signals.txt"
+        if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
+        if (Test-Path $signalsFile) { Copy-Item $signalsFile (Join-Path $reportsDir "signals.txt") -Force }
 
-        Push-Location $RepoRoot
+        Push-Location $repoRoot
         try {
             & $gitExe pull --rebase 2>&1 | Out-Null
             & $gitExe add reports/ 2>&1 | Out-Null
             & $gitExe commit -m $Date 2>&1 | Out-Null
             & $gitExe push 2>&1 | Out-Null
-            Write-Log "  Git push completed for $Date - Trading_Analysis-${VpsName}.txt" "OK"
+            Write-Log "  Git push completed for $Date - Trading_Analysis-${vpsName}.txt" "OK"
         } catch {
             Write-Log "  Git push failed: $_" "ERROR"
         } finally {
             Pop-Location
         }
-        } # end if $VpsName
     } else {
         Write-Log "  No analysis report found to push" "WARN"
     }
@@ -382,48 +377,75 @@ try {
     } else {
         Write-Log "  No files older than 3 weeks found" "INFO"
     }
+#>
 
-    # ==================== STEP 9: SEND EMAIL REPORT ====================
-    Write-Log "Step 9: Sending email report..."
+# ==================== STEP 9: SEND EMAIL REPORT ====================
+Write-Log "Step 9: Sending email report..."
 
-    if (-not $VpsName) {
-        Write-Log "  Skipping email — not running on a known VPS." "WARN"
-    } else {
-        $EmailTo      = "alex.boutov@gmail.com"
-        $EmailFrom    = "alex.boutov@gmail.com"
-        $EmailAppPass = "oqmy bqia arud hfmf"
+$EmailTo      = "alex.boutov@gmail.com"
+$EmailFrom    = "alex.boutov@gmail.com"
+$EmailAppPass = "oqmy bqia arud hfmf"
 
-        $emailAttachment = Join-Path $reportsDir "Trading_Analysis-${VpsName}.txt"
+# Get VPS identity from public IP
+$publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+$vpsName = switch ($publicIP) {
+    "104.237.203.83" { "VPS1" }
+    "205.234.153.21" { "VPS2" }
+    "64.44.56.21"    { "VPS3" }
+    default          { "VPS_$publicIP" }
+}
+Write-Log "  VPS identity: $vpsName (IP: $publicIP)"
 
-        if (Test-Path $emailAttachment) {
-            try {
-                $smtpCred = New-Object System.Management.Automation.PSCredential(
-                    $EmailFrom,
-                    (ConvertTo-SecureString $EmailAppPass -AsPlainText -Force)
-                )
-                $tradeCount  = if ($allTrades.Count -gt 0) { $allTrades.Count } else { 0 }
-                $signalCount = if ($allSignalLines.Count -gt 0) { $allSignalLines.Count } else { 0 }
-                $emailBody = "Trading Analysis Report - ${VpsName} - ${Date}`nTrades filled : ${tradeCount}`nSignal lines  : ${signalCount}`nFull report is attached.`n---`nGenerated automatically by Analyze-VPSTrades.ps1 on ${VpsName}"
-                $mailParams = @{
-                    From        = $EmailFrom
-                    To          = $EmailTo
-                    Subject     = "[${VpsName}] Trading Analysis - ${Date}"
-                    Body        = $emailBody
-                    Attachments = $emailAttachment
-                    SmtpServer  = "smtp.gmail.com"
-                    Port        = 587
-                    UseSsl      = $true
-                    Credential  = $smtpCred
-                }
-                Send-MailMessage @mailParams
-                Write-Log "  Email sent to $EmailTo - Trading_Analysis-${VpsName}.txt" "OK"
-            } catch {
-                Write-Log "  Email send failed: $_" "ERROR"
-            }
-        } else {
-            Write-Log "  Email attachment not found, skipping: $emailAttachment" "WARN"
-        }
+# Find the generated analysis report in the analysis folder
+$reportFile = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+if ($reportFile) {
+    # Ensure reports directory exists
+    if (!(Test-Path $reportsDir)) {
+        New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
+        Write-Log "  Created reports directory: $reportsDir" "OK"
     }
+    
+    # Copy report to reports directory with VPS naming convention
+    $emailAttachment = Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt"
+    Copy-Item $reportFile.FullName $emailAttachment -Force
+    Write-Log "  Copied report to: $emailAttachment" "OK"
+    
+    # Also copy trades_final.txt and signals.txt for reference
+    $tradesFile = Join-Path $analysisFolder "trades_final.txt"
+    $signalsFile = Join-Path $analysisFolder "signals.txt"
+    if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
+    if (Test-Path $signalsFile) { Copy-Item $signalsFile (Join-Path $reportsDir "signals.txt") -Force }
+    
+    try {
+        $smtpCred = New-Object System.Management.Automation.PSCredential(
+            $EmailFrom,
+            (ConvertTo-SecureString $EmailAppPass -AsPlainText -Force)
+        )
+        $tradeCount  = if ($allTrades.Count -gt 0) { $allTrades.Count } else { 0 }
+        $signalCount = if ($allSignalLines.Count -gt 0) { $allSignalLines.Count } else { 0 }
+        $emailBody = "Trading Analysis Report - ${vpsName} - ${Date}`nTrades filled : ${tradeCount}`nSignal lines  : ${signalCount}`nFull report is attached.`n---`nGenerated automatically by Analyze-VPSTrades.ps1 on ${vpsName}"
+        $mailParams = @{
+            From        = $EmailFrom
+            To          = $EmailTo
+            Subject     = "[${vpsName}] Trading Analysis - ${Date}"
+            Body        = $emailBody
+            Attachments = $emailAttachment
+            SmtpServer  = "smtp.gmail.com"
+            Port        = 587
+            UseSsl      = $true
+            Credential  = $smtpCred
+        }
+        Send-MailMessage @mailParams
+        Write-Log "  Email sent to $EmailTo - Trading_Analysis-${vpsName}.txt" "OK"
+    } catch {
+        Write-Log "  Email send failed: $_" "ERROR"
+    }
+} else {
+    Write-Log "  No analysis report found to attach" "WARN"
+    Write-Log "  Expected to find: *_Trading_Analysis.txt in $analysisFolder" "WARN"
+}
+
 
 } catch {
     Write-Log "FATAL: $($_.Exception.Message)" "ERROR"
