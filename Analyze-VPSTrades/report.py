@@ -640,6 +640,7 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     
     if early_exit_analysis:
         lines.append("4. EXIT STRATEGY COMPARISON:")
+
         conf_ea = early_exit_analysis.get('confluence')
         flip_ea = early_exit_analysis.get('flip')
         
@@ -692,18 +693,60 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
         else:
             lines.append(f"   ΓåÆ Current SL/TP performs best")
         lines.append("")
-    
+    else:
+        lines.append("4. EXIT STRATEGY COMPARISON:")
+        lines.append("   - No BAR data available (IndicatorValues CSV not found for this session)")
+        lines.append("")
+
     lines.append("5. RECOMMENDATIONS:")
+    rec_count = 0
+
     if no_signal_pnl < 0:
         lines.append(f"   - Avoiding NO SIGNAL trades would have saved {abs(no_signal_pnl):.0f}t")
+        rec_count += 1
     if counter_pnl < 0:
         lines.append(f"   - Avoiding COUNTER trades would have saved {abs(counter_pnl):.0f}t")
-    
+        rec_count += 1
+
     if trigger_stats:
         profitable_triggers = [(k, v) for k, v in trigger_stats.items() if v['pnl'] > 0]
         if profitable_triggers:
             best_trigger = max(profitable_triggers, key=lambda x: x[1]['pnl'])
             lines.append(f"   - Best trigger: {best_trigger[0]} with {best_trigger[1]['pnl']:+.0f}t")
+            rec_count += 1
+
+    if early_exit_analysis:
+        # Repeat best exit strategy finding from section 4
+        conf_ea = early_exit_analysis.get('confluence')
+        flip_ea = early_exit_analysis.get('flip')
+        conf_net = conf_ea['total_difference_ticks'] if conf_ea else 0
+        flip_net = flip_ea['total_difference_ticks'] if flip_ea else 0
+        trail_net = 0
+        best_trail = None
+        if trailing_stop_analysis and trailing_stop_analysis.get('configs'):
+            for cn, ts in trailing_stop_analysis['configs'].items():
+                if ts['total_difference_ticks'] > trail_net:
+                    trail_net = ts['total_difference_ticks']
+                    best_trail = cn
+        best_improvement = max(conf_net, flip_net, trail_net)
+        if trail_net > 0 and trail_net == best_improvement and best_trail:
+            lines.append(f"   - Trailing stop ({best_trail}) would improve results by {trail_net:+.0f}t")
+            rec_count += 1
+        elif conf_net > 0 and conf_net == best_improvement:
+            lines.append(f"   - Confluence drop exit would improve results by {conf_net:+.0f}t")
+            rec_count += 1
+        elif flip_net > 0 and flip_net == best_improvement:
+            lines.append(f"   - Indicator flip exit would improve results by {flip_net:+.0f}t")
+            rec_count += 1
+        else:
+            lines.append("   - Current SL/TP outperforms all tested exit strategies")
+            rec_count += 1
+    else:
+        lines.append("   - Exit strategy comparison unavailable (no BAR data)")
+        rec_count += 1
+
+    if rec_count == 0:
+        lines.append("   - No specific recommendations (all alignment categories break even)")
     lines.append("")
     
     entry_slippages = [rt.get('entry_slippage_ticks', 0) for rt in complete_rts if rt.get('entry_slippage_ticks') is not None]

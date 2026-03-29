@@ -196,30 +196,44 @@ try {
     Write-Log "  $traderCopied of $($traderFiles.Count) Trader file(s) had data for $Date" "OK"
 
     # ==================== STEP 5: COPY IndicatorValues FILES ====================
+# ==================== STEP 5: COPY IndicatorValues FILES ====================
     Write-Log "Step 5: Copying IndicatorValues CSV files..."
-
     $csvFiles = Get-ChildItem -Path $NT8LogPath -Filter "IndicatorValues_*.csv" -ErrorAction SilentlyContinue
     $csvCopied = 0
-
     foreach ($file in $csvFiles) {
-        # For CSVs, check if any row contains today's date in BarTime
-        # Use Select-String for fast check without loading entire file
-        $hasToday = Select-String -Path $file.FullName -Pattern $Date -Quiet -ErrorAction SilentlyContinue
-        if (!$hasToday) {
-            # Also check M/D/YYYY format (e.g., 2/9/2026)
-            $dt = [datetime]::ParseExact($Date, "yyyy-MM-dd", $null)
-            $altDatePattern = "$($dt.Month)/$($dt.Day)/$($dt.Year)"
-            $hasToday = Select-String -Path $file.FullName -Pattern ([regex]::Escape($altDatePattern)) -Quiet -ErrorAction SilentlyContinue
+        $shouldCopy = $false
+
+        # Primary: match session-start date in filename (e.g. IndicatorValues_2026-03-28_*.csv)
+        # This handles Market Replay sessions where bar timestamps are historical dates
+        if ($file.Name -match [regex]::Escape($Date)) {
+            $shouldCopy = $true
+            $copyReason = "filename match"
         }
-        if ($hasToday) {
+
+        # Fallback: check if any row contains today's date in BarTime content
+        # Handles live sessions where filename date may differ from content date
+        if (!$shouldCopy) {
+            $hasToday = Select-String -Path $file.FullName -Pattern $Date -Quiet -ErrorAction SilentlyContinue
+            if (!$hasToday) {
+                $dt = [datetime]::ParseExact($Date, "yyyy-MM-dd", $null)
+                $altDatePattern = "$($dt.Month)/$($dt.Day)/$($dt.Year)"
+                $hasToday = Select-String -Path $file.FullName -Pattern ([regex]::Escape($altDatePattern)) -Quiet -ErrorAction SilentlyContinue
+            }
+            if ($hasToday) {
+                $shouldCopy = $true
+                $copyReason = "content match"
+            }
+        }
+
+        if ($shouldCopy) {
             Copy-Item -Path $file.FullName -Destination (Join-Path $analysisFolder $file.Name) -Force
             $fileSize = [math]::Round($file.Length / 1KB, 1)
-            Write-Log "  Copied (has today's data): $($file.Name) (${fileSize} KB)"
+            Write-Log "  Copied ($copyReason): $($file.Name) (${fileSize} KB)"
             $csvCopied++
         }
     }
     Write-Log "  $csvCopied of $($csvFiles.Count) CSV file(s) had data for $Date" "OK"
-
+    # ==================== STEP 6: RUN PYTHON ANALYSIS ====================
     # ==================== STEP 6: RUN PYTHON ANALYSIS ====================
     Write-Log "Step 6: Running Python analysis..."
 
@@ -383,6 +397,7 @@ if ($env:USERNAME -eq "Administrator") {
 Write-Log "Step 9: Sending email report..."
 
 $EmailTo      = "alex.boutov@gmail.com"
+# $EmailTo      = @("alex.boutov@gmail.com", "615thstreetdev@gmail.com")
 $EmailFrom    = "alex.boutov@gmail.com"
 $EmailAppPass = "oqmy bqia arud hfmf"
 
