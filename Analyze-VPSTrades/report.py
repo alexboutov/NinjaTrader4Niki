@@ -572,7 +572,9 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
             if rt['pnl_ticks'] > 0:
                 slot_detail[bucket]['short_wins'] += 1
 
-    lines.append(f"{'Slot':14} {'Trades':>6} {'Win%':>6} {'P&L':>9} {'Avg/Tr':>8}  {'LONG: Tr W% PnL':<22}  {'SHORT: Tr W% PnL':<22}")
+    _dir_sub = "Tr     Wns%    PnL    "   # 22-char sub-header aligned to data fields
+    lines.append(f"{'Slot':14} {'Trades':>6} {'Win%':>6} {'P&L':>9} {'Avg/Tr':>8}  {'--- LONG ---':^22}  {'--- SHORT ---':^22}")
+    lines.append(f"{'':{49}}{_dir_sub}  {_dir_sub}")
     lines.append("-" * 88)
     bucket_order_ts = [f"{h:02d}:00-{h:02d}:59" for h in range(24)]
     any_slot = False
