@@ -144,17 +144,8 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
         hour = rt['entry']['timestamp'].hour
         minute = rt['entry']['timestamp'].minute
         
-        if hour < 8 or (hour == 8 and minute < 30):
-            bucket = 'Pre-8:30'
-        elif hour == 8:
-            bucket = '8:30-9:00'
-        elif hour == 9:
-            bucket = '9:00-10:00'
-        elif hour == 10:
-            bucket = '10:00-11:00'
-        else:
-            bucket = '11:00+'
-        
+        bucket = f"{hour:02d}:00-{hour:02d}:59"
+
         time_buckets[bucket]['trades'] += 1
         time_buckets[bucket]['pnl'] += rt['pnl_ticks']
         if rt['pnl_ticks'] > 0:
@@ -549,13 +540,72 @@ def generate_report(roundtrips, signals, date_str, folder_path=None, bars=None):
     
     lines.append("TIME-BASED ANALYSIS")
     lines.append("-" * 19)
-    bucket_order = ['Pre-8:30', '8:30-9:00', '9:00-10:00', '10:00-11:00', '11:00+']
+    bucket_order = [f"{h:02d}:00-{h:02d}:59" for h in range(24)]
     for bucket in bucket_order:
         if bucket in time_buckets:
             stats = time_buckets[bucket]
             lines.append(f"{bucket:12}: {stats['trades']} trades, {stats['wins']}W, {stats['pnl']:+.0f}t")
     lines.append("")
     
+    lines.append("=" * 80)
+    lines.append("TIME SLOT ANALYSIS")
+    lines.append("=" * 80)
+    lines.append("")
+
+    # Build per-slot direction breakdown from complete roundtrips
+    slot_detail = defaultdict(lambda: {
+        'long_trades': 0, 'long_wins': 0, 'long_pnl': 0,
+        'short_trades': 0, 'short_wins': 0, 'short_pnl': 0,
+    })
+    for rt in complete_rts:
+        hour = rt['entry']['timestamp'].hour
+        minute = rt['entry']['timestamp'].minute
+        bucket = f"{hour:02d}:00-{hour:02d}:59"
+        if rt['direction'] == 'LONG':
+            slot_detail[bucket]['long_trades'] += 1
+            slot_detail[bucket]['long_pnl'] += rt['pnl_ticks']
+            if rt['pnl_ticks'] > 0:
+                slot_detail[bucket]['long_wins'] += 1
+        else:
+            slot_detail[bucket]['short_trades'] += 1
+            slot_detail[bucket]['short_pnl'] += rt['pnl_ticks']
+            if rt['pnl_ticks'] > 0:
+                slot_detail[bucket]['short_wins'] += 1
+
+    lines.append(f"{'Slot':14} {'Trades':>6} {'Win%':>6} {'P&L':>9} {'Avg/Tr':>8}  {'LONG: Tr W% PnL':<22}  {'SHORT: Tr W% PnL':<22}")
+    lines.append("-" * 88)
+    bucket_order_ts = [f"{h:02d}:00-{h:02d}:59" for h in range(24)]
+    any_slot = False
+    for bucket in bucket_order_ts:
+        if bucket not in time_buckets:
+            lines.append(f"{bucket:14} {'...':>6} {'...':>6} {'...':>9} {'...':>8}  " + "..." + " " * 19 + "  " + "..." + " " * 19)
+            continue
+        any_slot = True
+        s = time_buckets[bucket]
+        d = slot_detail[bucket]
+        wr = (s['wins'] / s['trades'] * 100) if s['trades'] > 0 else 0
+        avg = s['pnl'] / s['trades'] if s['trades'] > 0 else 0
+        lt, lw, lp = d['long_trades'], d['long_wins'], d['long_pnl']
+        st, sw, sp = d['short_trades'], d['short_wins'], d['short_pnl']
+        lwr = (lw / lt * 100) if lt > 0 else 0
+        swr = (sw / st * 100) if st > 0 else 0
+        long_str  = f"{lt:2}tr {lw:2}W({lwr:3.0f}%) {lp:+5.0f}t".ljust(22) if lt > 0 else "..." + " " * 19
+        short_str = f"{st:2}tr {sw:2}W({swr:3.0f}%) {sp:+5.0f}t".ljust(22) if st > 0 else "..." + " " * 19
+        lines.append(f"{bucket:14} {s['trades']:>6} {wr:>5.0f}% {s['pnl']:>+8.0f}t {avg:>+7.1f}t  {long_str}  {short_str}")
+    if not any_slot:
+        lines.append("  No trades to analyze.")
+    lines.append("-" * 80)
+
+    # Best and worst slot summary
+    active_buckets = [(b, time_buckets[b]) for b in bucket_order_ts if b in time_buckets and time_buckets[b]['trades'] > 0]
+    if active_buckets:
+        best_slot  = max(active_buckets, key=lambda x: x[1]['pnl'])
+        worst_slot = min(active_buckets, key=lambda x: x[1]['pnl'])
+        lines.append(f"  Best slot:  {best_slot[0]:14} {best_slot[1]['pnl']:+.0f}t")
+        lines.append(f"  Worst slot: {worst_slot[0]:14} {worst_slot[1]['pnl']:+.0f}t")
+    lines.append("")
+
+  
     lines.append("=" * 80)
     lines.append("KEY INSIGHTS")
     lines.append("=" * 80)
