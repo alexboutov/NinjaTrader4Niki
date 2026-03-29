@@ -9,3 +9,4 @@ VPS/
 # Python bytecode
 __pycache__/
 *.pyc
+Analyze-VPSTrades/Trading_Analysis-VPS*.txt
